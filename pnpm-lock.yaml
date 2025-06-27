@@ -653,6 +653,12 @@ importers:
 
   apps/web-antd:
     dependencies:
+      '@tanstack/vue-query':
+        specifier: 'catalog:'
+        version: 5.75.1(vue@3.5.13(typescript@5.8.3))
+      '@vben-core/menu-ui':
+        specifier: workspace:*
+        version: link:../../packages/@core/ui-kit/menu-ui
       '@vben/access':
         specifier: workspace:*
         version: link:../../packages/effects/access
@@ -704,6 +710,9 @@ importers:
       dayjs:
         specifier: 'catalog:'
         version: 1.11.13
+      json-bigint:
+        specifier: 'catalog:'
+        version: 1.0.0
       pinia:
         specifier: ^3.0.2
         version: 3.0.2(typescript@5.8.3)(vue@3.5.13(typescript@5.8.3))

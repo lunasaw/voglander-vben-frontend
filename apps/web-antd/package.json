@@ -25,7 +25,9 @@
   "imports": {
     "#/*": "./src/*"
   },
-  "dependencies": {
+ "dependencies": {
+    "@tanstack/vue-query": "catalog:",
+    "@vben-core/menu-ui": "workspace:*",
     "@vben/access": "workspace:*",
     "@vben/common-ui": "workspace:*",
     "@vben/constants": "workspace:*",
@@ -43,6 +45,7 @@
     "@vueuse/core": "catalog:",
     "ant-design-vue": "catalog:",
     "dayjs": "catalog:",
+    "json-bigint": "catalog:",
     "pinia": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:"

@@ -1,0 +1,75 @@
+# Vue-Vben-Admin 管理后台基础框架开发规则
+
+## 项目概述
+这是一个基于Vue-Vben-Admin的管理后台基础框架。所有开发工作都在`apps/web-antd`目录下进行。主要任务是对接`apps/web-antd/api/`目录下的OpenAPI接口定义，创建和适配对应的管理页面。所有页面的样式设计、组件使用和交互模式都必须参考`playground/`目录下的示例进行复用和改造，确保整个系统的一致性和统一性。
+
+## 工作目录结构
+- **主要开发目录**: `apps/web-antd/`
+- **API定义文件**: `apps/web-antd/api/Voglander.openapi.json`
+- **样式参考目录**: `playground/src/views/`
+- **组件示例目录**: `playground/src/views/examples/`
+
+## 开发规范
+
+### 1. 页面开发规范
+- 所有新页面必须放在`apps/web-antd/src/views/`目录下
+- 页面结构、布局、组件使用必须严格参考`playground/`目录下的对应示例
+- 保持与playground示例一致的设计语言和交互模式
+- 使用相同的组件库和样式规范
+
+### 2. API对接规范
+- 基于`apps/web-antd/api/Voglander.openapi.json`文件中的接口定义进行开发
+- API调用代码应放在`apps/web-antd/src/api/`目录下
+- 遵循现有的API调用模式和错误处理机制
+- 确保接口参数、响应格式与OpenAPI文档一致
+
+### 3. 组件使用规范
+- 优先使用`playground/src/views/examples/`中已有的组件模式
+- 表格操作参考`playground/src/views/examples/vxe-table/`
+- 表单设计参考`playground/src/views/examples/form/`
+- 弹窗和抽屉参考`playground/src/views/examples/modal/`和`drawer/`
+- 按钮组合参考`playground/src/views/examples/button-group/`
+
+### 4. 样式规范
+- 使用playground中的现有样式和主题
+- 保持统一的间距、字体、颜色规范
+- 响应式设计要与playground保持一致
+- 使用相同的图标库和图标风格
+
+### 5. 路由和菜单
+- 新增路由配置在`apps/web-antd/src/router/`
+- 菜单配置要与路由结构保持一致
+- 参考playground的路由结构和命名规范
+
+### 6. 数据管理
+- 使用统一的状态管理模式
+- API数据缓存和更新策略要保持一致
+- 错误处理和用户反馈机制统一
+
+## 代码质量要求
+- 使用TypeScript进行类型安全开发
+- 遵循Vue 3 Composition API规范
+- 组件要具有良好的可复用性和可维护性
+- 添加必要的注释和文档说明
+
+## 开发流程
+1. 查看OpenAPI文档，了解需要对接的接口
+2. 在playground中寻找相似的页面示例作为参考
+3. 复制并改造playground中的组件和样式
+4. 适配具体的业务逻辑和数据结构
+5. 确保页面功能完整且样式一致
+
+## 注意事项
+- 严禁偏离playground的设计风格和组件使用方式
+- 所有UI交互都要保持与示例的一致性
+- 代码提交前必须确保样式和功能都符合规范
+- 新增功能要考虑在其他类似页面的复用性
+
+## 技术栈
+- Vue 3 + TypeScript
+- Ant Design Vue (根据web-antd目录推断)
+- Vite构建工具
+- Pinia状态管理
+- Vue Router路由管理
+
+遵循以上规则，确保整个管理后台系统的一致性、可维护性和用户体验的统一性。
