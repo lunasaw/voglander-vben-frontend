@@ -37,6 +37,26 @@ const [Drawer, drawerApi] = useVbenDrawer({
     const { valid } = await formApi.validate();
     if (!valid) return;
     const values = await formApi.getValues();
+
+    // 过滤 permissions 字段中的 null 值和 undefined 值
+    if (values.permissions) {
+      if (Array.isArray(values.permissions)) {
+        values.permissions = values.permissions.filter((item: any) => item !== null && item !== undefined);
+      } else if (typeof values.permissions === 'string') {
+        // 如果是字符串，可能需要解析
+        try {
+          const parsed = JSON.parse(values.permissions);
+          if (Array.isArray(parsed)) {
+            values.permissions = parsed.filter((item: any) => item !== null && item !== undefined);
+          }
+        } catch (e) {
+          // 如果解析失败，保持原值
+        }
+      }
+    }
+
+    console.log('处理后的提交数据:', values); // 调试日志
+
     drawerApi.lock();
     (id.value ? updateRole(id.value, values) : createRole(values))
       .then(() => {
@@ -93,6 +113,18 @@ function getNodeClass(node: Recordable<any>) {
 
   return classes.join(' ');
 }
+
+function handlePermissionsChange(value: any) {
+  // 过滤掉null和undefined值
+  const filteredValue = Array.isArray(value)
+    ? value.filter((item: any) => item !== null && item !== undefined)
+    : value;
+
+  console.log('Tree组件变化:', { original: value, filtered: filteredValue });
+
+  // 更新表单值
+  formApi.setFieldValue('permissions', filteredValue);
+}
 </script>
 <template>
   <Drawer :title="getDrawerTitle">
@@ -109,6 +141,7 @@ function getNodeClass(node: Recordable<any>) {
             value-field="id"
             label-field="meta.title"
             icon-field="meta.icon"
+            @change="handlePermissionsChange"
           >
             <template #node="{ value }">
               <IconifyIcon v-if="value.meta.icon" :icon="value.meta.icon" />
