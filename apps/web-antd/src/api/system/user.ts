@@ -1,6 +1,7 @@
 import type { Recordable } from '@vben/types';
 
 import { requestClient } from '#/api/request';
+import type { SystemRoleApi } from './role';
 
 export namespace SystemUserApi {
   /** 用户信息 */
@@ -13,6 +14,7 @@ export namespace SystemUserApi {
     phone?: string;
     avatar?: string;
     status: 0 | 1;
+    roles?: SystemRoleApi.SystemRole[];
     createTime?: string;
     updateTime?: string;
   }
@@ -27,6 +29,7 @@ export namespace SystemUserApi {
     phone?: string;
     avatar?: string;
     status: 0 | 1;
+    roles?: SystemRoleApi.SystemRole[];
     createTime?: string;
     updateTime?: string;
   }

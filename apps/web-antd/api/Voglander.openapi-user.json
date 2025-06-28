@@ -502,6 +502,13 @@
           "status": {
             "type": "integer",
             "description": "状态 1启用 0禁用"
+          },
+          "roleIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "角色ID列表（可选）"
           }
         },
         "required": [
@@ -553,6 +560,13 @@
           "status": {
             "type": "integer",
             "description": "状态 1启用 0禁用"
+          },
+          "roleIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "角色ID列表（可选）"
           }
         },
         "required": [

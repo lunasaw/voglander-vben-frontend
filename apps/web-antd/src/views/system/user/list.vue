@@ -10,7 +10,7 @@ import type { SystemUserApi } from '#/api';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
-import { Button, message, Modal } from 'ant-design-vue';
+import { Button, message, Modal, Tag } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteUser, getUserList, updateUser } from '#/api';
@@ -111,7 +111,7 @@ async function onStatusChange(
       `你要将用户【${row.username}】的状态切换为 【${status[newStatus.toString()]}】 吗？`,
       `切换状态`,
     );
-    await updateUser(row.id, { status: newStatus });
+    await updateUser(row.id, { status: newStatus as 0 | 1 });
     return true;
   } catch {
     return false;
@@ -159,6 +159,19 @@ function onCreate() {
           <Plus class="size-5" />
           {{ $t('ui.actionTitle.create', [$t('system.user.name')]) }}
         </Button>
+      </template>
+            <template #roles="{ row }">
+        <span v-if="!row.roles || row.roles.length === 0" class="text-gray-400">-</span>
+        <div v-else class="flex gap-1 overflow-x-auto max-w-full" style="max-height: 32px;">
+          <Tag
+            v-for="role in row.roles"
+            :key="role.id"
+            color="blue"
+            class="whitespace-nowrap flex-shrink-0"
+          >
+            {{ role.name }}
+          </Tag>
+        </div>
       </template>
     </Grid>
   </Page>

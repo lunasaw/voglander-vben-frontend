@@ -8,7 +8,10 @@
     "createTime": "Create Time",
     "remark": "Remark",
     "operation": "Operation",
-    "parentDept": "Parent Department"
+    "parentDept": "Parent Department",
+    "create": "Create Department",
+    "edit": "Edit Department",
+    "delete": "Delete Department"
   },
   "menu": {
     "title": "Menu Management",
@@ -47,7 +50,10 @@
       "normal": "Text",
       "none": "None"
     },
-    "badgeVariants": "Badge Style"
+    "badgeVariants": "Badge Style",
+    "create": "Create Menu",
+    "edit": "Edit Menu",
+    "delete": "Delete Menu"
   },
   "role": {
     "title": "Role Management",
@@ -60,7 +66,10 @@
     "createTime": "Creation Time",
     "operation": "Operation",
     "permissions": "Permissions",
-    "setPermissions": "Permissions"
+    "setPermissions": "Permissions",
+    "create": "Create Role",
+    "edit": "Edit Role",
+    "delete": "Delete Role"
   },
   "user": {
     "title": "User Management",
@@ -76,6 +85,9 @@
     "status": "Status",
     "createTime": "Create Time",
     "updateTime": "Update Time",
-    "operation": "Operation"
+    "operation": "Operation",
+    "create": "Create User",
+    "edit": "Edit User",
+    "delete": "Delete User"
   }
 }

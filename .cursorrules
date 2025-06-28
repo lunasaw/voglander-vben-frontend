@@ -46,6 +46,15 @@
 - API数据缓存和更新策略要保持一致
 - 错误处理和用户反馈机制统一
 
+### 7. 国际化规范
+- 新增页面时必须同时创建完整的国际化描述文件
+- 国际化键值命名遵循模块化结构，如：`system.menu.create`、`system.user.edit`、`dashboard.overview.title`
+- 所有页面标题、按钮文字、表单标签、提示信息都必须使用国际化键值
+- 国际化文件位置：`apps/web-antd/src/locales/`
+- 参考playground中的国际化键值命名规范和层级结构
+- 确保中英文翻译的准确性和一致性
+- 错误提示和成功消息也需要国际化处理
+
 ## 代码质量要求
 - 使用TypeScript进行类型安全开发
 - 遵循Vue 3 Composition API规范

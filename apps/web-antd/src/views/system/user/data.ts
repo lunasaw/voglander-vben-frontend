@@ -3,6 +3,8 @@ import type { OnActionClickFn, VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { SystemUserApi } from '#/api';
 
 import { $t } from '#/locales';
+import { getRoleList } from '#/api';
+import { z } from '#/adapter/form';
 
 export function useFormSchema(): VbenFormSchema[] {
   return [
@@ -40,7 +42,7 @@ export function useFormSchema(): VbenFormSchema[] {
       },
       fieldName: 'email',
       label: $t('system.user.email'),
-      rules: 'email',
+      rules: z.string().email('请输入正确的邮箱').optional().or(z.literal('')),
     },
     {
       component: 'Input',
@@ -57,6 +59,45 @@ export function useFormSchema(): VbenFormSchema[] {
       },
       fieldName: 'avatar',
       label: $t('system.user.avatar'),
+    },
+    {
+      component: 'ApiSelect',
+      componentProps: {
+        // 角色接口转options格式
+        afterFetch: (data: any) => {
+          // 从 data.items 中提取数组数据
+          const items = data?.items || [];
+          return items.map((item: any) => ({
+            label: item.name,
+            value: item.id,
+          }));
+        },
+        // 角色接口
+        api: getRoleList,
+        allowClear: true,
+        // 自定义过滤函数，支持按角色名称搜索
+        filterOption: (input: string, option: any) => {
+          if (!input || input.length === 0) {
+            return true;
+          }
+          const label = option.label || '';
+          return label.toLowerCase().includes(input.toLowerCase());
+        },
+        // 支持多选
+        mode: 'multiple',
+        placeholder: '请选择角色',
+        showSearch: true,
+        // 搜索时的提示
+        notFoundContent: '暂无数据',
+        // 最多显示的选中项数量，超过后会显示省略
+        maxTagCount: 5,
+        // 搜索参数
+        params: {},
+        // 设置选择框宽度，确保与其他输入框保持一致
+        style: { width: '100%' },
+      },
+      fieldName: 'roleIds',
+      label: $t('system.role.name'),
     },
     {
       component: 'RadioGroup',
@@ -111,7 +152,7 @@ export function useEditFormSchema(): VbenFormSchema[] {
       },
       fieldName: 'email',
       label: $t('system.user.email'),
-      rules: 'email',
+      rules: z.string().email('请输入正确的邮箱').optional().or(z.literal('')),
     },
     {
       component: 'Input',
@@ -128,6 +169,45 @@ export function useEditFormSchema(): VbenFormSchema[] {
       },
       fieldName: 'avatar',
       label: $t('system.user.avatar'),
+    },
+    {
+      component: 'ApiSelect',
+      componentProps: {
+        // 角色接口转options格式
+        afterFetch: (data: any) => {
+          // 从 data.items 中提取数组数据
+          const items = data?.items || [];
+          return items.map((item: any) => ({
+            label: item.name,
+            value: item.id,
+          }));
+        },
+        // 角色接口
+        api: getRoleList,
+        allowClear: true,
+        // 自定义过滤函数，支持按角色名称搜索
+        filterOption: (input: string, option: any) => {
+          if (!input || input.length === 0) {
+            return true;
+          }
+          const label = option.label || '';
+          return label.toLowerCase().includes(input.toLowerCase());
+        },
+        // 支持多选
+        mode: 'multiple',
+        placeholder: '请选择角色',
+        showSearch: true,
+        // 搜索时的提示
+        notFoundContent: '暂无数据',
+        // 最多显示的选中项数量，超过后会显示省略
+        maxTagCount: 3,
+        // 搜索参数
+        params: {},
+        // 设置选择框宽度，确保与其他输入框保持一致
+        style: { width: '100%' },
+      },
+      fieldName: 'roleIds',
+      label: $t('system.role.name'),
     },
     {
       component: 'RadioGroup',
@@ -226,6 +306,13 @@ export function useColumns<T = SystemUserApi.UserVO>(
       field: 'phone',
       title: $t('system.user.phone'),
       width: 130,
+    },
+    {
+      field: 'roles',
+      title: $t('system.role.name'),
+      width: 150,
+      align: 'center',
+      slots: { default: 'roles' },
     },
     {
       cellRender: {

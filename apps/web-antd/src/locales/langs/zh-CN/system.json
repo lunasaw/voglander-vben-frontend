@@ -8,7 +8,10 @@
     "parentDept": "上级部门",
     "remark": "备注",
     "status": "状态",
-    "title": "部门管理"
+    "title": "部门管理",
+    "create": "新增部门",
+    "edit": "编辑部门",
+    "delete": "删除部门"
   },
   "menu": {
     "list": "菜单列表",
@@ -48,7 +51,10 @@
     "typeCatalog": "目录",
     "typeEmbedded": "内嵌",
     "typeLink": "外链",
-    "typeMenu": "菜单"
+    "typeMenu": "菜单",
+    "create": "新增菜单",
+    "edit": "编辑菜单",
+    "delete": "删除菜单"
   },
   "role": {
     "title": "角色管理",
@@ -61,7 +67,10 @@
     "createTime": "创建时间",
     "operation": "操作",
     "permissions": "权限",
-    "setPermissions": "授权"
+    "setPermissions": "授权",
+    "create": "新增角色",
+    "edit": "编辑角色",
+    "delete": "删除角色"
   },
   "user": {
     "title": "用户管理",
@@ -77,7 +86,10 @@
     "status": "状态",
     "createTime": "创建时间",
     "updateTime": "更新时间",
-    "operation": "操作"
+    "operation": "操作",
+    "create": "新增用户",
+    "edit": "编辑用户",
+    "delete": "删除用户"
   },
   "title": "系统管理"
 }
