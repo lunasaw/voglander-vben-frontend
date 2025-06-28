@@ -63,5 +63,21 @@
     "permissions": "权限",
     "setPermissions": "授权"
   },
+  "user": {
+    "title": "用户管理",
+    "list": "用户列表",
+    "name": "用户",
+    "id": "用户ID",
+    "username": "用户名",
+    "password": "密码",
+    "nickname": "昵称",
+    "email": "邮箱",
+    "phone": "手机号",
+    "avatar": "头像",
+    "status": "状态",
+    "createTime": "创建时间",
+    "updateTime": "更新时间",
+    "operation": "操作"
+  },
   "title": "系统管理"
 }

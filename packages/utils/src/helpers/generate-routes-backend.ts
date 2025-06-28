@@ -14,11 +14,18 @@ import { mapTree } from '@vben-core/shared/utils';
 async function generateRoutesByBackend(
   options: GenerateMenuAndRoutesOptions,
 ): Promise<RouteRecordRaw[]> {
+  console.log('🌐 generateRoutesByBackend 开始执行', options);
+
   const { fetchMenuListAsync, layoutMap = {}, pageMap = {} } = options;
+
+  console.log('🔍 fetchMenuListAsync 是否存在:', !!fetchMenuListAsync);
 
   try {
     const menuRoutes = await fetchMenuListAsync?.();
+    console.log('📋 后端菜单数据:', menuRoutes);
+
     if (!menuRoutes) {
+      console.log('⚠️ 没有获取到菜单数据，返回空数组');
       return [];
     }
 
@@ -29,10 +36,11 @@ async function generateRoutesByBackend(
     }
 
     const routes = convertRoutes(menuRoutes, layoutMap, normalizePageMap);
+    console.log('🎯 生成的后端路由:', routes);
 
     return routes;
   } catch (error) {
-    console.error(error);
+    console.error('❌ generateRoutesByBackend 执行出错:', error);
     throw error;
   }
 }

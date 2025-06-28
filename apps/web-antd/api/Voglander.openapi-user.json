@@ -1,0 +1,568 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Voglander",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/user/info": {
+      "get": {
+        "summary": "获取用户信息",
+        "deprecated": false,
+        "description": "获取用户信息\n获取用户信息\n获取当前登录用户的详细信息",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "访问令牌",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResultUserInfoVO",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/user/list": {
+      "get": {
+        "summary": "分页查询用户列表",
+        "deprecated": false,
+        "description": "分页查询用户列表\n分页查询用户列表\n根据查询条件分页获取用户列表",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "description": "用户名",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nickname",
+            "in": "query",
+            "description": "昵称",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "description": "邮箱",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "phone",
+            "in": "query",
+            "description": "手机号",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "状态 1启用 0禁用",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageNum",
+            "in": "query",
+            "description": "页码",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页数量",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResultUserListResp",
+                  "description": "查询成功"
+                },
+                "example": {
+                  "": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "summary": "获取用户详情",
+        "deprecated": false,
+        "description": "根据ID获取用户详情\n获取用户详情\n根据用户ID获取用户详细信息",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "用户ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResultUserVO",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      },
+      "put": {
+        "summary": "更新用户",
+        "deprecated": false,
+        "description": "更新用户\n更新用户\n根据用户ID更新用户信息",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "用户ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateReq",
+                "description": "用户更新信息"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResultBoolean",
+                  "description": "更新成功"
+                },
+                "example": {
+                  "": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      },
+      "delete": {
+        "summary": "删除用户",
+        "deprecated": false,
+        "description": "删除用户\n删除用户\n根据用户ID删除用户",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "用户ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResultBoolean",
+                  "description": "删除成功"
+                },
+                "example": {
+                  "": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/user": {
+      "post": {
+        "summary": "创建用户",
+        "deprecated": false,
+        "description": "创建用户\n创建用户\n创建新的用户",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreateReq",
+                "description": "用户创建信息"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResultLong",
+                  "description": "创建成功"
+                },
+                "example": {
+                  "": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/user/check-username/{username}": {
+      "get": {
+        "summary": "检查用户名",
+        "deprecated": false,
+        "description": "检查用户名是否存在\n检查用户名\n检查用户名是否已存在",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "用户名",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeId",
+            "in": "query",
+            "description": "排除的用户ID",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResultBoolean",
+                  "description": "检查完成"
+                },
+                "example": {
+                  "": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/user/check-email/{email}": {
+      "get": {
+        "summary": "检查邮箱",
+        "deprecated": false,
+        "description": "检查邮箱是否存在\n检查邮箱\n检查邮箱是否已存在",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "description": "邮箱",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeId",
+            "in": "query",
+            "description": "排除的用户ID",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResultBoolean",
+                  "description": "检查完成"
+                },
+                "example": {
+                  "": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/user/check-phone/{phone}": {
+      "get": {
+        "summary": "检查手机号",
+        "deprecated": false,
+        "description": "检查手机号是否存在\n检查手机号\n检查手机号是否已存在",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "phone",
+            "in": "path",
+            "description": "手机号",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeId",
+            "in": "query",
+            "description": "排除的用户ID",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResultBoolean",
+                  "description": "检查完成"
+                },
+                "example": {
+                  "": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AjaxResultUserInfoVO": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      },
+      "AjaxResultUserListResp": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      },
+      "AjaxResultUserVO": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      },
+      "AjaxResultLong": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      },
+      "UserCreateReq": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "用户名",
+            "pattern": "^[a-zA-Z0-9_]{4,20}$"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码",
+            "pattern": "^.{6,20}$"
+          },
+          "nickname": {
+            "type": "string",
+            "description": "昵称"
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "description": "手机号",
+            "pattern": "^1[3-9]\\d{9}$"
+          },
+          "avatar": {
+            "type": "string",
+            "description": "头像URL"
+          },
+          "status": {
+            "type": "integer",
+            "description": "状态 1启用 0禁用"
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "status"
+        ]
+      },
+      "AjaxResultBoolean": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      },
+      "UserUpdateReq": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "用户ID",
+            "format": "int64"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码（可选，不传则不更新密码）",
+            "pattern": "^.{6,20}$"
+          },
+          "nickname": {
+            "type": "string",
+            "description": "昵称"
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "description": "手机号",
+            "pattern": "^1[3-9]\\d{9}$"
+          },
+          "avatar": {
+            "type": "string",
+            "description": "头像URL"
+          },
+          "status": {
+            "type": "integer",
+            "description": "状态 1启用 0禁用"
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ]
+      }
+    },
+    "securitySchemes": {}
+  },
+  "servers": [],
+  "security": []
+}

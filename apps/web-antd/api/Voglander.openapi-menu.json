@@ -1,0 +1,485 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Voglander",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/system/menu/all": {
+      "get": {
+        "summary": "获取用户菜单",
+        "deprecated": false,
+        "description": "获取用户所有菜单\n获取用户菜单\n获取当前登录用户的所有可访问菜单，返回树形结构",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "访问令牌",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResultListMenuResp",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/system/menu/permissions": {
+      "get": {
+        "summary": "获取用户权限菜单",
+        "deprecated": false,
+        "description": "获取用户权限菜单（前端路由格式）\n获取用户权限菜单\n获取当前登录用户的权限菜单，返回前端路由格式",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "访问令牌",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResultListMenuVO",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/system/menu/list": {
+      "get": {
+        "summary": "获取菜单列表",
+        "deprecated": false,
+        "description": "获取菜单数据列表\n获取菜单列表\n获取所有菜单数据，返回树形结构",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResultListMenuResp",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/system/menu/name-exists": {
+      "get": {
+        "summary": "检查菜单名称",
+        "deprecated": false,
+        "description": "检查菜单名称是否存在\n检查菜单名称\n检查菜单名称是否已存在",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "菜单名称",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "description": "排除的菜单ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResult",
+                  "description": "检查成功"
+                },
+                "example": {
+                  "": null
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/system/menu/path-exists": {
+      "get": {
+        "summary": "检查菜单路径",
+        "deprecated": false,
+        "description": "检查菜单路径是否存在\n检查菜单路径\n检查菜单路径是否已存在",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "description": "菜单路径",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "description": "排除的菜单ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResult",
+                  "description": "检查成功"
+                },
+                "example": {
+                  "": null
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/system/menu": {
+      "post": {
+        "summary": "创建菜单",
+        "deprecated": false,
+        "description": "创建菜单\n创建菜单\n创建新的菜单",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuReq",
+                "description": "菜单信息"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResult",
+                  "description": "创建成功"
+                },
+                "example": {
+                  "": null
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/system/menu/{id}": {
+      "put": {
+        "summary": "更新菜单",
+        "deprecated": false,
+        "description": "更新菜单\n更新菜单\n更新指定ID的菜单",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "菜单ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuReq",
+                "description": "菜单信息"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResult",
+                  "description": "更新成功"
+                },
+                "example": {
+                  "": null
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      },
+      "delete": {
+        "summary": "删除菜单",
+        "deprecated": false,
+        "description": "删除菜单\n删除菜单\n删除指定ID的菜单",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "菜单ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResult",
+                  "description": "删除成功"
+                },
+                "example": {
+                  "": null
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AjaxResult": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "null"
+          }
+        }
+      },
+      "AjaxResultListMenuResp": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      },
+      "AjaxResultListMenuVO": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      },
+      "MetaReq": {
+        "type": "object",
+        "properties": {
+          "activeIcon": {
+            "type": "string",
+            "description": "激活时显示的图标"
+          },
+          "activePath": {
+            "type": "string",
+            "description": "作为路由时，需要激活的菜单的Path"
+          },
+          "affixTab": {
+            "type": "boolean",
+            "description": "固定在标签栏"
+          },
+          "affixTabOrder": {
+            "type": "integer",
+            "description": "在标签栏固定的顺序"
+          },
+          "badge": {
+            "type": "string",
+            "description": "徽标内容"
+          },
+          "badgeType": {
+            "type": "string",
+            "description": "徽标类型"
+          },
+          "badgeVariants": {
+            "type": "string",
+            "description": "徽标颜色"
+          },
+          "hideChildrenInMenu": {
+            "type": "boolean",
+            "description": "在菜单中隐藏下级"
+          },
+          "hideInBreadcrumb": {
+            "type": "boolean",
+            "description": "在面包屑中隐藏"
+          },
+          "hideInMenu": {
+            "type": "boolean",
+            "description": "在菜单中隐藏"
+          },
+          "hideInTab": {
+            "type": "boolean",
+            "description": "在标签栏中隐藏"
+          },
+          "icon": {
+            "type": "string",
+            "description": "菜单图标"
+          },
+          "iframeSrc": {
+            "type": "string",
+            "description": "内嵌Iframe的URL"
+          },
+          "keepAlive": {
+            "type": "boolean",
+            "description": "是否缓存页面"
+          },
+          "link": {
+            "type": "string",
+            "description": "外链页面的URL"
+          },
+          "maxNumOfOpenTab": {
+            "type": "integer",
+            "description": "同一个路由最大打开的标签数"
+          },
+          "noBasicLayout": {
+            "type": "boolean",
+            "description": "无需基础布局"
+          },
+          "openInNewWindow": {
+            "type": "boolean",
+            "description": "是否在新窗口打开"
+          },
+          "order": {
+            "type": "integer",
+            "description": "菜单排序"
+          },
+          "title": {
+            "type": "string",
+            "description": "菜单标题"
+          }
+        }
+      },
+      "MenuReq": {
+        "type": "object",
+        "properties": {
+          "authCode": {
+            "type": "string",
+            "description": "后端权限标识"
+          },
+          "component": {
+            "type": "string",
+            "description": "组件路径"
+          },
+          "name": {
+            "type": "string",
+            "description": "菜单名称"
+          },
+          "path": {
+            "type": "string",
+            "description": "路由路径"
+          },
+          "pid": {
+            "type": "string",
+            "description": "父级ID"
+          },
+          "redirect": {
+            "type": "string",
+            "description": "重定向"
+          },
+          "type": {
+            "type": "string",
+            "description": "菜单类型"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/MetaReq",
+            "description": "菜单元数据"
+          }
+        },
+        "required": [
+          "authCode",
+          "name",
+          "path",
+          "pid",
+          "type"
+        ]
+      }
+    },
+    "securitySchemes": {}
+  },
+  "servers": [],
+  "security": []
+}
