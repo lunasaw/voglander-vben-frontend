@@ -81,6 +81,106 @@
 - **用户反馈**：权限校验失败时必须使用 `message.error()` 给出明确的提示信息
 - **权限优先级**：按钮显示控制 > 点击时校验 > 避免重复校验
 
+### 9. 状态切换组件规范
+- **统一使用CellSwitch**：所有状态字段（如启用/禁用、在线/离线等）都应使用CellSwitch渲染器实现直接切换
+- **列定义规范**：在data.ts的useColumns函数中配置状态切换列
+  ```typescript
+  {
+    cellRender: {
+      attrs: {
+        beforeChange: onStatusChange,
+        disabled: () => !hasAccessByCodes(['Module:Entity:Edit']),
+      },
+      name: onStatusChange ? 'CellSwitch' : 'CellTag',
+      options: onStatusChange ? undefined : [
+        { label: $t('common.enabled'), value: true, type: 'success' },
+        { label: $t('common.disabled'), value: false, type: 'error' },
+      ],
+    },
+    field: 'status',
+    title: $t('module.entity.status'),
+    width: 100,
+    align: 'center',
+  }
+  ```
+- **回调函数参数**：useColumns函数必须接收状态切换的回调函数参数
+  ```typescript
+  export function useColumns<T = EntityVO>(
+    onActionClick: OnActionClickFn<T>,
+    onStatusChange?: (newStatus: any, row: T) => PromiseLike<boolean | undefined>,
+  ): VxeTableGridOptions['columns']
+  ```
+- **状态切换处理函数**：在list.vue中实现状态切换逻辑，必须包含以下步骤：
+  1. **权限检查**：首先检查用户是否有编辑权限
+  2. **确认对话框**：显示状态切换确认提示
+  3. **API调用**：调用更新接口
+  4. **错误处理**：处理切换失败的情况
+  ```typescript
+  async function onStatusChange(newStatus: any, row: EntityVO) {
+    if (!hasAccessByCodes(['Module:Entity:Edit'])) {
+      message.error('您没有编辑权限');
+      return false;
+    }
+
+    const statusText = { true: '启用', false: '禁用' };
+    try {
+      await confirm(
+        `你要将【${row.name}】的状态切换为 【${statusText[newStatus.toString()]}】 吗？`,
+        `切换状态`,
+      );
+      await updateEntity({ id: row.id!, status: newStatus });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  ```
+- **Grid配置传递**：在Grid组件配置中传递状态切换回调函数
+  ```typescript
+  const [Grid, gridApi] = useVbenVxeGrid({
+    gridOptions: {
+      columns: useColumns(onActionClick, onStatusChange),
+      // ... 其他配置
+    },
+  });
+  ```
+- **多状态字段支持**：对于有多个状态字段的实体，为每个状态字段创建独立的回调函数
+  ```typescript
+  // 启用状态切换
+  async function onEnabledChange(newEnabled: boolean, row: EntityVO) { ... }
+  // Hook状态切换
+  async function onHookEnabledChange(newHookEnabled: boolean, row: EntityVO) { ... }
+
+  // 传递多个回调函数
+  columns: useColumns(onActionClick, undefined, onEnabledChange, onHookEnabledChange)
+  ```
+
+### 10. 数据库菜单SQL生成规范
+- **后端路由控制**：所有接口路由由后端通过数据库菜单表控制，前端页面需要对应的数据库菜单记录
+- **SQL模板基础**：参考 `apps/web-antd/sql/menu-data-insert.sql` 模板结构生成对应的SQL插入语句
+- **菜单层级结构**：
+  - 根级菜单：`menu_type = 1`，`parent_id = 0`
+  - 页面菜单：`menu_type = 2`，`parent_id` 为父级菜单ID
+  - 按钮权限：`menu_type = 3`，`parent_id` 为页面菜单ID
+- **必填字段规范**：
+  - `id`：唯一标识，建议按模块预留ID段
+  - `menu_code`：菜单编码，采用驼峰命名，如 `SystemUser`
+  - `menu_name`：菜单名称，使用国际化键值，如 `system.user.title`
+  - `path`：路由路径，如 `/system/user`
+  - `component`：组件路径，如 `/system/user/list`
+  - `permission`：权限编码，格式为 `Module:Entity:Action`
+  - `meta`：JSON格式的元数据，包含 `title`、`icon` 等信息
+- **ID分配规则**：
+  - 系统管理模块：200-299
+  - 项目管理模块：900-999
+  - 按钮权限ID：在页面ID基础上加两位序号，如页面ID为201，按钮权限ID为20101、20102
+- **权限分配**：新增菜单后需要在 `tb_role_menu` 表中为管理员角色（通常role_id=1）分配相应权限
+- **SQL生成流程**：
+  1. 根据新增页面的功能模块确定ID范围
+  2. 按照层级结构生成菜单记录（目录->页面->按钮）
+  3. 生成对应的角色权限分配记录
+  4. 确保国际化键值与前端保持一致
+
 ## 代码质量要求
 - 使用TypeScript进行类型安全开发
 - 遵循Vue 3 Composition API规范

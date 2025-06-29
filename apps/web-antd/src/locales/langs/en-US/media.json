@@ -1,0 +1,27 @@
+{
+  "title": "Media Management",
+  "node": {
+    "title": "Media Node Management",
+    "list": "Node List",
+    "name": "Media Node",
+    "id": "Node ID",
+    "serverId": "Server ID",
+    "host": "Node Address",
+    "secret": "API Secret",
+    "enabled": "Enabled Status",
+    "hookEnabled": "Hook Status",
+    "weight": "Node Weight",
+    "status": "Online Status",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "description": "Description",
+    "extend": "Extended Fields",
+    "keepalive": "Last Active Time",
+    "createTime": "Create Time",
+    "updateTime": "Update Time",
+    "operation": "Operation",
+    "create": "Create Node",
+    "edit": "Edit Node",
+    "delete": "Delete Node"
+  }
+}

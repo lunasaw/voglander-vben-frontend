@@ -1,0 +1,27 @@
+{
+  "title": "媒体管理",
+  "node": {
+    "title": "流媒体节点管理",
+    "list": "节点列表",
+    "name": "流媒体节点",
+    "id": "节点ID",
+    "serverId": "节点服务ID",
+    "host": "节点地址",
+    "secret": "API密钥",
+    "enabled": "启用状态",
+    "hookEnabled": "Hook状态",
+    "weight": "节点权重",
+    "status": "在线状态",
+    "statusOnline": "在线",
+    "statusOffline": "离线",
+    "description": "节点描述",
+    "extend": "扩展字段",
+    "keepalive": "最后活跃时间",
+    "createTime": "创建时间",
+    "updateTime": "更新时间",
+    "operation": "操作",
+    "create": "新增节点",
+    "edit": "编辑节点",
+    "delete": "删除节点"
+  }
+}

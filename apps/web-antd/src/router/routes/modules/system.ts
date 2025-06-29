@@ -48,6 +48,7 @@ const routes: RouteRecordRaw[] = [
         },
         component: () => import('#/views/system/dept/list.vue'),
       },
+
     ],
   },
 ];
