@@ -7,6 +7,7 @@ import type {
 } from '#/adapter/vxe-table';
 import type { SystemUserApi } from '#/api';
 
+import { useAccess } from '@vben/access';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
@@ -18,6 +19,8 @@ import { $t } from '#/locales';
 
 import { useColumns, useGridFormSchema } from './data';
 import Form from './modules/form.vue';
+
+const { hasAccessByCodes } = useAccess();
 
 const [FormDrawer, formDrawerApi] = useVbenDrawer({
   connectedComponent: Form,
@@ -119,6 +122,10 @@ async function onStatusChange(
 }
 
 function onEdit(row: SystemUserApi.UserVO) {
+  if (!hasAccessByCodes(['System:User:Edit'])) {
+    message.error('您没有编辑用户的权限');
+    return;
+  }
   formDrawerApi.setData(row).open();
 }
 

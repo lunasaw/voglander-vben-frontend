@@ -55,6 +55,32 @@
 - 确保中英文翻译的准确性和一致性
 - 错误提示和成功消息也需要国际化处理
 
+### 8. 权限控制规范
+- **双重权限防护机制**：必须同时实现按钮显示控制和点击时权限校验
+- **按钮显示控制**：在表格列定义或组件配置中使用 `show` 属性控制按钮是否显示
+  ```typescript
+  {
+    code: 'edit',
+    text: $t('common.edit'),
+    show: () => hasAccessByCodes(['Module:Action:Permission']),
+  }
+  ```
+- **点击时权限校验**：在事件处理函数中进行权限检查并给出用户提示
+  ```typescript
+  function onEdit(row: any) {
+    if (!hasAccessByCodes(['Module:Action:Permission'])) {
+      message.error('您没有编辑权限');
+      return;
+    }
+    // 执行编辑逻辑
+  }
+  ```
+- **权限编码规范**：使用 `Module:Entity:Action` 格式，如 `System:User:Edit`、`System:Role:Delete`
+- **避免重复校验**：不要在表单提交等后续步骤中重复进行相同的权限检查
+- **权限导入**：使用 `import { useAccess } from '@vben/access'` 和 `const { hasAccessByCodes } = useAccess()`
+- **用户反馈**：权限校验失败时必须使用 `message.error()` 给出明确的提示信息
+- **权限优先级**：按钮显示控制 > 点击时校验 > 避免重复校验
+
 ## 代码质量要求
 - 使用TypeScript进行类型安全开发
 - 遵循Vue 3 Composition API规范

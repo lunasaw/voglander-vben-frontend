@@ -3,6 +3,7 @@ import type { SystemUserApi } from '#/api/system/user';
 
 import { computed, ref } from 'vue';
 
+import { useAccess } from '@vben/access';
 import { useVbenDrawer } from '@vben/common-ui';
 
 import { useVbenForm } from '#/adapter/form';
@@ -13,6 +14,7 @@ import { useEditFormSchema, useFormSchema } from '../data';
 
 const emits = defineEmits(['success']);
 
+const { hasAccessByCodes } = useAccess();
 const formData = ref<SystemUserApi.UserVO>();
 const isEdit = ref(false);
 
@@ -31,6 +33,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
   async onConfirm() {
     const { valid } = await formApi.validate();
     if (!valid) return;
+
     const values = await formApi.getValues();
 
     // 编辑模式下，如果密码为空则不传递密码字段
