@@ -12,6 +12,7 @@ import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
 import { Button, message, Modal } from 'ant-design-vue';
+import { useRouter } from 'vue-router';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteMediaNode, getMediaNodePageList, updateMediaNode } from '#/api/media/medianode';
@@ -21,6 +22,7 @@ import { useColumns, useGridFormSchema } from './data';
 import Form from './modules/form.vue';
 
 const { hasAccessByCodes } = useAccess();
+const router = useRouter();
 
 const [FormDrawer, formDrawerApi] = useVbenDrawer({
   connectedComponent: Form,
@@ -34,7 +36,7 @@ const [Grid, gridApi] = useVbenVxeGrid({
     submitOnChange: true,
   },
   gridOptions: {
-    columns: useColumns(onActionClick, undefined, onEnabledChange, onHookEnabledChange),
+    columns: useColumns(onActionClick, undefined, onEnabledChange, onHookEnabledChange, onServerIdClick),
     height: 'auto',
     keepSource: true,
     proxyConfig: {
@@ -140,6 +142,27 @@ function onCreate() {
 }
 
 /**
+ * 点击节点服务ID跳转到详情页面
+ * @param row 行数据
+ */
+function onServerIdClick(row: MediaNodeApi.MediaNodeVO) {
+  if (!hasAccessByCodes(['Media:Node:List'])) {
+    message.error('您没有查看节点详情的权限');
+    return;
+  }
+
+  router.push({
+    name: 'media.node.detail',
+    params: {
+      nodeKey: row.serverId
+    },
+    query: {
+      nodeName: row.name || row.serverId
+    }
+  });
+}
+
+/**
  * 启用状态开关即将改变
  * @param newEnabled 期望改变的启用状态值
  * @param row 行数据
@@ -204,6 +227,11 @@ async function onHookEnabledChange(
         <Button type="primary" @click="onCreate">
           <Plus class="size-5" />
           {{ $t('ui.actionTitle.create', [$t('media.node.name')]) }}
+        </Button>
+      </template>
+      <template #serverId="{ row }">
+        <Button type="link" size="small" @click="onServerIdClick(row)">
+          {{ row.serverId }}
         </Button>
       </template>
     </Grid>

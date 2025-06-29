@@ -3,6 +3,7 @@
   "node": {
     "title": "Media Node Management",
     "list": "Node List",
+    "detail": "Node Detail",
     "name": "Media Node",
     "id": "Node ID",
     "serverId": "Server ID",
@@ -22,6 +23,32 @@
     "operation": "Operation",
     "create": "Create Node",
     "edit": "Edit Node",
-    "delete": "Delete Node"
+    "delete": "Delete Node",
+    "query": {
+      "version": "Version Info",
+      "apiList": "API List",
+      "threadsLoad": "Network Threads Load",
+      "workThreadsLoad": "Work Threads Load",
+      "statistic": "Object Statistics",
+      "serverConfig": "Server Configuration",
+      "buildTime": "Build Time",
+      "branchName": "Branch Name",
+      "commitHash": "Commit Hash",
+      "delay": "Delay",
+      "load": "Load",
+      "threadId": "Thread ID",
+      "configKey": "Config Key",
+      "configValue": "Config Value",
+      "objectType": "Object Type",
+      "objectCount": "Object Count",
+      "backToList": "Back to List",
+      "refreshData": "Refresh Data",
+      "loadingData": "Loading data...",
+      "loadFailed": "Failed to load data",
+      "noData": "No data available",
+      "overview": "Overview",
+      "performance": "Performance Monitor",
+      "configuration": "Configuration"
+    }
   }
 }

@@ -275,6 +275,7 @@ export function useColumns<T = MediaNodeApi.MediaNodeVO>(
   onStatusChange?: (newStatus: any, row: T) => PromiseLike<boolean | undefined>,
   onEnabledChange?: (newEnabled: boolean, row: T) => PromiseLike<boolean | undefined>,
   onHookEnabledChange?: (newHookEnabled: boolean, row: T) => PromiseLike<boolean | undefined>,
+  onServerIdClick?: (row: T) => void,
 ): VxeTableGridOptions['columns'] {
   const { hasAccessByCodes } = useAccess();
 
@@ -288,6 +289,7 @@ export function useColumns<T = MediaNodeApi.MediaNodeVO>(
       field: 'serverId',
       title: $t('media.node.serverId'),
       width: 120,
+      slots: onServerIdClick ? { default: 'serverId' } : undefined,
     },
     {
       field: 'name',

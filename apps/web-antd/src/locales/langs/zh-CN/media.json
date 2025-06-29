@@ -3,6 +3,7 @@
   "node": {
     "title": "流媒体节点管理",
     "list": "节点列表",
+    "detail": "节点详情",
     "name": "流媒体节点",
     "id": "节点ID",
     "serverId": "节点服务ID",
@@ -22,6 +23,32 @@
     "operation": "操作",
     "create": "新增节点",
     "edit": "编辑节点",
-    "delete": "删除节点"
+    "delete": "删除节点",
+    "query": {
+      "version": "版本信息",
+      "apiList": "API列表",
+      "threadsLoad": "网络线程负载",
+      "workThreadsLoad": "后台线程负载",
+      "statistic": "对象统计",
+      "serverConfig": "服务器配置",
+      "buildTime": "构建时间",
+      "branchName": "分支名称",
+      "commitHash": "提交哈希",
+      "delay": "延时",
+      "load": "负载",
+      "threadId": "线程ID",
+      "configKey": "配置项",
+      "configValue": "配置值",
+      "objectType": "对象类型",
+      "objectCount": "对象数量",
+      "backToList": "返回列表",
+      "refreshData": "刷新数据",
+      "loadingData": "加载数据中...",
+      "loadFailed": "数据加载失败",
+      "noData": "暂无数据",
+      "overview": "概览信息",
+      "performance": "性能监控",
+      "configuration": "配置信息"
+    }
   }
 }

@@ -21,6 +21,16 @@ const routes: RouteRecordRaw[] = [
         },
         component: () => import('#/views/media/node/list.vue'),
       },
+      {
+        path: '/media/node/detail/:nodeKey',
+        name: 'MediaNodeDetail',
+        meta: {
+          hideInMenu: true,
+          icon: 'mdi:server-network',
+          title: $t('media.node.detail'),
+        },
+        component: () => import('#/views/media/node/detail.vue'),
+      },
     ],
   },
 ];
