@@ -1,0 +1,4370 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Voglander",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/zlm/api/version": {
+      "get": {
+        "summary": "获取版本信息",
+        "deprecated": false,
+        "description": "获取版本信息\n获取版本信息\n获取ZLMediaKit服务器的版本信息",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseVersion",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "buildTime": "",
+                    "branchName": "",
+                    "commitHash": ""
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/api/list": {
+      "get": {
+        "summary": "获取API列表",
+        "deprecated": false,
+        "description": "获取API列表\n获取API列表\n获取ZLMediaKit服务器支持的所有API接口列表",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseListString",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": [
+                    ""
+                  ],
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/threads/load": {
+      "get": {
+        "summary": "获取网络线程负载",
+        "deprecated": false,
+        "description": "获取网络线程负载\n获取网络线程负载\n获取ZLMediaKit服务器网络线程的负载情况",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseListThreadLoad",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": [
+                    {
+                      "delay": "",
+                      "load": ""
+                    }
+                  ],
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/statistic": {
+      "get": {
+        "summary": "获取统计信息",
+        "deprecated": false,
+        "description": "获取主要对象个数\n获取统计信息\n获取ZLMediaKit服务器主要对象的统计数量",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseImportantObjectNum",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "Buffer": 0,
+                    "RtpPacket": 0,
+                    "Frame": 0,
+                    "RtmpPacket": 0,
+                    "TcpSession": 0,
+                    "UdpServer": 0,
+                    "TcpServer": 0,
+                    "FrameImp": 0,
+                    "BufferList": 0,
+                    "BufferRaw": 0,
+                    "MediaSource": 0,
+                    "MultiMediaSourceMuxer": 0,
+                    "TcpClient": 0,
+                    "BufferLikeString": 0,
+                    "Socket": 0,
+                    "UdpSession": 0
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/work-threads/load": {
+      "get": {
+        "summary": "获取后台线程负载",
+        "deprecated": false,
+        "description": "获取后台线程负载\n获取后台线程负载\n获取ZLMediaKit服务器后台工作线程的负载情况",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseListThreadLoad",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": [
+                    {
+                      "delay": "",
+                      "load": ""
+                    }
+                  ],
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/server/config": {
+      "get": {
+        "summary": "获取服务器配置",
+        "deprecated": false,
+        "description": "获取服务器配置\n获取服务器配置\n获取ZLMediaKit服务器的配置信息",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseListServerNodeConfig",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "rtp.rtpMaxSize": "",
+                    "protocol.hls_demand": "",
+                    "rtp_proxy.opus_pt": "",
+                    "rtp_proxy.timeoutSec": "",
+                    "rtmp.port": "",
+                    "hook.on_ip_not_found": "",
+                    "record.fileRepeat": "",
+                    "general.flowThreshold": "",
+                    "rtsp.rtpTransportType": "",
+                    "hook.retry_delay": "",
+                    "http.rootPath": "",
+                    "rtsp.keepAliveSecond": "",
+                    "hook.on_server_started": "",
+                    "api.defaultSnap": "",
+                    "cluster.origin_url": "",
+                    "http.port": "",
+                    "http.virtualPath": "",
+                    "http.keepAliveSecond": "",
+                    "ffmpeg.log": "",
+                    "hook.on_flow_report": "",
+                    "http.dirMenu": "",
+                    "rtsp.directProxy": "",
+                    "ffmpeg.cmd": "",
+                    "rtp.lowLatency": "",
+                    "protocol.enable_rtsp": "",
+                    "rtsp.port": "",
+                    "rtmp.sslport": "",
+                    "protocol.hls_save_path": "",
+                    "http.charSet": "",
+                    "http.sendBufSize": "",
+                    "hls.broadcastRecordTs": "",
+                    "api.apiDebug": "",
+                    "general.mergeWriteMS": "",
+                    "http.forbidCacheSuffix": "",
+                    "http.notFound": "",
+                    "hook.retry": "",
+                    "record.appName": "",
+                    "hls.fileBufSize": "",
+                    "hook.timeoutSec": "",
+                    "rtsp.sslport": "",
+                    "hls.deleteDelaySec": "",
+                    "hook.on_rtp_server_timeout": "",
+                    "hook.on_send_rtp_stopped": "",
+                    "hook.on_record_mp4": "",
+                    "hook.alive_interval": "",
+                    "rtmp.handshakeSecond": "",
+                    "hook.stream_changed_schemas": "",
+                    "rtc.externIP": "",
+                    "rtc.rembBitRate": "",
+                    "general.streamNoneReaderDelayMS": "",
+                    "protocol.mp4_max_second": "",
+                    "hook.on_publish": "",
+                    "rtp_proxy.port": "",
+                    "http.sslport": "",
+                    "rtp.audioMtuSize": "",
+                    "general.check_nvidia_dev": "",
+                    "record.fastStart": "",
+                    "hook.on_stream_not_found": "",
+                    "rtp_proxy.port_range": "",
+                    "protocol.enable_rtmp": "",
+                    "srt.timeoutSec": "",
+                    "rtsp.handshakeSecond": "",
+                    "hls.segDur": "",
+                    "protocol.mp4_as_player": "",
+                    "api.secret": "",
+                    "hls.segRetain": "",
+                    "protocol.rtsp_demand": "",
+                    "srt.port": "",
+                    "srt.pktBufSize": "",
+                    "rtp_proxy.gop_cache": "",
+                    "shell.maxReqSize": "",
+                    "ffmpeg.snap": "",
+                    "general.maxStreamWaitMS": "",
+                    "multicast.addrMax": "",
+                    "general.wait_add_track_ms": "",
+                    "http.allow_cross_domains": "",
+                    "protocol.modify_stamp": "",
+                    "rtp.videoMtuSize": "",
+                    "api.snapRoot": "",
+                    "protocol.enable_audio": "",
+                    "hook.on_server_keepalive": "",
+                    "multicast.addrMin": "",
+                    "protocol.ts_demand": "",
+                    "protocol.enable_fmp4": "",
+                    "rtsp.lowLatency": "",
+                    "http.allow_ip_range": "",
+                    "hook.on_rtsp_realm": "",
+                    "hook.on_stream_changed": "",
+                    "http.forwarded_ip_header": "",
+                    "rtp_proxy.h265_pt": "",
+                    "hook.on_del_mp4": "",
+                    "protocol.enable_hls": "",
+                    "protocol.enable_mp4": "",
+                    "rtc.port": "",
+                    "protocol.fmp4_demand": "",
+                    "record.sampleMS": "",
+                    "shell.port": "",
+                    "hook.on_shell_login": "",
+                    "cluster.retry_count": "",
+                    "general.enableVhost": "",
+                    "general.unready_frame_cache": "",
+                    "rtc.preferredCodecV": "",
+                    "rtp_proxy.h264_pt": "",
+                    "protocol.auto_close": "",
+                    "srt.latencyMul": "",
+                    "hook.on_server_exited": "",
+                    "general.resetWhenRePlay": "",
+                    "protocol.mp4_save_path": "",
+                    "protocol.continue_push_ms": "",
+                    "rtp_proxy.dumpDir": "",
+                    "rtp_proxy.ps_pt": "",
+                    "hook.enable": "",
+                    "rtc.timeoutSec": "",
+                    "rtc.preferredCodecA": "",
+                    "hls.segKeep": "",
+                    "multicast.udpTTL": "",
+                    "rtp.h264_stap_a": "",
+                    "hook.on_stream_none_reader": "",
+                    "hook.on_record_ts": "",
+                    "ffmpeg.bin": "",
+                    "protocol.enable_ts": "",
+                    "protocol.enable_hls_fmp4": "",
+                    "hls.segNum": "",
+                    "http.maxReqSize": "",
+                    "rtc.tcpPort": "",
+                    "cluster.timeout_sec": "",
+                    "general.enable_ffmpeg_log": "",
+                    "general.mediaServerId": "",
+                    "hook.on_http_access": "",
+                    "general.wait_track_ready_ms": "",
+                    "rtsp.authBasic": "",
+                    "hook.on_rtsp_auth": "",
+                    "protocol.rtmp_demand": "",
+                    "protocol.add_mute_audio": "",
+                    "record.fileBufSize": "",
+                    "rtmp.keepAliveSecond": "",
+                    "hook.on_play": ""
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "summary": "设置服务器配置",
+        "deprecated": false,
+        "description": "设置服务器配置\n设置服务器配置\n修改ZLMediaKit服务器的配置参数",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapString",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "设置成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/server/restart": {
+      "post": {
+        "summary": "重启服务器",
+        "deprecated": false,
+        "description": "重启服务器\n重启服务器\n重启ZLMediaKit服务器",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapString",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseObject",
+                  "description": "重启成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {},
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/media/list": {
+      "post": {
+        "summary": "获取流列表",
+        "deprecated": false,
+        "description": "获取流列表\n获取流列表\n获取ZLMediaKit服务器中的媒体流列表",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseListMediaData",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": [
+                    {
+                      "app": "",
+                      "readerCount": 0,
+                      "totalReaderCount": 0,
+                      "schema": "",
+                      "stream": "",
+                      "originSock": {
+                        "identifier": "",
+                        "local_ip": "",
+                        "local_port": 0,
+                        "peer_ip": "",
+                        "peer_port": 0,
+                        "typeid": ""
+                      },
+                      "originType": 0,
+                      "originTypeStr": "",
+                      "originUrl": "",
+                      "createStamp": 0,
+                      "aliveSecond": 0,
+                      "bytesSpeed": 0,
+                      "tracks": [
+                        {
+                          "channels": 0,
+                          "codec_id": 0,
+                          "codec_id_name": "",
+                          "codec_type": 0,
+                          "fps": 0,
+                          "height": 0,
+                          "ready": false,
+                          "width": 0,
+                          "frames": 0,
+                          "sample_bit": 0,
+                          "sample_rate": 0,
+                          "gop_interval_ms": 0,
+                          "gop_size": 0,
+                          "key_frames": 0
+                        }
+                      ],
+                      "vhost": ""
+                    }
+                  ],
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/media/close": {
+      "post": {
+        "summary": "关断单个流",
+        "deprecated": false,
+        "description": "关断单个流\n关断单个流\n关闭指定的媒体流",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "关闭成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/media/close-batch": {
+      "post": {
+        "summary": "批量关断流",
+        "deprecated": false,
+        "description": "批量关断流\n批量关断流\n批量关闭多个媒体流",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseStreamsReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponse",
+                  "description": ""
+                },
+                "example": {
+                  "code": 0,
+                  "data": {},
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/media/online": {
+      "post": {
+        "summary": "检查流是否在线",
+        "deprecated": false,
+        "description": "流是否在线\n检查流是否在线\n检查指定媒体流是否在线",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaOnlineStatus",
+                  "description": ""
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": "",
+                  "online": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/media/player/list": {
+      "post": {
+        "summary": "获取媒体流播放器列表",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseMediaPlayer"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "identifier": "",
+                    "local_ip": "",
+                    "local_port": 0,
+                    "peer_ip": "",
+                    "peer_port": 0,
+                    "typeid": ""
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/media/info": {
+      "post": {
+        "summary": "获取流信息",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseMediaInfo"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "code": 0,
+                    "online": false,
+                    "readerCount": 0,
+                    "totalReaderCount": 0,
+                    "tracks": [
+                      {
+                        "channels": 0,
+                        "codec_id": 0,
+                        "codec_id_name": "",
+                        "codec_type": 0,
+                        "fps": 0,
+                        "height": 0,
+                        "ready": false,
+                        "width": 0,
+                        "frames": 0,
+                        "sample_bit": 0,
+                        "sample_rate": 0,
+                        "gop_interval_ms": 0,
+                        "gop_size": 0,
+                        "key_frames": 0
+                      }
+                    ]
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/broadcast/message": {
+      "post": {
+        "summary": "广播webrtc datachannel消息",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapString",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponse",
+                  "description": ""
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/session/list": {
+      "get": {
+        "summary": "获取TCP会话列表",
+        "deprecated": false,
+        "description": "获取所有TcpSession列表\n获取TCP会话列表\n获取ZLMediaKit服务器中所有TCP连接会话的列表",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "localPort",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "peerIp",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseListTcpLink",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": [
+                    {
+                      "id": "",
+                      "local_ip": "",
+                      "local_port": 0,
+                      "peer_ip": "",
+                      "peer_port": 0,
+                      "typeid": ""
+                    }
+                  ],
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/session/{sessionId}": {
+      "delete": {
+        "summary": "断开TCP连接",
+        "deprecated": false,
+        "description": "断开tcp连接\n断开TCP连接\n根据会话ID断开指定的TCP连接",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "断开成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/session/kick-batch": {
+      "post": {
+        "summary": "批量断开tcp连接",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapString",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/proxy/add": {
+      "post": {
+        "summary": "添加代理拉流",
+        "deprecated": false,
+        "description": "添加代理拉流\n添加代理拉流\n添加一个拉流代理，用于从外部拉取媒体流",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamProxyItem",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseStreamKey",
+                  "description": "添加成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "key": ""
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/proxy/{key}": {
+      "delete": {
+        "summary": "关闭拉流代理",
+        "deprecated": false,
+        "description": "关闭拉流代理\n关闭拉流代理\n根据代理key关闭指定的拉流代理",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseStringDelFlag",
+                  "description": "关闭成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "flag": ""
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/proxy/info": {
+      "post": {
+        "summary": "获取拉流代理信息",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapString",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponse",
+                  "description": ""
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/pusher/add": {
+      "post": {
+        "summary": "添加推流代理",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamPusherItem",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseStreamKey"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "key": ""
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/pusher/{key}": {
+      "delete": {
+        "summary": "关闭推流代理",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseStringDelFlag"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "flag": ""
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/pusher/info": {
+      "post": {
+        "summary": "获取推流代理信息",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapString",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponse",
+                  "description": ""
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/ffmpeg/add": {
+      "post": {
+        "summary": "添加FFmpeg拉流代理",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamFfmpegItem",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseStreamKey"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "key": ""
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/ffmpeg/{key}": {
+      "delete": {
+        "summary": "关闭FFmpeg拉流代理",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseStringDelFlag"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "flag": ""
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/record/files": {
+      "post": {
+        "summary": "获取录制文件列表",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseMp4RecordFile"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "paths": [
+                      ""
+                    ],
+                    "rootPath": ""
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/record/delete-directory": {
+      "post": {
+        "summary": "删除录像文件夹",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapString",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteRecordDirectory",
+                  "description": ""
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": "",
+                  "path": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/record/start": {
+      "post": {
+        "summary": "开始录制",
+        "deprecated": false,
+        "description": "开始录制\n开始录制\n开始录制指定的媒体流",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "录制开始成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/record/speed": {
+      "post": {
+        "summary": "设置录像速度",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/record/seek": {
+      "post": {
+        "summary": "设置录像流播放位置",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/record/stop": {
+      "post": {
+        "summary": "停止录制",
+        "deprecated": false,
+        "description": "停止录制\n停止录制\n停止录制指定的媒体流",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "录制停止成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/record/status": {
+      "post": {
+        "summary": "是否正在录制",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/record/summary": {
+      "post": {
+        "summary": "查询文件概览",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapString",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/snapshot": {
+      "post": {
+        "summary": "获取截图",
+        "deprecated": false,
+        "description": "获取截图\n获取截图\n获取指定媒体流的截图",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SnapshotReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "description": "截图获取成功"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/rtp/info/{streamId}": {
+      "get": {
+        "summary": "获取RTP推流信息",
+        "deprecated": false,
+        "description": "获取rtp推流信息\n获取RTP推流信息\n根据流ID获取RTP推流的详细信息",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "streamId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RtpInfoResult",
+                  "description": "获取rtp代理时的某路ssrc rtp信息。"
+                },
+                "example": {
+                  "code": 0,
+                  "exist": false,
+                  "peer_ip": "",
+                  "peer_port": 0,
+                  "local_ip": "",
+                  "local_port": 0
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/rtp/server/open": {
+      "post": {
+        "summary": "创建RTP服务器",
+        "deprecated": false,
+        "description": "创建RTP服务器\n创建RTP服务器\n创建一个RTP服务器用于接收RTP推流",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenRtpServerReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenRtpServerResult",
+                  "description": ""
+                },
+                "example": {
+                  "port": "",
+                  "code": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/rtp/server/open-multiplex": {
+      "post": {
+        "summary": "创建多路复用RTP服务器",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenRtpServerReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenRtpServerResult",
+                  "description": ""
+                },
+                "example": {
+                  "port": "",
+                  "code": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/rtp/server/connect": {
+      "post": {
+        "summary": "连接RTP服务器",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectRtpServerReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenRtpServerResult",
+                  "description": ""
+                },
+                "example": {
+                  "port": "",
+                  "code": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/rtp/server/{streamId}": {
+      "delete": {
+        "summary": "关闭RTP服务器",
+        "deprecated": false,
+        "description": "关闭RTP服务器\n关闭RTP服务器\n根据流ID关闭指定的RTP服务器",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "streamId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloseRtpServerResult",
+                  "description": ""
+                },
+                "example": {
+                  "hit": "",
+                  "code": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/rtp/server/{streamId}/ssrc/{ssrc}": {
+      "put": {
+        "summary": "更新RTP服务器过滤SSRC",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "streamId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ssrc",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/rtp/server/{streamId}/pause-check": {
+      "post": {
+        "summary": "暂停RTP超时检查",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "streamId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/rtp/server/{streamId}/resume-check": {
+      "post": {
+        "summary": "恢复RTP超时检查",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "streamId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/rtp/server/list": {
+      "get": {
+        "summary": "获取RTP服务器列表",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseListRtpServer"
+                },
+                "example": {
+                  "code": 0,
+                  "data": [
+                    {
+                      "port": "",
+                      "streamId": ""
+                    }
+                  ],
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/rtp/send/start": {
+      "post": {
+        "summary": "开始发送rtp",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartSendRtpReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartSendRtpResult",
+                  "description": ""
+                },
+                "example": {
+                  "code": "",
+                  "local_port": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/rtp/send/start-passive": {
+      "post": {
+        "summary": "开始tcp passive被动发送rtp",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartSendRtpReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartSendRtpResult",
+                  "description": ""
+                },
+                "example": {
+                  "code": "",
+                  "local_port": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/rtp/send/stop": {
+      "post": {
+        "summary": "停止发送rtp",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseSendRtpReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseString"
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/mp4/publish/start": {
+      "post": {
+        "summary": "多文件推流",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapString",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponse",
+                  "description": ""
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/mp4/publish/stop": {
+      "post": {
+        "summary": "关闭多文件推流",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapString",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponse",
+                  "description": ""
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/mp4/load": {
+      "post": {
+        "summary": "点播mp4文件",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapString",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponse",
+                  "description": ""
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/storage/space": {
+      "post": {
+        "summary": "获取存储信息",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapString",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponse",
+                  "description": ""
+                },
+                "example": {
+                  "code": 0,
+                  "data": "",
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/node/{nodeId}/version": {
+      "get": {
+        "summary": "指定节点获取版本信息",
+        "deprecated": false,
+        "description": "指定节点获取版本信息\n指定节点获取版本信息\n获取指定ZLM节点的版本信息",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseVersion",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "buildTime": "",
+                    "branchName": "",
+                    "commitHash": ""
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/node/{nodeId}/media/list": {
+      "post": {
+        "summary": "指定节点获取流列表",
+        "deprecated": false,
+        "description": "指定节点获取流列表\n指定节点获取流列表\n获取指定ZLM节点中的媒体流列表",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaReq",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponseListMediaData",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": [
+                    {
+                      "app": "",
+                      "readerCount": 0,
+                      "totalReaderCount": 0,
+                      "schema": "",
+                      "stream": "",
+                      "originSock": {
+                        "identifier": "",
+                        "local_ip": "",
+                        "local_port": 0,
+                        "peer_ip": "",
+                        "peer_port": 0,
+                        "typeid": ""
+                      },
+                      "originType": 0,
+                      "originTypeStr": "",
+                      "originUrl": "",
+                      "createStamp": 0,
+                      "aliveSecond": 0,
+                      "bytesSpeed": 0,
+                      "tracks": [
+                        {
+                          "channels": 0,
+                          "codec_id": 0,
+                          "codec_id_name": "",
+                          "codec_type": 0,
+                          "fps": 0,
+                          "height": 0,
+                          "ready": false,
+                          "width": 0,
+                          "frames": 0,
+                          "sample_bit": 0,
+                          "sample_rate": 0,
+                          "gop_interval_ms": 0,
+                          "gop_size": 0,
+                          "key_frames": 0
+                        }
+                      ],
+                      "vhost": ""
+                    }
+                  ],
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/zlm/api/nodes": {
+      "get": {
+        "summary": "获取所有节点列表",
+        "deprecated": false,
+        "description": "获取所有节点列表\n获取所有节点列表\n获取当前配置的所有ZLM节点信息",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ZlmNode",
+                    "description": ""
+                  },
+                  "description": "获取成功"
+                },
+                "example": [
+                  {
+                    "serverId": "",
+                    "host": "",
+                    "secret": "",
+                    "enabled": false,
+                    "hookEnabled": false,
+                    "weight": 0,
+                    "keepalive": 0
+                  }
+                ]
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Version": {
+        "type": "object",
+        "properties": {
+          "buildTime": {
+            "type": "string",
+            "description": ""
+          },
+          "branchName": {
+            "type": "string",
+            "description": ""
+          },
+          "commitHash": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "ServerResponseVersion": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/Version",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "ServerResponseListString": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "ThreadLoad": {
+        "type": "object",
+        "properties": {
+          "delay": {
+            "type": "string",
+            "description": "该线程延时"
+          },
+          "load": {
+            "type": "string",
+            "description": "该线程负载，0 ~ 100"
+          }
+        }
+      },
+      "ServerResponseListThreadLoad": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ThreadLoad",
+              "description": ""
+            },
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "ServerResponseImportantObjectNum": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/ImportantObjectNum",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "ImportantObjectNum": {
+        "type": "object",
+        "properties": {
+          "Buffer": {
+            "type": "integer",
+            "description": ""
+          },
+          "RtpPacket": {
+            "type": "integer",
+            "description": ""
+          },
+          "Frame": {
+            "type": "integer",
+            "description": ""
+          },
+          "RtmpPacket": {
+            "type": "integer",
+            "description": ""
+          },
+          "TcpSession": {
+            "type": "integer",
+            "description": ""
+          },
+          "UdpServer": {
+            "type": "integer",
+            "description": ""
+          },
+          "TcpServer": {
+            "type": "integer",
+            "description": ""
+          },
+          "FrameImp": {
+            "type": "integer",
+            "description": ""
+          },
+          "BufferList": {
+            "type": "integer",
+            "description": ""
+          },
+          "BufferRaw": {
+            "type": "integer",
+            "description": ""
+          },
+          "MediaSource": {
+            "type": "integer",
+            "description": ""
+          },
+          "MultiMediaSourceMuxer": {
+            "type": "integer",
+            "description": ""
+          },
+          "TcpClient": {
+            "type": "integer",
+            "description": ""
+          },
+          "BufferLikeString": {
+            "type": "integer",
+            "description": ""
+          },
+          "Socket": {
+            "type": "integer",
+            "description": ""
+          },
+          "UdpSession": {
+            "type": "integer",
+            "description": ""
+          }
+        }
+      },
+      "ServerResponseListServerNodeConfig": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServerNodeConfig",
+              "description": "io.github.lunasaw.zlm.entity.ServerNodeConfig"
+            },
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "ServerNodeConfig": {
+        "type": "object",
+        "properties": {
+          "rtp.rtpMaxSize": {
+            "type": "string",
+            "description": "The maximum size of RTP packets."
+          },
+          "protocol.hls_demand": {
+            "type": "string",
+            "description": "Whether to enable HLS demand."
+          },
+          "rtp_proxy.opus_pt": {
+            "type": "string",
+            "description": "The Opus payload type used by the RTP proxy."
+          },
+          "rtp_proxy.timeoutSec": {
+            "type": "string",
+            "description": "The timeout value for the RTP proxy in seconds."
+          },
+          "rtmp.port": {
+            "type": "string",
+            "description": "The port used for RTMP."
+          },
+          "hook.on_ip_not_found": {
+            "type": "string",
+            "description": "The action to take when the IP address is not found."
+          },
+          "record.fileRepeat": {
+            "type": "string",
+            "description": "Whether to allow file repetition during recording."
+          },
+          "general.flowThreshold": {
+            "type": "string",
+            "description": "The threshold for the maximum flow."
+          },
+          "rtsp.rtpTransportType": {
+            "type": "string",
+            "description": "The transport type used for RTP in RTSP."
+          },
+          "hook.retry_delay": {
+            "type": "string",
+            "description": "The delay time for retrying hooks in seconds."
+          },
+          "http.rootPath": {
+            "type": "string",
+            "description": "The root path for HTTP requests."
+          },
+          "rtsp.keepAliveSecond": {
+            "type": "string",
+            "description": "The time in seconds to keep the RTSP connection alive."
+          },
+          "hook.on_server_started": {
+            "type": "string",
+            "description": "The action to take when the server is started."
+          },
+          "api.defaultSnap": {
+            "type": "string",
+            "description": "The default snapshot for the API."
+          },
+          "cluster.origin_url": {
+            "type": "string",
+            "description": "The origin URL for the cluster."
+          },
+          "http.port": {
+            "type": "string",
+            "description": "The port used for HTTP."
+          },
+          "http.virtualPath": {
+            "type": "string",
+            "description": "The virtual path for HTTP requests."
+          },
+          "http.keepAliveSecond": {
+            "type": "string",
+            "description": "The time in seconds to keep the HTTP connection alive."
+          },
+          "ffmpeg.log": {
+            "type": "string",
+            "description": "The log file for FFmpeg."
+          },
+          "hook.on_flow_report": {
+            "type": "string",
+            "description": "The action to take when a flow report is received."
+          },
+          "http.dirMenu": {
+            "type": "string",
+            "description": "Whether to enable directory listing for HTTP requests."
+          },
+          "rtsp.directProxy": {
+            "type": "string",
+            "description": "Whether to use direct proxy for RTSP."
+          },
+          "ffmpeg.cmd": {
+            "type": "string",
+            "description": "The command used for FFmpeg."
+          },
+          "rtp.lowLatency": {
+            "type": "string",
+            "description": "Whether to enable low latency for RTP."
+          },
+          "protocol.enable_rtsp": {
+            "type": "string",
+            "description": "Whether to enable RTSP."
+          },
+          "rtsp.port": {
+            "type": "string",
+            "description": "The port used for RTSP."
+          },
+          "rtmp.sslport": {
+            "type": "string",
+            "description": "The SSL port used for RTMP."
+          },
+          "protocol.hls_save_path": {
+            "type": "string",
+            "description": "The save path for HLS."
+          },
+          "http.charSet": {
+            "type": "string",
+            "description": "The character set used for HTTP requests."
+          },
+          "http.sendBufSize": {
+            "type": "string",
+            "description": "The size of the send buffer for HTTP requests."
+          },
+          "hls.broadcastRecordTs": {
+            "type": "string",
+            "description": "Whether to broadcast recorded TS files."
+          },
+          "api.apiDebug": {
+            "type": "string",
+            "description": "Whether to enable API debugging."
+          },
+          "general.mergeWriteMS": {
+            "type": "string",
+            "description": "The time in milliseconds for merging writes."
+          },
+          "http.forbidCacheSuffix": {
+            "type": "string",
+            "description": "The suffixes to forbid caching for HTTP requests."
+          },
+          "http.notFound": {
+            "type": "string",
+            "description": "The action to take when a resource is not found for HTTP requests."
+          },
+          "hook.retry": {
+            "type": "string",
+            "description": "The number of times to retry hooks."
+          },
+          "record.appName": {
+            "type": "string",
+            "description": "The application name for recording."
+          },
+          "hls.fileBufSize": {
+            "type": "string",
+            "description": "The buffer size for HLS files."
+          },
+          "hook.timeoutSec": {
+            "type": "string",
+            "description": "The timeout value for hooks in seconds."
+          },
+          "rtsp.sslport": {
+            "type": "string",
+            "description": "The SSL port used for RTSP."
+          },
+          "hls.deleteDelaySec": {
+            "type": "string",
+            "description": "The delay time for deleting HLS files in seconds."
+          },
+          "hook.on_rtp_server_timeout": {
+            "type": "string",
+            "description": "The action to take when the RTP server times out."
+          },
+          "hook.on_send_rtp_stopped": {
+            "type": "string",
+            "description": "The action to take when sending RTP is stopped."
+          },
+          "hook.on_record_mp4": {
+            "type": "string",
+            "description": "The action to take when recording MP4 files."
+          },
+          "hook.alive_interval": {
+            "type": "string",
+            "description": "The interval time for sending keepalive messages for hooks in seconds."
+          },
+          "rtmp.handshakeSecond": {
+            "type": "string",
+            "description": "The time in seconds for the RTMP handshake."
+          },
+          "hook.stream_changed_schemas": {
+            "type": "string",
+            "description": "The schemas to use for stream changes in hooks."
+          },
+          "rtc.externIP": {
+            "type": "string",
+            "description": "The external IP address for RTC."
+          },
+          "rtc.rembBitRate": {
+            "type": "string",
+            "description": "The bit rate for REMB in RTC."
+          },
+          "general.streamNoneReaderDelayMS": {
+            "type": "string",
+            "description": "The time in milliseconds for waiting for a stream reader."
+          },
+          "protocol.mp4_max_second": {
+            "type": "string",
+            "description": "The maximum duration for MP4 files in seconds."
+          },
+          "hook.on_publish": {
+            "type": "string",
+            "description": "The action to take when publishing a stream."
+          },
+          "rtp_proxy.port": {
+            "type": "string",
+            "description": "The port used for the RTP proxy."
+          },
+          "http.sslport": {
+            "type": "string",
+            "description": "The SSL port used for HTTP."
+          },
+          "rtp.audioMtuSize": {
+            "type": "string",
+            "description": "The MTU size for audio packets in RTP."
+          },
+          "general.check_nvidia_dev": {
+            "type": "string",
+            "description": "Whether to check for NVIDIA devices."
+          },
+          "record.fastStart": {
+            "type": "string",
+            "description": "Whether to enable fast start for recording."
+          },
+          "hook.on_stream_not_found": {
+            "type": "string",
+            "description": "The action to take when a stream is not found in hooks."
+          },
+          "rtp_proxy.port_range": {
+            "type": "string",
+            "description": "The port range used for the RTP proxy."
+          },
+          "protocol.enable_rtmp": {
+            "type": "string",
+            "description": "Whether to enable RTMP."
+          },
+          "srt.timeoutSec": {
+            "type": "string",
+            "description": "The timeout value for SRT in seconds."
+          },
+          "rtsp.handshakeSecond": {
+            "type": "string",
+            "description": "The time in seconds for the RTSP handshake."
+          },
+          "hls.segDur": {
+            "type": "string",
+            "description": "The duration for each HLS segment in seconds."
+          },
+          "protocol.mp4_as_player": {
+            "type": "string",
+            "description": "Whether to use MP4 as a player for the protocol."
+          },
+          "api.secret": {
+            "type": "string",
+            "description": "The secret key for the API."
+          },
+          "hls.segRetain": {
+            "type": "string",
+            "description": "The number of HLS segments to retain."
+          },
+          "protocol.rtsp_demand": {
+            "type": "string",
+            "description": "Whether to enable demand for RTSP."
+          },
+          "srt.port": {
+            "type": "string",
+            "description": "The port used for SRT."
+          },
+          "srt.pktBufSize": {
+            "type": "string",
+            "description": "The packet buffer size for SRT."
+          },
+          "rtp_proxy.gop_cache": {
+            "type": "string",
+            "description": "Whether to enable GOP caching for the RTP proxy."
+          },
+          "shell.maxReqSize": {
+            "type": "string",
+            "description": "The maximum size of requests for the shell."
+          },
+          "ffmpeg.snap": {
+            "type": "string",
+            "description": "Whether to enable snapshots for FFmpeg."
+          },
+          "general.maxStreamWaitMS": {
+            "type": "string",
+            "description": "The maximum time in milliseconds to wait for a stream reader."
+          },
+          "multicast.addrMax": {
+            "type": "string",
+            "description": "The maximum multicast address."
+          },
+          "general.wait_add_track_ms": {
+            "type": "string",
+            "description": "The time in milliseconds to wait for adding a track."
+          },
+          "http.allow_cross_domains": {
+            "type": "string",
+            "description": "Whether to allow cross-domain requests for HTTP."
+          },
+          "protocol.modify_stamp": {
+            "type": "string",
+            "description": "Whether to modify the timestamp for the protocol."
+          },
+          "rtp.videoMtuSize": {
+            "type": "string",
+            "description": "The MTU size for video packets in RTP."
+          },
+          "api.snapRoot": {
+            "type": "string",
+            "description": "The root directory for snapshots in the API."
+          },
+          "protocol.enable_audio": {
+            "type": "string",
+            "description": "Whether to enable audio for the protocol."
+          },
+          "hook.on_server_keepalive": {
+            "type": "string",
+            "description": "The action to take when the server keeps alive."
+          },
+          "multicast.addrMin": {
+            "type": "string",
+            "description": "The minimum multicast address."
+          },
+          "protocol.ts_demand": {
+            "type": "string",
+            "description": "Whether to enable demand for TS."
+          },
+          "protocol.enable_fmp4": {
+            "type": "string",
+            "description": "Whether to enable FMP4 for the protocol."
+          },
+          "rtsp.lowLatency": {
+            "type": "string",
+            "description": "Whether to enable low latency for RTSP."
+          },
+          "http.allow_ip_range": {
+            "type": "string",
+            "description": "The IP range to allow for HTTP requests."
+          },
+          "hook.on_rtsp_realm": {
+            "type": "string",
+            "description": "The action to take when the RTSP realm is accessed in hooks."
+          },
+          "hook.on_stream_changed": {
+            "type": "string",
+            "description": "The action to take when a stream is changed in hooks."
+          },
+          "http.forwarded_ip_header": {
+            "type": "string",
+            "description": "The header to use for forwarded IP addresses in HTTP requests."
+          },
+          "rtp_proxy.h265_pt": {
+            "type": "string",
+            "description": "The H.265 payload type used by the RTP proxy."
+          },
+          "hook.on_del_mp4": {
+            "type": "string",
+            "description": "The action to take when an MP4 file is deleted in hooks."
+          },
+          "protocol.enable_hls": {
+            "type": "string",
+            "description": "Whether to enable HLS for the protocol."
+          },
+          "protocol.enable_mp4": {
+            "type": "string",
+            "description": "Whether to enable MP4 for the protocol."
+          },
+          "rtc.port": {
+            "type": "string",
+            "description": "The port used for RTC."
+          },
+          "protocol.fmp4_demand": {
+            "type": "string",
+            "description": "Whether to enable demand for FMP4."
+          },
+          "record.sampleMS": {
+            "type": "string",
+            "description": "The time in milliseconds for each sample during recording."
+          },
+          "shell.port": {
+            "type": "string",
+            "description": "The port used for the shell."
+          },
+          "hook.on_shell_login": {
+            "type": "string",
+            "description": "The action to take when logging in to the shell."
+          },
+          "cluster.retry_count": {
+            "type": "string",
+            "description": "The number of times to retry connecting to the cluster."
+          },
+          "general.enableVhost": {
+            "type": "string",
+            "description": "Whether to enable virtual hosts."
+          },
+          "general.unready_frame_cache": {
+            "type": "string",
+            "description": "The size of the unready frame cache."
+          },
+          "rtc.preferredCodecV": {
+            "type": "string",
+            "description": "The preferred video codec for RTC."
+          },
+          "rtp_proxy.h264_pt": {
+            "type": "string",
+            "description": "The H.264 payload type used by the RTP proxy."
+          },
+          "protocol.auto_close": {
+            "type": "string",
+            "description": "Whether to automatically close connections for the protocol."
+          },
+          "srt.latencyMul": {
+            "type": "string",
+            "description": "The latency multiplier for SRT."
+          },
+          "hook.on_server_exited": {
+            "type": "string",
+            "description": "The action to take when the server is exited."
+          },
+          "general.resetWhenRePlay": {
+            "type": "string",
+            "description": "Whether to reset when replaying."
+          },
+          "protocol.mp4_save_path": {
+            "type": "string",
+            "description": "The save path for MP4 files in the protocol."
+          },
+          "protocol.continue_push_ms": {
+            "type": "string",
+            "description": "The time in milliseconds for continuing to push data for the protocol."
+          },
+          "rtp_proxy.dumpDir": {
+            "type": "string",
+            "description": "The dump directory for the RTP proxy."
+          },
+          "rtp_proxy.ps_pt": {
+            "type": "string",
+            "description": "The payload type used for PS in the RTP proxy."
+          },
+          "hook.enable": {
+            "type": "string",
+            "description": "Whether to enable hooks."
+          },
+          "rtc.timeoutSec": {
+            "type": "string",
+            "description": "The timeout value for RTC in seconds."
+          },
+          "rtc.preferredCodecA": {
+            "type": "string",
+            "description": "The preferred audio codec for RTC."
+          },
+          "hls.segKeep": {
+            "type": "string",
+            "description": "The number of HLS segments to keep."
+          },
+          "multicast.udpTTL": {
+            "type": "string",
+            "description": "The TTL value for UDP multicast."
+          },
+          "rtp.h264_stap_a": {
+            "type": "string",
+            "description": "Whether to enable STAP-A for H.264 in RTP."
+          },
+          "hook.on_stream_none_reader": {
+            "type": "string",
+            "description": "The action to take when there are no stream readers in hooks."
+          },
+          "hook.on_record_ts": {
+            "type": "string",
+            "description": "The action to take when recording TS files in hooks."
+          },
+          "ffmpeg.bin": {
+            "type": "string",
+            "description": "The path to the FFmpeg binary."
+          },
+          "protocol.enable_ts": {
+            "type": "string",
+            "description": "Whether to enable demand for TS in the protocol."
+          },
+          "protocol.enable_hls_fmp4": {
+            "type": "string",
+            "description": "Whether to enable HLS FMP4 in the protocol."
+          },
+          "hls.segNum": {
+            "type": "string",
+            "description": "The number of HLS segments."
+          },
+          "http.maxReqSize": {
+            "type": "string",
+            "description": "The maximum size of requests for HTTP."
+          },
+          "rtc.tcpPort": {
+            "type": "string",
+            "description": "The TCP port used for RTC."
+          },
+          "cluster.timeout_sec": {
+            "type": "string",
+            "description": "The timeout value for the cluster in seconds."
+          },
+          "general.enable_ffmpeg_log": {
+            "type": "string",
+            "description": "Whether to enable FFmpeg logging."
+          },
+          "general.mediaServerId": {
+            "type": "string",
+            "description": "The ID of the media server."
+          },
+          "hook.on_http_access": {
+            "type": "string",
+            "description": "The action to take when accessing HTTP in hooks."
+          },
+          "general.wait_track_ready_ms": {
+            "type": "string",
+            "description": "The time in milliseconds to wait for a track to be ready."
+          },
+          "rtsp.authBasic": {
+            "type": "string",
+            "description": "Whether to enable basic authentication for RTSP."
+          },
+          "hook.on_rtsp_auth": {
+            "type": "string",
+            "description": "The action to take when authenticating RTSP in hooks."
+          },
+          "protocol.rtmp_demand": {
+            "type": "string",
+            "description": "Whether to enable demand for RTMP in the protocol."
+          },
+          "protocol.add_mute_audio": {
+            "type": "string",
+            "description": "Whether to add mute audio for the protocol."
+          },
+          "record.fileBufSize": {
+            "type": "string",
+            "description": "The buffer size for recording files."
+          },
+          "rtmp.keepAliveSecond": {
+            "type": "string",
+            "description": "The time in seconds to keep the RTMP connection alive."
+          },
+          "hook.on_play": {
+            "type": "string",
+            "description": "The action to take when playing a stream in hooks."
+          }
+        }
+      },
+      "MapString": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "ServerResponseString": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "string",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "ServerResponseObject": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "object",
+            "properties": {},
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "MediaReq": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "description": "筛选协议，例如 rtsp或rtmp",
+            "default": "rtsp"
+          },
+          "vhost": {
+            "type": "string",
+            "description": "筛选虚拟主机，例如__defaultVhost__",
+            "default": "__defaultVhost__"
+          },
+          "app": {
+            "type": "string",
+            "description": "筛选应用名，例如 live"
+          },
+          "stream": {
+            "type": "string",
+            "description": "筛选流id，例如 test"
+          }
+        }
+      },
+      "ServerResponseListMediaData": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaData",
+              "description": "Class representing the 'data' array in the JSON structure."
+            },
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "MediaData": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "type": "string",
+            "description": "应用名"
+          },
+          "readerCount": {
+            "type": "integer",
+            "description": "本协议观看人数"
+          },
+          "totalReaderCount": {
+            "type": "integer",
+            "description": "观看总人数，包括hls/rtsp/rtmp/http-flv/ws-flv"
+          },
+          "schema": {
+            "type": "string",
+            "description": "协议"
+          },
+          "stream": {
+            "type": "string",
+            "description": "流id"
+          },
+          "originSock": {
+            "$ref": "#/components/schemas/MediaPlayer",
+            "description": "客户端和服务器网络信息，可能为null类型"
+          },
+          "originType": {
+            "type": "integer",
+            "description": "产生源类型，包括 unknown = 0,rtmp_push=1,rtsp_push=2,rtp_push=3,pull=4,ffmpeg_pull=5,mp4_vod=6,device_chn=7"
+          },
+          "originTypeStr": {
+            "type": "string",
+            "description": ""
+          },
+          "originUrl": {
+            "type": "string",
+            "description": "产生源的url"
+          },
+          "createStamp": {
+            "type": "integer",
+            "description": "GMT unix系统时间戳，单位秒",
+            "format": "int64"
+          },
+          "aliveSecond": {
+            "type": "integer",
+            "description": "存活时间，单位秒"
+          },
+          "bytesSpeed": {
+            "type": "integer",
+            "description": "数据产生速度，单位byte/s"
+          },
+          "tracks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Track"
+            },
+            "description": "音视频轨道"
+          },
+          "vhost": {
+            "type": "string",
+            "description": "虚拟主机名"
+          }
+        }
+      },
+      "Track": {
+        "type": "object",
+        "properties": {
+          "channels": {
+            "type": "integer",
+            "description": "音频通道数。"
+          },
+          "codec_id": {
+            "type": "integer",
+            "description": "编码ID。H264 = 0, H265 = 1, AAC = 2, G711A = 3, G711U = 4。"
+          },
+          "codec_id_name": {
+            "type": "string",
+            "description": "编码类型的名称。"
+          },
+          "codec_type": {
+            "type": "integer",
+            "description": "类型。视频 = 0, 音频 = 1。"
+          },
+          "fps": {
+            "type": "integer",
+            "description": "视频的帧率。"
+          },
+          "height": {
+            "type": "integer",
+            "description": "视频的高度。"
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "轨道是否准备就绪。"
+          },
+          "width": {
+            "type": "integer",
+            "description": "视频的宽度。"
+          },
+          "frames": {
+            "type": "integer",
+            "description": "累计接收帧数"
+          },
+          "sample_bit": {
+            "type": "integer",
+            "description": "音频采样位数"
+          },
+          "sample_rate": {
+            "type": "integer",
+            "description": "音频采样率"
+          },
+          "gop_interval_ms": {
+            "type": "integer",
+            "description": "gop间隔时间，单位毫秒"
+          },
+          "gop_size": {
+            "type": "integer",
+            "description": "gop大小，单位帧数"
+          },
+          "key_frames": {
+            "type": "integer",
+            "description": "累计接收关键帧数"
+          }
+        }
+      },
+      "MediaPlayer": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The unique identifier for the session, e.g., \"3-309\"."
+          },
+          "local_ip": {
+            "type": "string",
+            "description": "The local IP address. \"::\" is a shorthand in IPv6 for representing multiple groups of zeros."
+          },
+          "local_port": {
+            "type": "integer",
+            "description": "The local port number."
+          },
+          "peer_ip": {
+            "type": "string",
+            "description": "The IP address of the peer in the session."
+          },
+          "peer_port": {
+            "type": "integer",
+            "description": "The port number of the peer."
+          },
+          "typeid": {
+            "type": "string",
+            "description": "The type identifier for the session, indicating it's a WebRTC session from MediaKit."
+          }
+        }
+      },
+      "CloseStreamsReq": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "description": "筛选协议，例如 rtsp或rtmp",
+            "default": "rtsp"
+          },
+          "vhost": {
+            "type": "string",
+            "description": "筛选虚拟主机，例如__defaultVhost__",
+            "default": "__defaultVhost__"
+          },
+          "app": {
+            "type": "string",
+            "description": "筛选应用名，例如 live"
+          },
+          "stream": {
+            "type": "string",
+            "description": "筛选流id，例如 test"
+          },
+          "force": {
+            "type": "integer",
+            "description": ""
+          }
+        }
+      },
+      "ServerResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "string",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "MediaOnlineStatus": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "string",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "online": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "ServerResponseMediaPlayer": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/MediaPlayer",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "ServerResponseMediaInfo": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/MediaInfo",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "MediaInfo": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "状态码。"
+          },
+          "online": {
+            "type": "boolean",
+            "description": "会话是否在线。"
+          },
+          "readerCount": {
+            "type": "integer",
+            "description": "本协议的观看人数。"
+          },
+          "totalReaderCount": {
+            "type": "integer",
+            "description": "观看总人数，包括hls/rtsp/rtmp/http-flv/ws-flv。"
+          },
+          "tracks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Track1",
+              "description": "io.github.lunasaw.zlm.entity.Track"
+            },
+            "description": "轨道列表。"
+          }
+        }
+      },
+      "Track1": {
+        "type": "object",
+        "properties": {
+          "channels": {
+            "type": "integer",
+            "description": "音频通道数。"
+          },
+          "codec_id": {
+            "type": "integer",
+            "description": "编码ID。H264 = 0, H265 = 1, AAC = 2, G711A = 3, G711U = 4。"
+          },
+          "codec_id_name": {
+            "type": "string",
+            "description": "编码类型的名称。"
+          },
+          "codec_type": {
+            "type": "integer",
+            "description": "类型。视频 = 0, 音频 = 1。"
+          },
+          "fps": {
+            "type": "integer",
+            "description": "视频的帧率。"
+          },
+          "height": {
+            "type": "integer",
+            "description": "视频的高度。"
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "轨道是否准备就绪。"
+          },
+          "width": {
+            "type": "integer",
+            "description": "视频的宽度。"
+          },
+          "frames": {
+            "type": "integer",
+            "description": "累计接收帧数"
+          },
+          "sample_bit": {
+            "type": "integer",
+            "description": "音频采样位数"
+          },
+          "sample_rate": {
+            "type": "integer",
+            "description": "音频采样率"
+          },
+          "gop_interval_ms": {
+            "type": "integer",
+            "description": "gop间隔时间，单位毫秒"
+          },
+          "gop_size": {
+            "type": "integer",
+            "description": "gop大小，单位帧数"
+          },
+          "key_frames": {
+            "type": "integer",
+            "description": "累计接收关键帧数"
+          }
+        }
+      },
+      "ServerResponseListTcpLink": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TcpLink",
+              "description": "Class representing the input structure."
+            },
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "TcpLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "该tcp链接唯一id"
+          },
+          "local_ip": {
+            "type": "string",
+            "description": "本机网卡ip"
+          },
+          "local_port": {
+            "type": "integer",
+            "description": "本机端口号 (这是个rtmp播放器或推流器)"
+          },
+          "peer_ip": {
+            "type": "string",
+            "description": "客户端ip"
+          },
+          "peer_port": {
+            "type": "integer",
+            "description": "客户端端口号"
+          },
+          "typeid": {
+            "type": "string",
+            "description": "客户端TCPSession typeid"
+          }
+        }
+      },
+      "StreamProxyItem": {
+        "type": "object",
+        "properties": {
+          "vhost": {
+            "type": "string",
+            "description": "添加的流的虚拟主机，例如__defaultVhost__"
+          },
+          "app": {
+            "type": "string",
+            "description": "添加的流的应用名，例如live"
+          },
+          "stream": {
+            "type": "string",
+            "description": "添加的流的id名，例如test"
+          },
+          "url": {
+            "type": "string",
+            "description": "拉流地址，例如rtmp://live.hkstv.hk.lxdns.com/live/hks2"
+          },
+          "retry_count": {
+            "type": "integer",
+            "description": "拉流重试次数，默认为-1无限重试"
+          },
+          "rtp_type": {
+            "type": "integer",
+            "description": "rtsp拉流时，拉流方式，0：tcp，1：udp，2：组播"
+          },
+          "timeout_sec": {
+            "type": "integer",
+            "description": "拉流超时时间，单位秒，float类型"
+          },
+          "enable_hls": {
+            "type": "boolean",
+            "description": "是否转换成hls-mpegts协议"
+          },
+          "enable_hls_fmp4": {
+            "type": "boolean",
+            "description": "是否转换成hls-fmp4协议"
+          },
+          "enable_mp4": {
+            "type": "boolean",
+            "description": "是否允许mp4录制"
+          },
+          "enable_rtsp": {
+            "type": "boolean",
+            "description": "是否转rtsp协议"
+          },
+          "enable_rtmp": {
+            "type": "boolean",
+            "description": "是否转rtmp/flv协议"
+          },
+          "enable_ts": {
+            "type": "boolean",
+            "description": "是否转http-ts/ws-ts协议"
+          },
+          "enable_fmp4": {
+            "type": "boolean",
+            "description": "是否转http-fmp4/ws-fmp4协议"
+          },
+          "hls_demand": {
+            "type": "boolean",
+            "description": "该协议是否有人观看才生成"
+          },
+          "rtsp_demand": {
+            "type": "boolean",
+            "description": "该协议是否有人观看才生成"
+          },
+          "rtmp_demand": {
+            "type": "boolean",
+            "description": "该协议是否有人观看才生成"
+          },
+          "ts_demand": {
+            "type": "boolean",
+            "description": "该协议是否有人观看才生成"
+          },
+          "fmp4_demand": {
+            "type": "boolean",
+            "description": "该协议是否有人观看才生成"
+          },
+          "enable_audio": {
+            "type": "boolean",
+            "description": "转协议时是否开启音频"
+          },
+          "add_mute_audio": {
+            "type": "boolean",
+            "description": "转协议时，无音频是否添加静音aac音频"
+          },
+          "mp4_save_path": {
+            "type": "string",
+            "description": "mp4录制文件保存根目录，置空使用默认"
+          },
+          "mp4_max_second": {
+            "type": "integer",
+            "description": "mp4录制切片大小，单位秒"
+          },
+          "mp4_as_player": {
+            "type": "boolean",
+            "description": "MP4录制是否当作观看者参与播放人数计数"
+          },
+          "hls_save_path": {
+            "type": "string",
+            "description": "hls文件保存保存根目录，置空使用默认"
+          },
+          "modify_stamp": {
+            "type": "integer",
+            "description": "该流是否开启时间戳覆盖(0:绝对时间戳/1:系统时间戳/2:相对时间戳)"
+          },
+          "auto_close": {
+            "type": "boolean",
+            "description": "无人观看是否自动关闭流(不触发无人观看hook)"
+          }
+        }
+      },
+      "ServerResponseStreamKey": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/StreamKey",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "StreamKey": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "ServerResponseStringDelFlag": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/StringDelFlag",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "StringDelFlag": {
+        "type": "object",
+        "properties": {
+          "flag": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "StreamPusherItem": {
+        "type": "object",
+        "properties": {
+          "vhost": {
+            "type": "string",
+            "description": "添加的流的虚拟主机，例如__defaultVhost__"
+          },
+          "schema": {
+            "type": "string",
+            "description": "协议，例如 rtsp或rtmp"
+          },
+          "app": {
+            "type": "string",
+            "description": "添加的流的应用名，例如live"
+          },
+          "stream": {
+            "type": "string",
+            "description": "需要转推的流id"
+          },
+          "dst_url": {
+            "type": "string",
+            "description": "目标转推url，带参数需要自行url转义"
+          },
+          "retry_count": {
+            "type": "integer",
+            "description": "转推失败重试次数，默认无限重试"
+          },
+          "rtp_type": {
+            "type": "integer",
+            "description": "rtsp推流时，推流方式，0：tcp，1：udp"
+          },
+          "timeout_sec": {
+            "type": "integer",
+            "description": "推流超时时间，单位秒，float类型"
+          }
+        }
+      },
+      "StreamFfmpegItem": {
+        "type": "object",
+        "properties": {
+          "src_url": {
+            "type": "string",
+            "description": "FFmpeg拉流地址,支持任意协议或格式(只要FFmpeg支持即可)"
+          },
+          "dst_url": {
+            "type": "string",
+            "description": "FFmpeg rtmp推流地址，一般都是推给自己，例如rtmp://127.0.0.1/live/stream_form_ffmpeg"
+          },
+          "timeout_ms": {
+            "type": "integer",
+            "description": "FFmpeg推流成功超时时间"
+          },
+          "enable_hls": {
+            "type": "boolean",
+            "description": "是否开启hls录制"
+          },
+          "enable_mp4": {
+            "type": "boolean",
+            "description": "是否开启mp4录制"
+          },
+          "ffmpeg_cmd_key": {
+            "type": "string",
+            "description": "配置文件中FFmpeg命令参数模板key(非内容)，置空则采用默认模板:ffmpeg.cmd"
+          }
+        }
+      },
+      "RecordReq": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "description": "筛选协议，例如 rtsp或rtmp",
+            "default": "rtsp"
+          },
+          "vhost": {
+            "type": "string",
+            "description": "筛选虚拟主机，例如__defaultVhost__",
+            "default": "__defaultVhost__"
+          },
+          "app": {
+            "type": "string",
+            "description": "筛选应用名，例如 live"
+          },
+          "stream": {
+            "type": "string",
+            "description": "筛选流id，例如 test"
+          },
+          "period": {
+            "type": "string",
+            "description": "流的录像日期，格式为2020-02-01,如果不是完整的日期，那么是搜索录像文件夹列表，否则搜索对应日期下的mp4文件列表"
+          },
+          "customized_path": {
+            "type": "string",
+            "description": "自定义搜索路径，与startRecord方法中的customized_path一样，默认为配置文件的路径"
+          },
+          "max_seconds": {
+            "type": "string",
+            "description": "mp4录像切片时间大小,单位秒，置0则采用配置项"
+          },
+          "type": {
+            "type": "integer",
+            "description": "0为hls，1为mp4"
+          },
+          "speed": {
+            "type": "string",
+            "description": "要设置的录像倍速 eg.2.0"
+          },
+          "stamp": {
+            "type": "string",
+            "description": "要设置的录像播放位置"
+          }
+        }
+      },
+      "ServerResponseMp4RecordFile": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/Mp4RecordFile",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "Mp4RecordFile": {
+        "type": "object",
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          "rootPath": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "DeleteRecordDirectory": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "string",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "path": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "SnapshotReq": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "需要截图的url，可以是本机的，也可以是远程主机的。"
+          },
+          "timeout_sec": {
+            "type": "integer",
+            "description": "截图失败超时时间，防止FFmpeg一直等待截图。",
+            "default": 30
+          },
+          "expire_sec": {
+            "type": "integer",
+            "description": "截图的过期时间，该时间内产生的截图都会作为缓存返回。",
+            "default": 5
+          }
+        }
+      },
+      "RtpInfoResult": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "状态码。"
+          },
+          "exist": {
+            "type": "boolean",
+            "description": "会话是否存在。"
+          },
+          "peer_ip": {
+            "type": "string",
+            "description": "推流客户端ip。"
+          },
+          "peer_port": {
+            "type": "integer",
+            "description": "客户端端口号。"
+          },
+          "local_ip": {
+            "type": "string",
+            "description": "本地监听的网卡ip。"
+          },
+          "local_port": {
+            "type": "integer",
+            "description": "本地端口号。"
+          }
+        }
+      },
+      "OpenRtpServerReq": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "integer",
+            "description": "接收端口，0则为随机端口。"
+          },
+          "tcp_mode": {
+            "type": "integer",
+            "description": "0 udp 模式，1 tcp 被动模式, 2 tcp 主动模式。 (兼容enable_tcp 为0/1)。"
+          },
+          "stream_id": {
+            "type": "string",
+            "description": "该端口绑定的流ID，该端口只能创建这一个流(而不是根据ssrc创建多个)。"
+          }
+        }
+      },
+      "OpenRtpServerResult": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "string",
+            "description": ""
+          },
+          "code": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "ConnectRtpServerReq": {
+        "type": "object",
+        "properties": {
+          "dst_port": {
+            "type": "integer",
+            "description": "tcp主动模式时服务端端口"
+          },
+          "dst_url": {
+            "type": "integer",
+            "description": "tcp主动模式时服务端地址"
+          },
+          "stream_id": {
+            "type": "string",
+            "description": "该端口绑定的流ID，该端口只能创建这一个流(而不是根据ssrc创建多个)。"
+          }
+        }
+      },
+      "CloseRtpServerResult": {
+        "type": "object",
+        "properties": {
+          "hit": {
+            "type": "string",
+            "description": "是否找到记录并关闭"
+          },
+          "code": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "RtpServer": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "string",
+            "description": ""
+          },
+          "streamId": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "ServerResponseListRtpServer": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RtpServer",
+              "description": ""
+            },
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "StartSendRtpReq": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "description": "筛选协议，例如 rtsp或rtmp",
+            "default": "rtsp"
+          },
+          "vhost": {
+            "type": "string",
+            "description": "筛选虚拟主机，例如__defaultVhost__",
+            "default": "__defaultVhost__"
+          },
+          "app": {
+            "type": "string",
+            "description": "筛选应用名，例如 live"
+          },
+          "stream": {
+            "type": "string",
+            "description": "筛选流id，例如 test"
+          },
+          "ssrc": {
+            "type": "integer",
+            "description": "推流的rtp的ssrc,指定不同的ssrc可以同时推流到多个服务器。"
+          },
+          "dst_url": {
+            "type": "string",
+            "description": "目标ip或域名。"
+          },
+          "dst_port": {
+            "type": "integer",
+            "description": "目标端口。"
+          },
+          "is_udp": {
+            "type": "boolean",
+            "description": "是否为udp模式,否则为tcp模式。"
+          },
+          "src_port": {
+            "type": "integer",
+            "description": "使用的本机端口，为0或不传时默认为随机端口。"
+          },
+          "pt": {
+            "type": "integer",
+            "description": "发送时，rtp的pt（uint8_t）,不传时默认为96。"
+          },
+          "use_ps": {
+            "type": "integer",
+            "description": "发送时，rtp的负载类型。为1时，负载为ps；为0时，为es；不传时默认为1。"
+          },
+          "only_audio": {
+            "type": "boolean",
+            "description": "当use_ps 为0时，有效。为1时，发送音频；为0时，发送视频；不传时默认为0。"
+          }
+        }
+      },
+      "StartSendRtpResult": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "local_port": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "CloseSendRtpReq": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "description": "筛选协议，例如 rtsp或rtmp",
+            "default": "rtsp"
+          },
+          "vhost": {
+            "type": "string",
+            "description": "筛选虚拟主机，例如__defaultVhost__",
+            "default": "__defaultVhost__"
+          },
+          "app": {
+            "type": "string",
+            "description": "筛选应用名，例如 live"
+          },
+          "stream": {
+            "type": "string",
+            "description": "筛选流id，例如 test"
+          },
+          "ssrc": {
+            "type": "string",
+            "description": "停止GB28181 ps-rtp推流"
+          }
+        }
+      },
+      "ZlmNode": {
+        "type": "object",
+        "properties": {
+          "serverId": {
+            "type": "string",
+            "description": "The id of this node.",
+            "default": "zlm"
+          },
+          "host": {
+            "type": "string",
+            "description": "The host of this node. eg: <a href=\"http://127.0.0.1:9092\">node</a>",
+            "default": "http://127.0.0.1:9092"
+          },
+          "secret": {
+            "type": "string",
+            "description": "The secret of this host."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether enable this host.",
+            "default": true
+          },
+          "hookEnabled": {
+            "type": "boolean",
+            "description": "Whether enable hook.",
+            "default": true
+          },
+          "weight": {
+            "type": "integer",
+            "description": "The weight of this host.",
+            "default": 100
+          }
+        }
+      }
+    },
+    "securitySchemes": {}
+  },
+  "servers": [],
+  "security": []
+}

@@ -48,7 +48,14 @@
       "noData": "暂无数据",
       "overview": "概览信息",
       "performance": "性能监控",
-      "configuration": "配置信息"
+      "configuration": "配置信息",
+      "editConfig": "编辑配置",
+      "saveConfig": "保存配置",
+      "cancel": "取消",
+      "doubleClickToEdit": "双击编辑",
+      "configSaved": "配置保存成功",
+      "saveFailed": "保存失败",
+      "doubleClickEditTip": "双击配置值可以进行编辑，按回车键或点击保存按钮提交修改，点击别处可以取消编辑"
     }
   }
 }

@@ -36,17 +36,38 @@
 - 响应式设计要与playground保持一致
 - 使用相同的图标库和图标风格
 
-### 5. 路由和菜单
+### 5. 图标使用规范
+- **统一图标系统**：项目使用 `@vben/icons` 作为统一的图标系统，严禁使用其他图标库
+- **禁止的导入**：不要使用 `@ant-design/icons-vue`、`@iconify/vue` 等第三方图标库
+- **正确的导入方式**：
+  ```typescript
+  // ✅ 正确：使用项目统一的图标系统
+  import { Search, SearchX, X, Plus, Settings } from '@vben/icons';
+
+  // ❌ 错误：使用第三方图标库
+  import { SearchOutlined, ClearOutlined } from '@ant-design/icons-vue';
+  ```
+- **可用图标查找**：所有可用图标都在 `packages/@core/base/icons/src/lucide.ts` 文件中定义
+- **图标命名规范**：使用 PascalCase 命名，如 `Search`、`SearchX`、`ArrowLeft`、`RotateCw`
+- **图标替换对照**：
+  - `SearchOutlined` → `Search`
+  - `ClearOutlined` → `X`
+  - `CloseOutlined` → `X`
+  - `PlusOutlined` → `Plus`
+  - `SettingOutlined` → `Settings`
+- **图标大小控制**：使用 Tailwind CSS 类控制图标大小，如 `class="size-4"`、`class="size-6"`
+
+### 6. 路由和菜单
 - 新增路由配置在`apps/web-antd/src/router/`
 - 菜单配置要与路由结构保持一致
 - 参考playground的路由结构和命名规范
 
-### 6. 数据管理
+### 7. 数据管理
 - 使用统一的状态管理模式
 - API数据缓存和更新策略要保持一致
 - 错误处理和用户反馈机制统一
 
-### 7. 国际化规范
+### 8. 国际化规范
 - 新增页面时必须同时创建完整的国际化描述文件
 - 国际化键值命名遵循模块化结构，如：`system.menu.create`、`system.user.edit`、`dashboard.overview.title`
 - 所有页面标题、按钮文字、表单标签、提示信息都必须使用国际化键值
@@ -55,7 +76,7 @@
 - 确保中英文翻译的准确性和一致性
 - 错误提示和成功消息也需要国际化处理
 
-### 8. 权限控制规范
+### 9. 权限控制规范
 - **双重权限防护机制**：必须同时实现按钮显示控制和点击时权限校验
 - **按钮显示控制**：在表格列定义或组件配置中使用 `show` 属性控制按钮是否显示
   ```typescript
@@ -81,7 +102,7 @@
 - **用户反馈**：权限校验失败时必须使用 `message.error()` 给出明确的提示信息
 - **权限优先级**：按钮显示控制 > 点击时校验 > 避免重复校验
 
-### 9. 状态切换组件规范
+### 10. 状态切换组件规范
 - **统一使用CellSwitch**：所有状态字段（如启用/禁用、在线/离线等）都应使用CellSwitch渲染器实现直接切换
 - **列定义规范**：在data.ts的useColumns函数中配置状态切换列
   ```typescript
@@ -155,7 +176,7 @@
   columns: useColumns(onActionClick, undefined, onEnabledChange, onHookEnabledChange)
   ```
 
-### 10. 数据库菜单SQL生成规范
+### 11. 数据库菜单SQL生成规范
 - **后端路由控制**：所有接口路由由后端通过数据库菜单表控制，前端页面需要对应的数据库菜单记录
 - **SQL模板基础**：参考 `apps/web-antd/sql/menu-data-insert.sql` 模板结构生成对应的SQL插入语句
 - **菜单层级结构**：

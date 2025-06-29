@@ -30,24 +30,24 @@ export namespace ZlmQueryApi {
     result: string;
   }
 
-  /** 重要对象统计 */
+  /** 重要对象统计 - 修复字段名为小写 */
   export interface ImportantObjectNum {
-    Buffer: number;
-    RtpPacket: number;
-    Frame: number;
-    RtmpPacket: number;
-    TcpSession: number;
-    UdpServer: number;
-    TcpServer: number;
-    FrameImp: number;
-    BufferList: number;
-    BufferRaw: number;
-    MediaSource: number;
-    MultiMediaSourceMuxer: number;
-    TcpClient: number;
-    BufferLikeString: number;
-    Socket: number;
-    UdpSession: number;
+    buffer: number;
+    rtpPacket: number;
+    frame: number;
+    rtmpPacket: number;
+    tcpSession: number;
+    udpServer: number;
+    tcpServer: number;
+    frameImp: number;
+    bufferList: number;
+    bufferRaw: number;
+    mediaSource: number;
+    multiMediaSourceMuxer: number;
+    tcpClient: number;
+    bufferLikeString: number;
+    socket: number;
+    udpSession: number;
   }
 
   /** 重要对象统计响应 */
@@ -58,10 +58,13 @@ export namespace ZlmQueryApi {
     result: string;
   }
 
-  /** 服务器配置 */
-  export interface ServerNodeConfig {
-    [key: string]: string;
+  /** 服务器配置项 */
+  export interface ServerConfigItem {
+    [key: string]: string | null;
   }
+
+  /** 服务器配置 - 修复为数组结构 */
+  export type ServerNodeConfig = ServerConfigItem[];
 
   /** 服务器配置响应 */
   export interface ServerResponseListServerNodeConfig {
@@ -90,7 +93,7 @@ export async function getZlmVersion(nodeKey?: string) {
     headers['X-Node-Key'] = nodeKey;
   }
 
-  return requestClient.get<ZlmQueryApi.ServerResponseVersion>('/zlm/api/version', {
+  return requestClient.get<ZlmQueryApi.Version>('/zlm/api/version', {
     headers,
   });
 }
@@ -111,7 +114,7 @@ export async function getZlmApiList(nodeKey?: string, key?: string) {
     params.key = key;
   }
 
-  return requestClient.get<ZlmQueryApi.ServerResponseListString>('/zlm/api/api/list', {
+  return requestClient.get<string[]>('/zlm/api/api/list', {
     headers,
     params,
   });
@@ -127,7 +130,7 @@ export async function getZlmThreadsLoad(nodeKey?: string) {
     headers['X-Node-Key'] = nodeKey;
   }
 
-  return requestClient.get<ZlmQueryApi.ServerResponseListThreadLoad>('/zlm/api/threads/load', {
+  return requestClient.get<ZlmQueryApi.ThreadLoad[]>('/zlm/api/threads/load', {
     headers,
   });
 }
@@ -142,7 +145,7 @@ export async function getZlmStatistic(nodeKey?: string) {
     headers['X-Node-Key'] = nodeKey;
   }
 
-  return requestClient.get<ZlmQueryApi.ServerResponseImportantObjectNum>('/zlm/api/statistic', {
+  return requestClient.get<ZlmQueryApi.ImportantObjectNum>('/zlm/api/statistic', {
     headers,
   });
 }
@@ -157,7 +160,7 @@ export async function getZlmWorkThreadsLoad(nodeKey?: string) {
     headers['X-Node-Key'] = nodeKey;
   }
 
-  return requestClient.get<ZlmQueryApi.ServerResponseListThreadLoad>('/zlm/api/work-threads/load', {
+  return requestClient.get<ZlmQueryApi.ThreadLoad[]>('/zlm/api/work-threads/load', {
     headers,
   });
 }
@@ -172,7 +175,23 @@ export async function getZlmServerConfig(nodeKey?: string) {
     headers['X-Node-Key'] = nodeKey;
   }
 
-  return requestClient.get<ZlmQueryApi.ServerResponseListServerNodeConfig>('/zlm/api/server/config', {
+  return requestClient.get<ZlmQueryApi.ServerNodeConfig>('/zlm/api/server/config', {
+    headers,
+  });
+}
+
+/**
+ * 设置服务器配置
+ * @param config 配置参数对象
+ * @param nodeKey 节点Key，通过X-Node-Key header传递
+ */
+export async function setZlmServerConfig(config: Record<string, string>, nodeKey?: string) {
+  const headers: Record<string, string> = {};
+  if (nodeKey) {
+    headers['X-Node-Key'] = nodeKey;
+  }
+
+  return requestClient.post<string>('/zlm/api/server/config', config, {
     headers,
   });
 }

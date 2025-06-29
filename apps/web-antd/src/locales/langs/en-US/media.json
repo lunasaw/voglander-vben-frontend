@@ -48,7 +48,14 @@
       "noData": "No data available",
       "overview": "Overview",
       "performance": "Performance Monitor",
-      "configuration": "Configuration"
+      "configuration": "Configuration",
+      "editConfig": "Edit Configuration",
+      "saveConfig": "Save Configuration",
+      "cancel": "Cancel",
+      "doubleClickToEdit": "Double Click to Edit",
+      "configSaved": "Configuration saved successfully",
+      "saveFailed": "Save failed",
+      "doubleClickEditTip": "Double-click on configuration values to edit them, press Enter or click Save button to submit changes, click elsewhere to cancel editing"
     }
   }
 }
