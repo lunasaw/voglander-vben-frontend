@@ -3,14 +3,14 @@ import type {
   ZlmQueryApi
 } from '#/api/media/zlm-query';
 
-import { computed, h, nextTick, onMounted, onUnmounted, ref } from 'vue';
+import { computed, h, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 import { ArrowLeft, RotateCw, Search, SearchX, X } from '@vben/icons';
 
-import { Button, Card, Col, Descriptions, Input, Row, Spin, Table, Tag, message } from 'ant-design-vue';
+import { Button, Card, Col, Descriptions, Input, Row, Select, Spin, Table, Tabs, Tag, message } from 'ant-design-vue';
 
 import {
   getZlmVersion,
@@ -21,7 +21,19 @@ import {
   getZlmServerConfig,
   setZlmServerConfig
 } from '#/api/media/zlm-query';
+import { getEnabledMediaNodeList, type MediaNodeApi } from '#/api/media/medianode';
 import { $t } from '#/locales';
+
+// 导入节点在线状态判断函数
+function isNodeOnline(keepalive?: string): boolean {
+  if (!keepalive) return false;
+
+  const keepaliveTime = new Date(keepalive).getTime();
+  const currentTime = new Date().getTime();
+  const diffMinutes = (currentTime - keepaliveTime) / (1000 * 60);
+
+  return diffMinutes < 5;
+}
 
 const { hasAccessByCodes } = useAccess();
 const route = useRoute();
@@ -39,6 +51,7 @@ const threadsLoadLoading = ref(false);
 const workThreadsLoadLoading = ref(false);
 const statisticLoading = ref(false);
 const serverConfigLoading = ref(false);
+const nodeListLoading = ref(false);
 
 // 数据状态
 const versionData = ref<ZlmQueryApi.Version | null>(null);
@@ -47,6 +60,7 @@ const threadsLoadData = ref<ZlmQueryApi.ThreadLoad[]>([]);
 const workThreadsLoadData = ref<ZlmQueryApi.ThreadLoad[]>([]);
 const statisticData = ref<ZlmQueryApi.ImportantObjectNum | null>(null);
 const serverConfigData = ref<ZlmQueryApi.ServerNodeConfig>([]);
+const nodeListData = ref<MediaNodeApi.MediaNodeVO[]>([]);
 
 // 配置项编辑状态
 const editingConfig = ref<string | null>(null);
@@ -55,19 +69,6 @@ const savingConfig = ref<string | null>(null);
 
 // 配置项搜索状态
 const configSearchText = ref<string>('');
-
-// 吸顶导航相关状态
-const activeSection = ref<string>('overview');
-const stickyNavVisible = ref(false);
-
-// 定义各个模块的ID和名称
-const sections = [
-  { id: 'overview', name: $t('media.node.query.overview') },
-  { id: 'performance', name: $t('media.node.query.performance') },
-  { id: 'statistic', name: $t('media.node.query.statistic') },
-  { id: 'serverConfig', name: $t('media.node.query.serverConfig') },
-  { id: 'apiList', name: $t('media.node.query.apiList') },
-];
 
 // 检查权限
 if (!hasAccessByCodes(['Media:Node:List'])) {
@@ -159,6 +160,42 @@ async function fetchServerConfig() {
   }
 }
 
+// 获取启用的节点列表
+async function fetchNodeList() {
+  nodeListLoading.value = true;
+  try {
+    const response = await getEnabledMediaNodeList();
+
+    // 由于requestClient配置了responseReturn: 'data'，所以response已经是解构后的数据
+    // 需要检查response的结构：
+    // 1. 如果是数组，直接使用
+    // 2. 如果是对象且有items字段，使用items
+    // 3. 如果是对象但直接包含节点数据，转为数组
+    let nodeList: MediaNodeApi.MediaNodeVO[] = [];
+
+    if (Array.isArray(response)) {
+      // 情况1：直接是数组
+      nodeList = response;
+    } else if (response && typeof response === 'object') {
+      if ('items' in response && Array.isArray(response.items)) {
+        // 情况2：有items字段
+        nodeList = response.items;
+      } else {
+        // 情况3：可能是单个节点对象，转为数组
+        nodeList = [response];
+      }
+    }
+
+    nodeListData.value = nodeList;
+    console.log('节点列表:', nodeListData.value);
+  } catch (error) {
+    console.error('获取节点列表失败:', error);
+    message.error($t('media.node.query.loadNodeListFailed'));
+  } finally {
+    nodeListLoading.value = false;
+  }
+}
+
 // 开始编辑单个配置项
 function startEditConfigItem(key: string, value: string) {
   if (!hasAccessByCodes(['Media:Node:Edit'])) {
@@ -223,18 +260,38 @@ function handleConfigCardClick(event: Event) {
 async function refreshAllData() {
   loading.value = true;
   try {
-    await Promise.all([
+    const results = await Promise.allSettled([
       fetchVersion(),
       fetchApiList(),
       fetchThreadsLoad(),
       fetchWorkThreadsLoad(),
       fetchStatistic(),
-      fetchServerConfig()
+      fetchServerConfig(),
+      fetchNodeList()
     ]);
-    message.success('数据刷新成功');
+
+    // 统计成功和失败的数量
+    const successful = results.filter(result => result.status === 'fulfilled').length;
+    const failed = results.filter(result => result.status === 'rejected').length;
+
+    if (failed === 0) {
+      message.success('数据刷新成功');
+    } else if (successful > 0) {
+      message.warning(`数据部分刷新成功（${successful}/${results.length}），部分接口可能无响应`);
+    } else {
+      message.error('数据刷新失败，请检查节点状态');
+    }
+
+    // 记录失败的请求
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        const apiNames = ['版本信息', 'API列表', '网络线程负载', '后台线程负载', '对象统计', '服务器配置', '节点列表'];
+        console.error(`${apiNames[index]}获取失败:`, result.reason);
+      }
+    });
   } catch (error) {
-    console.error('刷新数据失败:', error);
-    message.error('刷新数据失败');
+    console.error('刷新数据时发生意外错误:', error);
+    message.error('刷新数据时发生意外错误');
   } finally {
     loading.value = false;
   }
@@ -245,61 +302,73 @@ function goBack() {
   router.push('/media/node');
 }
 
-// 滚动到指定模块
-function scrollToSection(sectionId: string) {
-  const element = document.getElementById(sectionId);
-  if (element) {
-    const offsetTop = element.offsetTop - 120; // 减去头部高度和导航高度
-    window.scrollTo({
-      top: offsetTop,
-      behavior: 'smooth'
+// 节点切换
+async function onNodeSwitch(selectedNodeKey: string) {
+  if (selectedNodeKey === nodeKey.value) {
+    return; // 如果选择的是当前节点，不执行任何操作
+  }
+
+  // 检查权限
+  if (!hasAccessByCodes(['Media:Node:List'])) {
+    message.error('您没有查看节点详情的权限');
+    return;
+  }
+
+  const selectedNode = nodeListData.value.find(node =>
+    (node.serverId || node.id) === selectedNodeKey
+  );
+  if (!selectedNode) {
+    message.error('节点不存在');
+    return;
+  }
+
+  // 获取节点显示名称
+  const nodeDisplayName = selectedNode.name || selectedNode.serverId || selectedNode.id || '未知节点';
+
+  try {
+    // 显示切换提示，如果节点离线则在提示中包含状态信息
+    const statusHint = !isNodeOnline(selectedNode.keepalive?.toString()) ? ' (离线状态)' : '';
+    message.loading({
+      content: `正在切换到节点: ${nodeDisplayName}${statusHint}...`,
+      duration: 2,
+      key: 'node_switch_msg',
+    });
+
+    // 更新路由参数
+    await router.push({
+      name: 'media.node.detail',
+      params: {
+        nodeKey: selectedNodeKey
+      },
+      query: {
+        nodeName: nodeDisplayName
+      }
+    });
+
+    // 路由变更后会自动触发数据刷新（通过watch监听nodeKey变化）
+  } catch (error) {
+    console.error('节点切换失败:', error);
+    message.error({
+      content: '节点切换失败',
+      key: 'node_switch_msg',
     });
   }
 }
 
-// 滚动监听函数
-function handleScroll() {
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-  // 判断是否显示吸顶导航（滚动超过200px时显示）
-  stickyNavVisible.value = scrollTop > 200;
-
-  // 查找当前最接近顶部的模块
-  let currentSection = 'overview';
-  const offset = 150; // 偏移量，用于提前切换激活状态
-
-  for (let i = sections.length - 1; i >= 0; i--) {
-    const element = document.getElementById(sections[i].id);
-    if (element) {
-      const elementTop = element.offsetTop - offset;
-      if (scrollTop >= elementTop) {
-        currentSection = sections[i].id;
-        break;
-      }
-    }
-  }
-
-  activeSection.value = currentSection;
-}
-
-// 节流函数
-function throttle(func: Function, delay: number) {
-  let timer: NodeJS.Timeout | null = null;
-  return function(this: any, ...args: any[]) {
-    if (!timer) {
-      timer = setTimeout(() => {
-        func.apply(this, args);
-        timer = null;
-      }, delay);
-    }
-  };
-}
-
-// 创建节流后的滚动处理函数
-const throttledHandleScroll = throttle(handleScroll, 16); // 约60fps
 
 // 搜索框引用
 const searchInputRef = ref();
+
+// 节点选择器的过滤函数
+function filterOption(input: string, option: any) {
+  const node = sortedNodeList.value.find(n => (n.serverId || n.id) === option.value);
+  if (!node) return false;
+  const searchText = input.toLowerCase();
+  return (node.name || '').toLowerCase().includes(searchText) ||
+         (node.serverId || node.id || '').toLowerCase().includes(searchText) ||
+         (node.host || '').toLowerCase().includes(searchText);
+}
 
 // 键盘快捷键处理
 function handleKeyDown(event: KeyboardEvent) {
@@ -483,7 +552,7 @@ const configGroupOrder = [
 
 // 根据配置分组获取排序权重
 function getConfigGroupWeight(configKey: string): number {
-  const prefix = configKey.split('.')[0];
+  const prefix = configKey.split('.')[0] || '';
   const index = configGroupOrder.indexOf(prefix);
   return index === -1 ? 999 : index; // 未知分组排到最后
 }
@@ -542,22 +611,73 @@ const configStats = computed(() => {
   };
 });
 
+// 排序后的节点列表 - 当前节点置顶，在线节点优先
+const sortedNodeList = computed(() => {
+  if (!nodeListData.value || nodeListData.value.length === 0) {
+    return [];
+  }
+
+  return [...nodeListData.value].sort((a, b) => {
+    const aNodeId = a.serverId || a.id;
+    const bNodeId = b.serverId || b.id;
+
+    // 当前节点最优先
+    if (aNodeId === nodeKey.value) return -1;
+    if (bNodeId === nodeKey.value) return 1;
+
+    // 在线状态优先（使用isNodeOnline函数计算）
+    const aOnline = isNodeOnline(a.keepalive?.toString());
+    const bOnline = isNodeOnline(b.keepalive?.toString());
+    if (aOnline !== bOnline) {
+      return bOnline ? 1 : -1; // 在线的排在前面
+    }
+
+    // 启用状态优先
+    if (a.enabled !== b.enabled) {
+      return (b.enabled ? 1 : 0) - (a.enabled ? 1 : 0);
+    }
+
+    // 按名称排序
+    const nameA = a.name || aNodeId || '未知节点';
+    const nameB = b.name || bNodeId || '未知节点';
+    return nameA.localeCompare(nameB);
+  });
+});
+
+// 监听节点Key变化，自动刷新数据
+watch(nodeKey, async (newNodeKey, oldNodeKey) => {
+  if (newNodeKey && newNodeKey !== oldNodeKey) {
+    try {
+      // 清理旧数据
+      versionData.value = null;
+      apiListData.value = [];
+      threadsLoadData.value = [];
+      workThreadsLoadData.value = [];
+      statisticData.value = null;
+      serverConfigData.value = [];
+
+      // 取消任何编辑状态
+      cancelEditConfigItem();
+
+      // 刷新所有数据
+      await refreshAllData();
+    } catch (error) {
+      console.error('节点切换时刷新数据失败:', error);
+      message.error('节点切换时刷新数据失败，请手动刷新');
+    }
+  }
+});
+
 // 组件挂载时加载数据
 onMounted(async () => {
   await refreshAllData();
 
-  // 等待DOM更新后添加滚动监听
-  await nextTick();
-  window.addEventListener('scroll', throttledHandleScroll, { passive: true });
+  // 添加键盘快捷键监听
   window.addEventListener('keydown', handleKeyDown);
-
-  // 初始化时检查一次滚动位置
-  handleScroll();
 });
 
 // 组件卸载时移除事件监听
 onUnmounted(() => {
-  window.removeEventListener('scroll', throttledHandleScroll);
   window.removeEventListener('keydown', handleKeyDown);
 });
 </script>
@@ -565,64 +685,88 @@ onUnmounted(() => {
 <template>
   <Page auto-content-height>
     <template #header>
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <Button @click="goBack">
-            <ArrowLeft class="size-4" />
-            {{ $t('media.node.query.backToList') }}
-          </Button>
-          <h1 class="text-2xl font-bold">
-            {{ $t('media.node.detail') }} - {{ nodeName }}
-          </h1>
-        </div>
-        <Button type="primary" :loading="loading" @click="refreshAllData">
-          <RotateCw class="size-4" />
-          {{ $t('media.node.query.refreshData') }}
+      <div class="flex items-center gap-3">
+        <Button @click="goBack">
+          <ArrowLeft class="size-4" />
+          {{ $t('media.node.query.backToList') }}
         </Button>
+        <h1 class="text-2xl font-bold">
+          {{ $t('media.node.detail') }} - {{ nodeName }}
+        </h1>
       </div>
     </template>
 
-    <!-- 吸顶导航 -->
-    <div
-      v-show="stickyNavVisible"
-      class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm transition-all duration-300"
-      :class="{ 'opacity-100 translate-y-0': stickyNavVisible, 'opacity-0 -translate-y-full': !stickyNavVisible }"
-    >
-      <div class="max-w-7xl mx-auto px-4 py-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-1">
-            <span class="text-sm font-medium text-gray-600 mr-4">{{ nodeName }}</span>
-            <Button
-              v-for="section in sections"
-              :key="section.id"
-              :type="activeSection === section.id ? 'primary' : 'text'"
-              size="small"
-              @click="scrollToSection(section.id)"
-              class="transition-colors duration-200"
-            >
-              {{ section.name }}
-            </Button>
-          </div>
-          <Button
-            type="primary"
-            size="small"
-            :loading="loading"
-            @click="refreshAllData"
-            class="flex items-center gap-1"
-          >
-            <RotateCw class="size-3" />
-            刷新
-          </Button>
-        </div>
-      </div>
-    </div>
-
     <div class="space-y-6">
+      <!-- 节点管理 -->
+      <Card class="sticky-node-management">
+        <template #title>
+          <div class="flex items-center justify-between gap-4">
+            <span class="text-lg font-semibold">{{ $t('media.node.query.nodeManagement') }}</span>
+            <div class="flex items-center gap-3">
+              <!-- 节点切换选择器 -->
+              <div class="flex items-center gap-2 flex-1">
+                <span class="text-sm font-medium text-gray-700 shrink-0">{{ $t('media.node.query.selectNode') }}:</span>
+                <Select
+                  :value="nodeKey"
+                  :loading="nodeListLoading"
+                  :placeholder="$t('media.node.query.selectNode')"
+                  @change="onNodeSwitch"
+                  show-search
+                  :filter-option="filterOption"
+                  :dropdown-match-select-width="true"
+                >
+                  <Select.Option
+                    v-for="node in sortedNodeList"
+                    :key="node.serverId || node.id"
+                    :value="node.serverId || node.id"
+                    :disabled="(node.serverId || node.id) === nodeKey"
+                    :style="{ padding: '8px 16px' }"
+                  >
+                    <div class="flex items-center justify-between w-full">
+                      <div class="flex items-center gap-2 flex-1 min-w-0">
+                        <span class="font-medium text-gray-900 truncate">
+                          {{ node.name || node.serverId || node.id || '未知节点' }}
+                        </span>
+                        <span class="text-xs text-gray-500 truncate">
+                          ({{ node.host || '-' }})
+                        </span>
+                        <span v-if="(node.serverId || node.id) === nodeKey" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full shrink-0">
+                          {{ $t('media.node.query.currentNode') }}
+                        </span>
+                      </div>
+                      <div class="flex items-center ml-3 shrink-0">
+                        <Tag
+                          :color="isNodeOnline(node.keepalive?.toString()) ? 'green' : 'red'"
+                          size="small"
+                          class="m-0"
+                        >
+                          {{ isNodeOnline(node.keepalive?.toString()) ? $t('media.node.statusOnline') : $t('media.node.statusOffline') }}
+                        </Tag>
+                      </div>
+                    </div>
+                  </Select.Option>
+                </Select>
+              </div>
+              <!-- 刷新所有数据按钮 -->
+              <Button
+                type="primary"
+                :loading="loading"
+                @click="refreshAllData"
+                :title="$t('media.node.query.refreshData')"
+              >
+                <RotateCw class="size-4 mr-1" />
+                {{ $t('media.node.query.refreshData') }}
+              </Button>
+            </div>
+          </div>
+        </template>
+      </Card>
+
       <!-- 概览信息 -->
-      <Card id="overview">
+      <Card>
         <template #title>
           <div class="flex items-center justify-between">
-            <span>{{ $t('media.node.query.overview') }}</span>
+            <span class="text-lg font-semibold">{{ $t('media.node.query.overview') }}</span>
             <Button
               size="small"
               type="text"
@@ -655,7 +799,7 @@ onUnmounted(() => {
       </Card>
 
       <!-- 性能监控 -->
-      <Card id="performance" :title="$t('media.node.query.performance')">
+      <Card :title="$t('media.node.query.performance')">
         <Row :gutter="16">
           <Col :span="12">
             <Card size="small" :bordered="false">
@@ -714,35 +858,8 @@ onUnmounted(() => {
         </Row>
       </Card>
 
-      <!-- 对象统计 -->
-      <Card id="statistic">
-        <template #title>
-          <div class="flex items-center justify-between">
-            <span>{{ $t('media.node.query.statistic') }}</span>
-            <Button
-              size="small"
-              type="text"
-              :loading="statisticLoading"
-              @click="fetchStatistic"
-              class="hover:bg-gray-100"
-            >
-              <RotateCw class="size-3" />
-            </Button>
-          </div>
-        </template>
-        <Spin :spinning="statisticLoading">
-          <Table
-            :columns="statisticColumns"
-            :data-source="statisticTableData"
-            :pagination="false"
-            size="small"
-            :scroll="{ y: 260 }"
-          />
-        </Spin>
-      </Card>
-
       <!-- 服务器配置 -->
-      <Card id="serverConfig" @click="handleConfigCardClick">
+      <Card @click="handleConfigCardClick">
         <template #title>
           <div class="flex items-center justify-between">
             <span>{{ $t('media.node.query.serverConfig') }}</span>
@@ -764,10 +881,10 @@ onUnmounted(() => {
               <div class="flex items-center gap-3 flex-1">
                 <Input
                   ref="searchInputRef"
-                  v-model:value="configSearchText"
+                  v-model="configSearchText"
                   placeholder="搜索配置项名称或值..."
                   allow-clear
-                  class="max-w-sm"
+                  class="w-96"
                 >
                   <template #prefix>
                     <Search class="text-gray-400" />
@@ -847,8 +964,35 @@ onUnmounted(() => {
         </Spin>
       </Card>
 
+      <!-- 对象统计 -->
+      <Card>
+        <template #title>
+          <div class="flex items-center justify-between">
+            <span>{{ $t('media.node.query.statistic') }}</span>
+            <Button
+              size="small"
+              type="text"
+              :loading="statisticLoading"
+              @click="fetchStatistic"
+              class="hover:bg-gray-100"
+            >
+              <RotateCw class="size-3" />
+            </Button>
+          </div>
+        </template>
+        <Spin :spinning="statisticLoading">
+          <Table
+            :columns="statisticColumns"
+            :data-source="statisticTableData"
+            :pagination="false"
+            size="small"
+            :scroll="{ y: 260 }"
+          />
+        </Spin>
+      </Card>
+
       <!-- API列表 -->
-      <Card id="apiList">
+      <Card>
         <template #title>
           <div class="flex items-center justify-between">
             <span>{{ $t('media.node.query.apiList') }}</span>
@@ -876,3 +1020,46 @@ onUnmounted(() => {
     </div>
   </Page>
 </template>
+
+<style scoped>
+/* 组件样式优化 */
+.ant-card {
+  margin-bottom: 16px;
+}
+
+/* 节点管理固定样式 */
+.sticky-node-management {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+}
+
+/* 表格滚动优化 */
+:deep(.ant-table-tbody > tr > td) {
+  vertical-align: top;
+}
+
+/* 搜索框样式优化 */
+:deep(.ant-input-affix-wrapper) {
+  border-radius: 6px;
+}
+
+/* 选择器下拉框样式优化 */
+:deep(.ant-select-dropdown) {
+  border-radius: 8px;
+  box-shadow: 0 6px 16px 0 rgb(0 0 0 / 8%);
+}
+
+:deep(.ant-select-item-option-content) {
+  width: 100%;
+}
+
+/* 标签样式优化 */
+:deep(.ant-tag) {
+  font-size: 12px;
+  border-radius: 4px;
+}
+</style>

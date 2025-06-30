@@ -55,7 +55,13 @@
       "doubleClickToEdit": "Double Click to Edit",
       "configSaved": "Configuration saved successfully",
       "saveFailed": "Save failed",
-      "doubleClickEditTip": "Double-click on configuration values to edit them, press Enter or click Save button to submit changes, click elsewhere to cancel editing"
+      "doubleClickEditTip": "Double click config value to edit, press Enter or click Save to submit, click elsewhere to cancel editing",
+      "nodeManagement": "Node Management",
+      "nodeSwitch": "Node Switch",
+      "selectNode": "Select Node",
+      "currentNode": "Current Node",
+      "switchSuccess": "Node switched successfully",
+      "loadNodeListFailed": "Failed to load node list"
     }
   }
 }

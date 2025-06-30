@@ -55,7 +55,13 @@
       "doubleClickToEdit": "双击编辑",
       "configSaved": "配置保存成功",
       "saveFailed": "保存失败",
-      "doubleClickEditTip": "双击配置值可以进行编辑，按回车键或点击保存按钮提交修改，点击别处可以取消编辑"
+      "doubleClickEditTip": "双击配置值可以进行编辑，按回车键或点击保存按钮提交修改，点击别处可以取消编辑",
+      "nodeManagement": "节点选择",
+      "nodeSwitch": "节点切换",
+      "selectNode": "选择节点",
+      "currentNode": "当前节点",
+      "switchSuccess": "节点切换成功",
+      "loadNodeListFailed": "获取节点列表失败"
     }
   }
 }

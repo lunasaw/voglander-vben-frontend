@@ -14,7 +14,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '/media/node',
-        name: 'MediaNode',
+        name: 'media.node',
         meta: {
           icon: 'mdi:server-network',
           title: $t('media.node.title'),
@@ -23,7 +23,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: '/media/node/detail/:nodeKey',
-        name: 'MediaNodeDetail',
+        name: 'edia.node.detail',
         meta: {
           hideInMenu: true,
           icon: 'mdi:server-network',
