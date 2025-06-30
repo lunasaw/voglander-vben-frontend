@@ -53,6 +53,12 @@ const [Grid, gridApi] = useVbenVxeGrid({
     rowConfig: {
       keyField: 'id',
     },
+    scrollX: {
+      enabled: true,
+    },
+    scrollY: {
+      enabled: true,
+    },
     toolbarConfig: {
       custom: true,
       export: false,

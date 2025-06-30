@@ -30,6 +30,26 @@
 - 弹窗和抽屉参考`playground/src/views/examples/modal/`和`drawer/`
 - 按钮组合参考`playground/src/views/examples/button-group/`
 
+### 3.1. VxeTable表格规范
+- **横向滚动同步问题**：当表格列宽度总和超过容器宽度时，必须配置滚动选项确保表头和表内容同步滚动
+- **滚动配置**：在gridOptions中添加scrollX和scrollY配置
+  ```typescript
+  const [Grid, gridApi] = useVbenVxeGrid({
+    gridOptions: {
+      columns: useColumns(...),
+      // 其他配置...
+      scrollX: {
+        enabled: true,
+      },
+      scrollY: {
+        enabled: true,
+      },
+    },
+  });
+  ```
+- **列宽设置**：确保所有列都设置了合适的width值，避免布局异常
+- **固定列配置**：操作列通常设置为`fixed: 'right'`，重要标识列可设置为`fixed: 'left'`
+
 ### 4. 样式规范
 - 使用playground中的现有样式和主题
 - 保持统一的间距、字体、颜色规范

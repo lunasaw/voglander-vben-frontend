@@ -352,16 +352,15 @@ export function useColumns<T = MediaNodeApi.MediaNodeVO>(
     {
       cellRender: {
         name: 'CellTag',
-        props: ({ row }: { row: any }) => {
-          const online = isNodeOnline(row.keepalive);
-          return {
-            value: online ? 1 : 0,
-            label: online ? $t('media.node.statusOnline') : $t('media.node.statusOffline'),
-            type: online ? 'success' : 'error',
-          };
-        },
+        options: [
+          { label: $t('media.node.statusOnline'), value: 1, color: 'success' },
+          { label: $t('media.node.statusOffline'), value: 0, color: 'error' },
+        ],
       },
       field: 'status',
+      formatter: ({ row }: { row: any }) => {
+        return isNodeOnline(row.keepalive) ? 1 : 0;
+      },
       title: $t('media.node.status'),
       width: 100,
       align: 'center',
