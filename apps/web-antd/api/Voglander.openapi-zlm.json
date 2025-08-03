@@ -69,7 +69,9 @@
                 },
                 "example": {
                   "code": 0,
-                  "data": [""],
+                  "data": [
+                    ""
+                  ],
                   "msg": "",
                   "result": ""
                 }
@@ -216,145 +218,147 @@
                 },
                 "example": {
                   "code": 0,
-                  "data": {
-                    "rtp.rtpMaxSize": "",
-                    "protocol.hls_demand": "",
-                    "rtp_proxy.opus_pt": "",
-                    "rtp_proxy.timeoutSec": "",
-                    "rtmp.port": "",
-                    "hook.on_ip_not_found": "",
-                    "record.fileRepeat": "",
-                    "general.flowThreshold": "",
-                    "rtsp.rtpTransportType": "",
-                    "hook.retry_delay": "",
-                    "http.rootPath": "",
-                    "rtsp.keepAliveSecond": "",
-                    "hook.on_server_started": "",
-                    "api.defaultSnap": "",
-                    "cluster.origin_url": "",
-                    "http.port": "",
-                    "http.virtualPath": "",
-                    "http.keepAliveSecond": "",
-                    "ffmpeg.log": "",
-                    "hook.on_flow_report": "",
-                    "http.dirMenu": "",
-                    "rtsp.directProxy": "",
-                    "ffmpeg.cmd": "",
-                    "rtp.lowLatency": "",
-                    "protocol.enable_rtsp": "",
-                    "rtsp.port": "",
-                    "rtmp.sslport": "",
-                    "protocol.hls_save_path": "",
-                    "http.charSet": "",
-                    "http.sendBufSize": "",
-                    "hls.broadcastRecordTs": "",
-                    "api.apiDebug": "",
-                    "general.mergeWriteMS": "",
-                    "http.forbidCacheSuffix": "",
-                    "http.notFound": "",
-                    "hook.retry": "",
-                    "record.appName": "",
-                    "hls.fileBufSize": "",
-                    "hook.timeoutSec": "",
-                    "rtsp.sslport": "",
-                    "hls.deleteDelaySec": "",
-                    "hook.on_rtp_server_timeout": "",
-                    "hook.on_send_rtp_stopped": "",
-                    "hook.on_record_mp4": "",
-                    "hook.alive_interval": "",
-                    "rtmp.handshakeSecond": "",
-                    "hook.stream_changed_schemas": "",
-                    "rtc.externIP": "",
-                    "rtc.rembBitRate": "",
-                    "general.streamNoneReaderDelayMS": "",
-                    "protocol.mp4_max_second": "",
-                    "hook.on_publish": "",
-                    "rtp_proxy.port": "",
-                    "http.sslport": "",
-                    "rtp.audioMtuSize": "",
-                    "general.check_nvidia_dev": "",
-                    "record.fastStart": "",
-                    "hook.on_stream_not_found": "",
-                    "rtp_proxy.port_range": "",
-                    "protocol.enable_rtmp": "",
-                    "srt.timeoutSec": "",
-                    "rtsp.handshakeSecond": "",
-                    "hls.segDur": "",
-                    "protocol.mp4_as_player": "",
-                    "api.secret": "",
-                    "hls.segRetain": "",
-                    "protocol.rtsp_demand": "",
-                    "srt.port": "",
-                    "srt.pktBufSize": "",
-                    "rtp_proxy.gop_cache": "",
-                    "shell.maxReqSize": "",
-                    "ffmpeg.snap": "",
-                    "general.maxStreamWaitMS": "",
-                    "multicast.addrMax": "",
-                    "general.wait_add_track_ms": "",
-                    "http.allow_cross_domains": "",
-                    "protocol.modify_stamp": "",
-                    "rtp.videoMtuSize": "",
-                    "api.snapRoot": "",
-                    "protocol.enable_audio": "",
-                    "hook.on_server_keepalive": "",
-                    "multicast.addrMin": "",
-                    "protocol.ts_demand": "",
-                    "protocol.enable_fmp4": "",
-                    "rtsp.lowLatency": "",
-                    "http.allow_ip_range": "",
-                    "hook.on_rtsp_realm": "",
-                    "hook.on_stream_changed": "",
-                    "http.forwarded_ip_header": "",
-                    "rtp_proxy.h265_pt": "",
-                    "hook.on_del_mp4": "",
-                    "protocol.enable_hls": "",
-                    "protocol.enable_mp4": "",
-                    "rtc.port": "",
-                    "protocol.fmp4_demand": "",
-                    "record.sampleMS": "",
-                    "shell.port": "",
-                    "hook.on_shell_login": "",
-                    "cluster.retry_count": "",
-                    "general.enableVhost": "",
-                    "general.unready_frame_cache": "",
-                    "rtc.preferredCodecV": "",
-                    "rtp_proxy.h264_pt": "",
-                    "protocol.auto_close": "",
-                    "srt.latencyMul": "",
-                    "hook.on_server_exited": "",
-                    "general.resetWhenRePlay": "",
-                    "protocol.mp4_save_path": "",
-                    "protocol.continue_push_ms": "",
-                    "rtp_proxy.dumpDir": "",
-                    "rtp_proxy.ps_pt": "",
-                    "hook.enable": "",
-                    "rtc.timeoutSec": "",
-                    "rtc.preferredCodecA": "",
-                    "hls.segKeep": "",
-                    "multicast.udpTTL": "",
-                    "rtp.h264_stap_a": "",
-                    "hook.on_stream_none_reader": "",
-                    "hook.on_record_ts": "",
-                    "ffmpeg.bin": "",
-                    "protocol.enable_ts": "",
-                    "protocol.enable_hls_fmp4": "",
-                    "hls.segNum": "",
-                    "http.maxReqSize": "",
-                    "rtc.tcpPort": "",
-                    "cluster.timeout_sec": "",
-                    "general.enable_ffmpeg_log": "",
-                    "general.mediaServerId": "",
-                    "hook.on_http_access": "",
-                    "general.wait_track_ready_ms": "",
-                    "rtsp.authBasic": "",
-                    "hook.on_rtsp_auth": "",
-                    "protocol.rtmp_demand": "",
-                    "protocol.add_mute_audio": "",
-                    "record.fileBufSize": "",
-                    "rtmp.keepAliveSecond": "",
-                    "hook.on_play": ""
-                  },
+                  "data": [
+                    {
+                      "rtp.rtpMaxSize": "",
+                      "protocol.hls_demand": "",
+                      "rtp_proxy.opus_pt": "",
+                      "rtp_proxy.timeoutSec": "",
+                      "rtmp.port": "",
+                      "hook.on_ip_not_found": "",
+                      "record.fileRepeat": "",
+                      "general.flowThreshold": "",
+                      "rtsp.rtpTransportType": "",
+                      "hook.retry_delay": "",
+                      "http.rootPath": "",
+                      "rtsp.keepAliveSecond": "",
+                      "hook.on_server_started": "",
+                      "api.defaultSnap": "",
+                      "cluster.origin_url": "",
+                      "http.port": "",
+                      "http.virtualPath": "",
+                      "http.keepAliveSecond": "",
+                      "ffmpeg.log": "",
+                      "hook.on_flow_report": "",
+                      "http.dirMenu": "",
+                      "rtsp.directProxy": "",
+                      "ffmpeg.cmd": "",
+                      "rtp.lowLatency": "",
+                      "protocol.enable_rtsp": "",
+                      "rtsp.port": "",
+                      "rtmp.sslport": "",
+                      "protocol.hls_save_path": "",
+                      "http.charSet": "",
+                      "http.sendBufSize": "",
+                      "hls.broadcastRecordTs": "",
+                      "api.apiDebug": "",
+                      "general.mergeWriteMS": "",
+                      "http.forbidCacheSuffix": "",
+                      "http.notFound": "",
+                      "hook.retry": "",
+                      "record.appName": "",
+                      "hls.fileBufSize": "",
+                      "hook.timeoutSec": "",
+                      "rtsp.sslport": "",
+                      "hls.deleteDelaySec": "",
+                      "hook.on_rtp_server_timeout": "",
+                      "hook.on_send_rtp_stopped": "",
+                      "hook.on_record_mp4": "",
+                      "hook.alive_interval": "",
+                      "rtmp.handshakeSecond": "",
+                      "hook.stream_changed_schemas": "",
+                      "rtc.externIP": "",
+                      "rtc.rembBitRate": "",
+                      "general.streamNoneReaderDelayMS": "",
+                      "protocol.mp4_max_second": "",
+                      "hook.on_publish": "",
+                      "rtp_proxy.port": "",
+                      "http.sslport": "",
+                      "rtp.audioMtuSize": "",
+                      "general.check_nvidia_dev": "",
+                      "record.fastStart": "",
+                      "hook.on_stream_not_found": "",
+                      "rtp_proxy.port_range": "",
+                      "protocol.enable_rtmp": "",
+                      "srt.timeoutSec": "",
+                      "rtsp.handshakeSecond": "",
+                      "hls.segDur": "",
+                      "protocol.mp4_as_player": "",
+                      "api.secret": "",
+                      "hls.segRetain": "",
+                      "protocol.rtsp_demand": "",
+                      "srt.port": "",
+                      "srt.pktBufSize": "",
+                      "rtp_proxy.gop_cache": "",
+                      "shell.maxReqSize": "",
+                      "ffmpeg.snap": "",
+                      "general.maxStreamWaitMS": "",
+                      "multicast.addrMax": "",
+                      "general.wait_add_track_ms": "",
+                      "http.allow_cross_domains": "",
+                      "protocol.modify_stamp": "",
+                      "rtp.videoMtuSize": "",
+                      "api.snapRoot": "",
+                      "protocol.enable_audio": "",
+                      "hook.on_server_keepalive": "",
+                      "multicast.addrMin": "",
+                      "protocol.ts_demand": "",
+                      "protocol.enable_fmp4": "",
+                      "rtsp.lowLatency": "",
+                      "http.allow_ip_range": "",
+                      "hook.on_rtsp_realm": "",
+                      "hook.on_stream_changed": "",
+                      "http.forwarded_ip_header": "",
+                      "rtp_proxy.h265_pt": "",
+                      "hook.on_del_mp4": "",
+                      "protocol.enable_hls": "",
+                      "protocol.enable_mp4": "",
+                      "rtc.port": "",
+                      "protocol.fmp4_demand": "",
+                      "record.sampleMS": "",
+                      "shell.port": "",
+                      "hook.on_shell_login": "",
+                      "cluster.retry_count": "",
+                      "general.enableVhost": "",
+                      "general.unready_frame_cache": "",
+                      "rtc.preferredCodecV": "",
+                      "rtp_proxy.h264_pt": "",
+                      "protocol.auto_close": "",
+                      "srt.latencyMul": "",
+                      "hook.on_server_exited": "",
+                      "general.resetWhenRePlay": "",
+                      "protocol.mp4_save_path": "",
+                      "protocol.continue_push_ms": "",
+                      "rtp_proxy.dumpDir": "",
+                      "rtp_proxy.ps_pt": "",
+                      "hook.enable": "",
+                      "rtc.timeoutSec": "",
+                      "rtc.preferredCodecA": "",
+                      "hls.segKeep": "",
+                      "multicast.udpTTL": "",
+                      "rtp.h264_stap_a": "",
+                      "hook.on_stream_none_reader": "",
+                      "hook.on_record_ts": "",
+                      "ffmpeg.bin": "",
+                      "protocol.enable_ts": "",
+                      "protocol.enable_hls_fmp4": "",
+                      "hls.segNum": "",
+                      "http.maxReqSize": "",
+                      "rtc.tcpPort": "",
+                      "cluster.timeout_sec": "",
+                      "general.enable_ffmpeg_log": "",
+                      "general.mediaServerId": "",
+                      "hook.on_http_access": "",
+                      "general.wait_track_ready_ms": "",
+                      "rtsp.authBasic": "",
+                      "hook.on_rtsp_auth": "",
+                      "protocol.rtmp_demand": "",
+                      "protocol.add_mute_audio": "",
+                      "record.fileBufSize": "",
+                      "rtmp.keepAliveSecond": "",
+                      "hook.on_play": ""
+                    }
+                  ],
                   "msg": "",
                   "result": ""
                 }
@@ -376,7 +380,7 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/MapString",
-                "description": ""
+                "description": "配置参数"
               }
             }
           }
@@ -416,7 +420,7 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/MapString",
-                "description": ""
+                "description": "重启参数"
               }
             }
           }
@@ -456,7 +460,7 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/MediaReq",
-                "description": ""
+                "description": "媒体查询条件"
               }
             }
           }
@@ -537,7 +541,7 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/MediaReq",
-                "description": ""
+                "description": "媒体流信息"
               }
             }
           }
@@ -577,7 +581,7 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CloseStreamsReq",
-                "description": ""
+                "description": "批量关流请求"
               }
             }
           }
@@ -589,7 +593,7 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ServerResponse",
-                  "description": ""
+                  "description": "关闭成功"
                 },
                 "example": {
                   "code": 0,
@@ -617,7 +621,7 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/MediaReq",
-                "description": ""
+                "description": "媒体流信息"
               }
             }
           }
@@ -629,7 +633,7 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MediaOnlineStatus",
-                  "description": ""
+                  "description": "检查成功"
                 },
                 "example": {
                   "code": 0,
@@ -650,7 +654,7 @@
       "post": {
         "summary": "获取媒体流播放器列表",
         "deprecated": false,
-        "description": "",
+        "description": "获取媒体流播放器列表\n获取媒体流播放器列表\n获取指定媒体流的播放器列表",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -669,7 +673,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseMediaPlayer"
+                  "$ref": "#/components/schemas/ServerResponseMediaPlayer",
+                  "description": "获取成功"
                 },
                 "example": {
                   "code": 0,
@@ -696,7 +701,7 @@
       "post": {
         "summary": "获取流信息",
         "deprecated": false,
-        "description": "",
+        "description": "获取流信息\n获取流信息\n获取指定媒体流的详细信息",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -715,7 +720,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseMediaInfo"
+                  "$ref": "#/components/schemas/ServerResponseMediaInfo",
+                  "description": "获取成功"
                 },
                 "example": {
                   "code": 0,
@@ -754,11 +760,61 @@
         "security": []
       }
     },
+    "/zlm/api/media/play-urls": {
+      "post": {
+        "summary": "获取播放地址",
+        "deprecated": false,
+        "description": "获取播放地址\n获取播放地址\n获取指定媒体流的多协议播放地址",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaReq",
+                "description": "媒体流信息"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerResponsePlayUrl",
+                  "description": "获取成功"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {
+                    "rtsp": "",
+                    "rtmp": "",
+                    "http_flv": "",
+                    "ws_flv": "",
+                    "hls": "",
+                    "http_ts": "",
+                    "ws_ts": "",
+                    "http_fmp4": "",
+                    "ws_fmp4": ""
+                  },
+                  "msg": "",
+                  "result": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
     "/zlm/api/broadcast/message": {
       "post": {
-        "summary": "广播webrtc datachannel消息",
+        "summary": "广播WebRTC消息",
         "deprecated": false,
-        "description": "",
+        "description": "广播webrtc datachannel消息\n广播WebRTC消息\n广播WebRTC datachannel消息",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -804,7 +860,7 @@
           {
             "name": "localPort",
             "in": "query",
-            "description": "",
+            "description": "本地端口",
             "required": false,
             "schema": {
               "type": "string"
@@ -813,7 +869,7 @@
           {
             "name": "peerIp",
             "in": "query",
-            "description": "",
+            "description": "对端IP",
             "required": false,
             "schema": {
               "type": "string"
@@ -862,7 +918,7 @@
           {
             "name": "sessionId",
             "in": "path",
-            "description": "",
+            "description": "会话ID",
             "required": true,
             "schema": {
               "type": "string"
@@ -894,9 +950,9 @@
     },
     "/zlm/api/session/kick-batch": {
       "post": {
-        "summary": "批量断开tcp连接",
+        "summary": "批量断开TCP连接",
         "deprecated": false,
-        "description": "",
+        "description": "批量断开tcp连接\n批量断开TCP连接\n根据条件批量断开TCP连接",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -915,7 +971,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseString"
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "断开成功"
                 },
                 "example": {
                   "code": 0,
@@ -943,7 +1000,7 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/StreamProxyItem",
-                "description": ""
+                "description": "拉流代理配置"
               }
             }
           }
@@ -983,7 +1040,7 @@
           {
             "name": "key",
             "in": "path",
-            "description": "",
+            "description": "代理key",
             "required": true,
             "schema": {
               "type": "string"
@@ -1019,7 +1076,7 @@
       "post": {
         "summary": "获取拉流代理信息",
         "deprecated": false,
-        "description": "",
+        "description": "获取拉流代理信息\n获取拉流代理信息\n获取拉流代理的详细信息",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -1059,7 +1116,7 @@
       "post": {
         "summary": "添加推流代理",
         "deprecated": false,
-        "description": "",
+        "description": "添加推流代理\n添加推流代理\n添加一个推流代理，用于向外部推送媒体流",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -1078,7 +1135,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseStreamKey"
+                  "$ref": "#/components/schemas/ServerResponseStreamKey",
+                  "description": "添加成功"
                 },
                 "example": {
                   "code": 0,
@@ -1100,7 +1158,7 @@
       "delete": {
         "summary": "关闭推流代理",
         "deprecated": false,
-        "description": "",
+        "description": "关闭推流代理\n关闭推流代理\n根据代理key关闭指定的推流代理",
         "tags": [],
         "parameters": [
           {
@@ -1119,7 +1177,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseStringDelFlag"
+                  "$ref": "#/components/schemas/ServerResponseStringDelFlag",
+                  "description": "关闭成功"
                 },
                 "example": {
                   "code": 0,
@@ -1141,7 +1200,7 @@
       "post": {
         "summary": "获取推流代理信息",
         "deprecated": false,
-        "description": "",
+        "description": "获取推流代理信息\n获取推流代理信息\n获取推流代理的详细信息",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -1181,7 +1240,7 @@
       "post": {
         "summary": "添加FFmpeg拉流代理",
         "deprecated": false,
-        "description": "",
+        "description": "添加FFmpeg拉流代理\n添加FFmpeg拉流代理\n添加一个FFmpeg拉流代理，用于从外部拉取媒体流",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -1200,7 +1259,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseStreamKey"
+                  "$ref": "#/components/schemas/ServerResponseStreamKey",
+                  "description": "添加成功"
                 },
                 "example": {
                   "code": 0,
@@ -1222,7 +1282,7 @@
       "delete": {
         "summary": "关闭FFmpeg拉流代理",
         "deprecated": false,
-        "description": "",
+        "description": "关闭FFmpeg拉流代理\n关闭FFmpeg拉流代理\n根据代理key关闭指定的FFmpeg拉流代理",
         "tags": [],
         "parameters": [
           {
@@ -1241,7 +1301,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseStringDelFlag"
+                  "$ref": "#/components/schemas/ServerResponseStringDelFlag",
+                  "description": "关闭成功"
                 },
                 "example": {
                   "code": 0,
@@ -1263,7 +1324,7 @@
       "post": {
         "summary": "获取录制文件列表",
         "deprecated": false,
-        "description": "",
+        "description": "获取录制文件列表\n获取录制文件列表\n获取指定媒体流的录制文件列表",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -1282,12 +1343,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseMp4RecordFile"
+                  "$ref": "#/components/schemas/ServerResponseMp4RecordFile",
+                  "description": "获取成功"
                 },
                 "example": {
                   "code": 0,
                   "data": {
-                    "paths": [""],
+                    "paths": [
+                      ""
+                    ],
                     "rootPath": ""
                   },
                   "msg": "",
@@ -1305,7 +1369,7 @@
       "post": {
         "summary": "删除录像文件夹",
         "deprecated": false,
-        "description": "",
+        "description": "删除录像文件夹\n删除录像文件夹\n删除指定的录像文件夹",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -1354,7 +1418,7 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/RecordReq",
-                "description": ""
+                "description": "录制配置"
               }
             }
           }
@@ -1386,7 +1450,7 @@
       "post": {
         "summary": "设置录像速度",
         "deprecated": false,
-        "description": "",
+        "description": "设置录像速度\n设置录像速度\n设置录像文件的播放速度",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -1405,7 +1469,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseString"
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "设置成功"
                 },
                 "example": {
                   "code": 0,
@@ -1423,9 +1488,9 @@
     },
     "/zlm/api/record/seek": {
       "post": {
-        "summary": "设置录像流播放位置",
+        "summary": "设置录像播放位置",
         "deprecated": false,
-        "description": "",
+        "description": "设置录像流播放位置\n设置录像播放位置\n设置录像流的播放位置",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -1444,7 +1509,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseString"
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "设置成功"
                 },
                 "example": {
                   "code": 0,
@@ -1472,7 +1538,7 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/RecordReq",
-                "description": ""
+                "description": "录制配置"
               }
             }
           }
@@ -1502,9 +1568,9 @@
     },
     "/zlm/api/record/status": {
       "post": {
-        "summary": "是否正在录制",
+        "summary": "检查录制状态",
         "deprecated": false,
-        "description": "",
+        "description": "是否正在录制\n检查录制状态\n检查指定媒体流是否正在录制",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -1523,7 +1589,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseString"
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "检查成功"
                 },
                 "example": {
                   "code": 0,
@@ -1543,7 +1610,7 @@
       "post": {
         "summary": "查询文件概览",
         "deprecated": false,
-        "description": "",
+        "description": "查询文件概览\n查询文件概览\n查询录制文件的概览信息",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -1562,7 +1629,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseString"
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "查询成功"
                 },
                 "example": {
                   "code": 0,
@@ -1590,7 +1658,7 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SnapshotReq",
-                "description": ""
+                "description": "截图配置"
               }
             }
           }
@@ -1622,7 +1690,7 @@
           {
             "name": "streamId",
             "in": "path",
-            "description": "",
+            "description": "流ID",
             "required": true,
             "schema": {
               "type": "string"
@@ -1636,7 +1704,7 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RtpInfoResult",
-                  "description": "获取rtp代理时的某路ssrc rtp信息。"
+                  "description": "获取成功"
                 },
                 "example": {
                   "code": 0,
@@ -1666,7 +1734,7 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/OpenRtpServerReq",
-                "description": ""
+                "description": "RTP服务器配置"
               }
             }
           }
@@ -1678,7 +1746,7 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OpenRtpServerResult",
-                  "description": ""
+                  "description": "创建成功"
                 },
                 "example": {
                   "port": "",
@@ -1696,7 +1764,7 @@
       "post": {
         "summary": "创建多路复用RTP服务器",
         "deprecated": false,
-        "description": "",
+        "description": "创建多路复用RTP服务器\n创建多路复用RTP服务器\n创建一个多路复用RTP服务器",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -1734,7 +1802,7 @@
       "post": {
         "summary": "连接RTP服务器",
         "deprecated": false,
-        "description": "",
+        "description": "连接RTP服务器\n连接RTP服务器\n连接到指定的RTP服务器",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -1778,7 +1846,7 @@
           {
             "name": "streamId",
             "in": "path",
-            "description": "",
+            "description": "流ID",
             "required": true,
             "schema": {
               "type": "string"
@@ -1792,7 +1860,7 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CloseRtpServerResult",
-                  "description": ""
+                  "description": "关闭成功"
                 },
                 "example": {
                   "hit": "",
@@ -1808,9 +1876,9 @@
     },
     "/zlm/api/rtp/server/{streamId}/ssrc/{ssrc}": {
       "put": {
-        "summary": "更新RTP服务器过滤SSRC",
+        "summary": "更新RTP服务器SSRC",
         "deprecated": false,
-        "description": "",
+        "description": "更新RTP服务器过滤SSRC\n更新RTP服务器SSRC\n更新RTP服务器的过滤SSRC",
         "tags": [],
         "parameters": [
           {
@@ -1838,7 +1906,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseString"
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "更新成功"
                 },
                 "example": {
                   "code": 0,
@@ -1858,7 +1927,7 @@
       "post": {
         "summary": "暂停RTP超时检查",
         "deprecated": false,
-        "description": "",
+        "description": "暂停RTP超时检查\n暂停RTP超时检查\n暂停指定RTP服务器的超时检查",
         "tags": [],
         "parameters": [
           {
@@ -1877,7 +1946,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseString"
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "暂停成功"
                 },
                 "example": {
                   "code": 0,
@@ -1897,7 +1967,7 @@
       "post": {
         "summary": "恢复RTP超时检查",
         "deprecated": false,
-        "description": "",
+        "description": "恢复RTP超时检查\n恢复RTP超时检查\n恢复指定RTP服务器的超时检查",
         "tags": [],
         "parameters": [
           {
@@ -1916,7 +1986,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseString"
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "恢复成功"
                 },
                 "example": {
                   "code": 0,
@@ -1936,7 +2007,7 @@
       "get": {
         "summary": "获取RTP服务器列表",
         "deprecated": false,
-        "description": "",
+        "description": "获取RTP服务器列表\n获取RTP服务器列表\n获取所有正在运行的RTP服务器列表",
         "tags": [],
         "parameters": [],
         "responses": {
@@ -1945,7 +2016,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseListRtpServer"
+                  "$ref": "#/components/schemas/ServerResponseListRtpServer",
+                  "description": "获取成功"
                 },
                 "example": {
                   "code": 0,
@@ -1968,9 +2040,9 @@
     },
     "/zlm/api/rtp/send/start": {
       "post": {
-        "summary": "开始发送rtp",
+        "summary": "开始发送RTP",
         "deprecated": false,
-        "description": "",
+        "description": "开始发送rtp\n开始发送RTP\n开始向指定地址发送RTP流",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -2006,9 +2078,9 @@
     },
     "/zlm/api/rtp/send/start-passive": {
       "post": {
-        "summary": "开始tcp passive被动发送rtp",
+        "summary": "开始被动发送RTP",
         "deprecated": false,
-        "description": "",
+        "description": "开始tcp passive被动发送rtp\n开始被动发送RTP\n开始TCP passive模式被动发送RTP流",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -2044,9 +2116,9 @@
     },
     "/zlm/api/rtp/send/stop": {
       "post": {
-        "summary": "停止发送rtp",
+        "summary": "停止发送RTP",
         "deprecated": false,
-        "description": "",
+        "description": "停止发送rtp\n停止发送RTP\n停止向指定地址发送RTP流",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -2065,7 +2137,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponseString"
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "停止成功"
                 },
                 "example": {
                   "code": 0,
@@ -2083,9 +2156,9 @@
     },
     "/zlm/api/mp4/publish/start": {
       "post": {
-        "summary": "多文件推流",
+        "summary": "开始多文件推流",
         "deprecated": false,
-        "description": "",
+        "description": "多文件推流\n开始多文件推流\n开始推流多个MP4文件",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -2123,9 +2196,9 @@
     },
     "/zlm/api/mp4/publish/stop": {
       "post": {
-        "summary": "关闭多文件推流",
+        "summary": "停止多文件推流",
         "deprecated": false,
-        "description": "",
+        "description": "关闭多文件推流\n停止多文件推流\n停止推流多个MP4文件",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -2163,9 +2236,9 @@
     },
     "/zlm/api/mp4/load": {
       "post": {
-        "summary": "点播mp4文件",
+        "summary": "点播MP4文件",
         "deprecated": false,
-        "description": "",
+        "description": "点播mp4文件\n点播MP4文件\n加载并点播指定MP4文件",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -2203,9 +2276,9 @@
     },
     "/zlm/api/storage/space": {
       "post": {
-        "summary": "获取存储信息",
+        "summary": "获取存储空间信息",
         "deprecated": false,
-        "description": "",
+        "description": "获取存储信息\n获取存储空间信息\n获取服务器的存储空间信息",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -2224,8 +2297,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerResponse",
-                  "description": ""
+                  "$ref": "#/components/schemas/ServerResponseString",
+                  "description": "获取成功"
                 },
                 "example": {
                   "code": 0,
@@ -2251,7 +2324,7 @@
           {
             "name": "nodeId",
             "in": "path",
-            "description": "",
+            "description": "节点ID",
             "required": true,
             "schema": {
               "type": "string"
@@ -2295,7 +2368,7 @@
           {
             "name": "nodeId",
             "in": "path",
-            "description": "",
+            "description": "节点ID",
             "required": true,
             "schema": {
               "type": "string"
@@ -2307,7 +2380,7 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/MediaReq",
-                "description": ""
+                "description": "媒体查询条件"
               }
             }
           }
@@ -2403,8 +2476,7 @@
                     "secret": "",
                     "enabled": false,
                     "hookEnabled": false,
-                    "weight": 0,
-                    "keepalive": 0
+                    "weight": 0
                   }
                 ]
               }
@@ -2524,29 +2596,6 @@
           }
         }
       },
-      "ServerResponseImportantObjectNum": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "description": ""
-          },
-          "data": {
-            "$ref": "#/components/schemas/ImportantObjectNum",
-            "description": ""
-          },
-          "msg": {
-            "type": "string",
-            "description": "",
-            "default": "success"
-          },
-          "result": {
-            "type": "string",
-            "description": "",
-            "default": "success"
-          }
-        }
-      },
       "ImportantObjectNum": {
         "type": "object",
         "properties": {
@@ -2616,7 +2665,7 @@
           }
         }
       },
-      "ServerResponseListServerNodeConfig": {
+      "ServerResponseImportantObjectNum": {
         "type": "object",
         "properties": {
           "code": {
@@ -2624,11 +2673,7 @@
             "description": ""
           },
           "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ServerNodeConfig",
-              "description": "io.github.lunasaw.zlm.entity.ServerNodeConfig"
-            },
+            "$ref": "#/components/schemas/ImportantObjectNum",
             "description": ""
           },
           "msg": {
@@ -3196,11 +3241,30 @@
           }
         }
       },
-      "MapString": {
+      "ServerResponseListServerNodeConfig": {
         "type": "object",
         "properties": {
-          "key": {
-            "type": "string"
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServerNodeConfig",
+              "description": "io.github.lunasaw.zlm.entity.ServerNodeConfig"
+            },
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
           }
         }
       },
@@ -3224,6 +3288,14 @@
             "type": "string",
             "description": "",
             "default": "success"
+          }
+        }
+      },
+      "MapString": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
           }
         }
       },
@@ -3251,53 +3323,102 @@
           }
         }
       },
-      "MediaReq": {
+      "MediaPlayer": {
         "type": "object",
         "properties": {
-          "schema": {
+          "identifier": {
             "type": "string",
-            "description": "筛选协议，例如 rtsp或rtmp",
-            "default": "rtsp"
+            "description": "The unique identifier for the session, e.g., \"3-309\"."
           },
-          "vhost": {
+          "local_ip": {
             "type": "string",
-            "description": "筛选虚拟主机，例如__defaultVhost__",
-            "default": "__defaultVhost__"
+            "description": "The local IP address. \"::\" is a shorthand in IPv6 for representing multiple groups of zeros."
           },
-          "app": {
-            "type": "string",
-            "description": "筛选应用名，例如 live"
+          "local_port": {
+            "type": "integer",
+            "description": "The local port number."
           },
-          "stream": {
+          "peer_ip": {
             "type": "string",
-            "description": "筛选流id，例如 test"
+            "description": "The IP address of the peer in the session."
+          },
+          "peer_port": {
+            "type": "integer",
+            "description": "The port number of the peer."
+          },
+          "typeid": {
+            "type": "string",
+            "description": "The type identifier for the session, indicating it's a WebRTC session from MediaKit."
           }
         }
       },
-      "ServerResponseListMediaData": {
+      "Track": {
         "type": "object",
         "properties": {
-          "code": {
+          "channels": {
             "type": "integer",
-            "description": ""
+            "description": "音频通道数。"
           },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MediaData",
-              "description": "Class representing the 'data' array in the JSON structure."
-            },
-            "description": ""
+          "codec_id": {
+            "type": "integer",
+            "description": "编码ID。H264 = 0, H265 = 1, AAC = 2, G711A = 3, G711U = 4。"
           },
-          "msg": {
+          "codec_id_name": {
             "type": "string",
-            "description": "",
-            "default": "success"
+            "description": "编码类型的名称。"
           },
-          "result": {
-            "type": "string",
-            "description": "",
-            "default": "success"
+          "codec_type": {
+            "type": "integer",
+            "description": "类型。视频 = 0, 音频 = 1。"
+          },
+          "fps": {
+            "type": "number",
+            "description": "视频的帧率。"
+          },
+          "height": {
+            "type": "integer",
+            "description": "视频的高度。"
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "轨道是否准备就绪。"
+          },
+          "width": {
+            "type": "integer",
+            "description": "视频的宽度。"
+          },
+          "frames": {
+            "type": "integer",
+            "description": "累计接收帧数"
+          },
+          "sample_bit": {
+            "type": "integer",
+            "description": "音频采样位数"
+          },
+          "sample_rate": {
+            "type": "integer",
+            "description": "音频采样率"
+          },
+          "gop_interval_ms": {
+            "type": "integer",
+            "description": "gop间隔时间，单位毫秒"
+          },
+          "gop_size": {
+            "type": "integer",
+            "description": "gop大小，单位帧数"
+          },
+          "key_frames": {
+            "type": "integer",
+            "description": "累计接收关键帧数"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "轨道时长，单位毫秒",
+            "format": "int64"
+          },
+          "loss": {
+            "type": "number",
+            "description": "丢包率，-1表示未知"
           }
         }
       },
@@ -3366,93 +3487,76 @@
           }
         }
       },
-      "Track": {
+      "ServerResponseListMediaData": {
         "type": "object",
         "properties": {
-          "channels": {
+          "code": {
             "type": "integer",
-            "description": "音频通道数。"
+            "description": ""
           },
-          "codec_id": {
-            "type": "integer",
-            "description": "编码ID。H264 = 0, H265 = 1, AAC = 2, G711A = 3, G711U = 4。"
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaData",
+              "description": "Class representing the 'data' array in the JSON structure."
+            },
+            "description": ""
           },
-          "codec_id_name": {
+          "msg": {
             "type": "string",
-            "description": "编码类型的名称。"
+            "description": "",
+            "default": "success"
           },
-          "codec_type": {
-            "type": "integer",
-            "description": "类型。视频 = 0, 音频 = 1。"
-          },
-          "fps": {
-            "type": "integer",
-            "description": "视频的帧率。"
-          },
-          "height": {
-            "type": "integer",
-            "description": "视频的高度。"
-          },
-          "ready": {
-            "type": "boolean",
-            "description": "轨道是否准备就绪。"
-          },
-          "width": {
-            "type": "integer",
-            "description": "视频的宽度。"
-          },
-          "frames": {
-            "type": "integer",
-            "description": "累计接收帧数"
-          },
-          "sample_bit": {
-            "type": "integer",
-            "description": "音频采样位数"
-          },
-          "sample_rate": {
-            "type": "integer",
-            "description": "音频采样率"
-          },
-          "gop_interval_ms": {
-            "type": "integer",
-            "description": "gop间隔时间，单位毫秒"
-          },
-          "gop_size": {
-            "type": "integer",
-            "description": "gop大小，单位帧数"
-          },
-          "key_frames": {
-            "type": "integer",
-            "description": "累计接收关键帧数"
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
           }
         }
       },
-      "MediaPlayer": {
+      "MediaReq": {
         "type": "object",
         "properties": {
-          "identifier": {
+          "schema": {
             "type": "string",
-            "description": "The unique identifier for the session, e.g., \"3-309\"."
+            "description": "筛选协议，例如 rtsp或rtmp",
+            "default": "rtsp"
           },
-          "local_ip": {
+          "vhost": {
             "type": "string",
-            "description": "The local IP address. \"::\" is a shorthand in IPv6 for representing multiple groups of zeros."
+            "description": "筛选虚拟主机，例如__defaultVhost__",
+            "default": "__defaultVhost__"
           },
-          "local_port": {
+          "app": {
+            "type": "string",
+            "description": "筛选应用名，例如 live"
+          },
+          "stream": {
+            "type": "string",
+            "description": "筛选流id，例如 test"
+          }
+        }
+      },
+      "ServerResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
             "type": "integer",
-            "description": "The local port number."
+            "description": ""
           },
-          "peer_ip": {
+          "data": {
             "type": "string",
-            "description": "The IP address of the peer in the session."
+            "description": ""
           },
-          "peer_port": {
-            "type": "integer",
-            "description": "The port number of the peer."
-          },
-          "typeid": {
+          "msg": {
             "type": "string",
-            "description": "The type identifier for the session, indicating it's a WebRTC session from MediaKit."
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
           }
         }
       },
@@ -3480,29 +3584,6 @@
           "force": {
             "type": "integer",
             "description": ""
-          }
-        }
-      },
-      "ServerResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "description": ""
-          },
-          "data": {
-            "type": "string",
-            "description": ""
-          },
-          "msg": {
-            "type": "string",
-            "description": "",
-            "default": "success"
-          },
-          "result": {
-            "type": "string",
-            "description": "",
-            "default": "success"
           }
         }
       },
@@ -3556,58 +3637,6 @@
           }
         }
       },
-      "ServerResponseMediaInfo": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "description": ""
-          },
-          "data": {
-            "$ref": "#/components/schemas/MediaInfo",
-            "description": ""
-          },
-          "msg": {
-            "type": "string",
-            "description": "",
-            "default": "success"
-          },
-          "result": {
-            "type": "string",
-            "description": "",
-            "default": "success"
-          }
-        }
-      },
-      "MediaInfo": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "description": "状态码。"
-          },
-          "online": {
-            "type": "boolean",
-            "description": "会话是否在线。"
-          },
-          "readerCount": {
-            "type": "integer",
-            "description": "本协议的观看人数。"
-          },
-          "totalReaderCount": {
-            "type": "integer",
-            "description": "观看总人数，包括hls/rtsp/rtmp/http-flv/ws-flv。"
-          },
-          "tracks": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Track1",
-              "description": "io.github.lunasaw.zlm.entity.Track"
-            },
-            "description": "轨道列表。"
-          }
-        }
-      },
       "Track1": {
         "type": "object",
         "properties": {
@@ -3628,7 +3657,7 @@
             "description": "类型。视频 = 0, 音频 = 1。"
           },
           "fps": {
-            "type": "integer",
+            "type": "number",
             "description": "视频的帧率。"
           },
           "height": {
@@ -3666,10 +3695,128 @@
           "key_frames": {
             "type": "integer",
             "description": "累计接收关键帧数"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "轨道时长，单位毫秒",
+            "format": "int64"
+          },
+          "loss": {
+            "type": "number",
+            "description": "丢包率，-1表示未知"
           }
         }
       },
-      "ServerResponseListTcpLink": {
+      "MediaInfo": {
+        "type": "object",
+        "properties": {
+          "readerCount": {
+            "type": "integer",
+            "description": "本协议的观看人数。"
+          },
+          "totalReaderCount": {
+            "type": "integer",
+            "description": "观看总人数，包括hls/rtsp/rtmp/http-flv/ws-flv。"
+          },
+          "tracks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Track1",
+              "description": "io.github.lunasaw.zlm.entity.Track"
+            },
+            "description": "轨道列表。"
+          },
+          "aliveSecond": {
+            "type": "integer",
+            "description": "存活时间，单位秒。"
+          },
+          "app": {
+            "type": "string",
+            "description": "应用名。"
+          },
+          "bytesSpeed": {
+            "type": "integer",
+            "description": "数据产生速度，单位byte/s。",
+            "format": "int64"
+          },
+          "createStamp": {
+            "type": "integer",
+            "description": "数据产生时间戳。",
+            "format": "int64"
+          },
+          "isRecordingHLS": {
+            "type": "boolean",
+            "description": "是否正在录制HLS。"
+          },
+          "isRecordingMP4": {
+            "type": "boolean",
+            "description": "是否正在录制MP4。"
+          },
+          "originSock": {
+            "$ref": "#/components/schemas/OriginSock",
+            "description": "源套接字信息。"
+          },
+          "originType": {
+            "type": "integer",
+            "description": "源类型编号。"
+          },
+          "originTypeStr": {
+            "type": "string",
+            "description": "源类型字符串。"
+          },
+          "originUrl": {
+            "type": "string",
+            "description": "源URL。"
+          },
+          "params": {
+            "type": "string",
+            "description": "参数。"
+          },
+          "schema": {
+            "type": "string",
+            "description": "协议。"
+          },
+          "stream": {
+            "type": "string",
+            "description": "流ID。"
+          },
+          "totalBytes": {
+            "type": "integer",
+            "description": "累计接收数据总字节数。",
+            "format": "int64"
+          },
+          "vhost": {
+            "type": "string",
+            "description": "虚拟主机。"
+          }
+        }
+      },
+      "OriginSock": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "连接标识符。"
+          },
+          "local_ip": {
+            "type": "string",
+            "description": "本地IP地址。"
+          },
+          "local_port": {
+            "type": "integer",
+            "description": "本地端口。"
+          },
+          "peer_ip": {
+            "type": "string",
+            "description": "对端IP地址。"
+          },
+          "peer_port": {
+            "type": "integer",
+            "description": "对端端口。"
+          }
+        }
+      },
+      "ServerResponseMediaInfo": {
         "type": "object",
         "properties": {
           "code": {
@@ -3677,11 +3824,7 @@
             "description": ""
           },
           "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TcpLink",
-              "description": "Class representing the input structure."
-            },
+            "$ref": "#/components/schemas/MediaInfo",
             "description": ""
           },
           "msg": {
@@ -3722,6 +3865,129 @@
           "typeid": {
             "type": "string",
             "description": "客户端TCPSession typeid"
+          }
+        }
+      },
+      "ServerResponseListTcpLink": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TcpLink",
+              "description": "Class representing the input structure."
+            },
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "PlayUrl": {
+        "type": "object",
+        "properties": {
+          "rtsp": {
+            "type": "string",
+            "description": "RTSP协议播放地址"
+          },
+          "rtmp": {
+            "type": "string",
+            "description": "RTMP协议播放地址"
+          },
+          "http_flv": {
+            "type": "string",
+            "description": "HTTP-FLV协议播放地址"
+          },
+          "ws_flv": {
+            "type": "string",
+            "description": "WebSocket-FLV协议播放地址"
+          },
+          "hls": {
+            "type": "string",
+            "description": "HLS协议播放地址"
+          },
+          "http_ts": {
+            "type": "string",
+            "description": "HTTP-TS协议播放地址"
+          },
+          "ws_ts": {
+            "type": "string",
+            "description": "WebSocket-TS协议播放地址"
+          },
+          "http_fmp4": {
+            "type": "string",
+            "description": "HTTP-fMP4协议播放地址"
+          },
+          "ws_fmp4": {
+            "type": "string",
+            "description": "WebSocket-fMP4协议播放地址"
+          }
+        }
+      },
+      "StreamKey": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "ServerResponsePlayUrl": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/PlayUrl",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
+      "ServerResponseStreamKey": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/StreamKey",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
           }
         }
       },
@@ -3838,33 +4104,10 @@
           }
         }
       },
-      "ServerResponseStreamKey": {
+      "StringDelFlag": {
         "type": "object",
         "properties": {
-          "code": {
-            "type": "integer",
-            "description": ""
-          },
-          "data": {
-            "$ref": "#/components/schemas/StreamKey",
-            "description": ""
-          },
-          "msg": {
-            "type": "string",
-            "description": "",
-            "default": "success"
-          },
-          "result": {
-            "type": "string",
-            "description": "",
-            "default": "success"
-          }
-        }
-      },
-      "StreamKey": {
-        "type": "object",
-        "properties": {
-          "key": {
+          "flag": {
             "type": "string",
             "description": ""
           }
@@ -3890,15 +4133,6 @@
             "type": "string",
             "description": "",
             "default": "success"
-          }
-        }
-      },
-      "StringDelFlag": {
-        "type": "object",
-        "properties": {
-          "flag": {
-            "type": "string",
-            "description": ""
           }
         }
       },
@@ -3968,6 +4202,45 @@
           }
         }
       },
+      "Mp4RecordFile": {
+        "type": "object",
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          "rootPath": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "ServerResponseMp4RecordFile": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": ""
+          },
+          "data": {
+            "$ref": "#/components/schemas/Mp4RecordFile",
+            "description": ""
+          },
+          "msg": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          },
+          "result": {
+            "type": "string",
+            "description": "",
+            "default": "success"
+          }
+        }
+      },
       "RecordReq": {
         "type": "object",
         "properties": {
@@ -4012,45 +4285,6 @@
           "stamp": {
             "type": "string",
             "description": "要设置的录像播放位置"
-          }
-        }
-      },
-      "ServerResponseMp4RecordFile": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "description": ""
-          },
-          "data": {
-            "$ref": "#/components/schemas/Mp4RecordFile",
-            "description": ""
-          },
-          "msg": {
-            "type": "string",
-            "description": "",
-            "default": "success"
-          },
-          "result": {
-            "type": "string",
-            "description": "",
-            "default": "success"
-          }
-        }
-      },
-      "Mp4RecordFile": {
-        "type": "object",
-        "properties": {
-          "paths": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": ""
-          },
-          "rootPath": {
-            "type": "string",
-            "description": ""
           }
         }
       },
@@ -4129,6 +4363,19 @@
           }
         }
       },
+      "OpenRtpServerResult": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "string",
+            "description": ""
+          },
+          "code": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
       "OpenRtpServerReq": {
         "type": "object",
         "properties": {
@@ -4143,19 +4390,6 @@
           "stream_id": {
             "type": "string",
             "description": "该端口绑定的流ID，该端口只能创建这一个流(而不是根据ssrc创建多个)。"
-          }
-        }
-      },
-      "OpenRtpServerResult": {
-        "type": "object",
-        "properties": {
-          "port": {
-            "type": "string",
-            "description": ""
-          },
-          "code": {
-            "type": "string",
-            "description": ""
           }
         }
       },
@@ -4229,6 +4463,19 @@
           }
         }
       },
+      "StartSendRtpResult": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "local_port": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
       "StartSendRtpReq": {
         "type": "object",
         "properties": {
@@ -4281,19 +4528,6 @@
           "only_audio": {
             "type": "boolean",
             "description": "当use_ps 为0时，有效。为1时，发送音频；为0时，发送视频；不传时默认为0。"
-          }
-        }
-      },
-      "StartSendRtpResult": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "description": ""
-          },
-          "local_port": {
-            "type": "string",
-            "description": ""
           }
         }
       },
