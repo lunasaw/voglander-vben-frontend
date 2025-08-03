@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm check:type:*)",
+      "Bash(pnpm run:*)",
+      "Bash(npx vue-tsc:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm format:*)",
+      "Bash(npx eslint:*)"
+    ],
+    "deny": []
+  }
+}
