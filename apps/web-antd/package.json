@@ -48,6 +48,9 @@
     "json-bigint": "catalog:",
     "pinia": "catalog:",
     "vue": "catalog:",
-    "vue-router": "catalog:"
+    "vue-router": "catalog:",
+    "video.js": "catalog:",
+    "flv.js": "catalog:",
+    "hls.js": "catalog:"
   }
 }

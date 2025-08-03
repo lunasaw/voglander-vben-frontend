@@ -3,7 +3,9 @@ import type { ZlmMediaApi } from '#/api/media/zlm-media';
 
 import { computed, ref } from 'vue';
 
-import { Modal } from 'ant-design-vue';
+import { Modal, message } from 'ant-design-vue';
+import { Copy } from '@vben/icons';
+import MediaPlayer from '../../media-player/index.vue';
 
 interface Props {
   mediaInfo?: null | ZlmMediaApi.MediaInfoDetail;
@@ -13,6 +15,8 @@ interface Props {
 const props = defineProps<Props>();
 
 const visible = ref(false);
+const playerRef = ref();
+const currentPlayingFormat = ref('');
 
 // 计算属性
 const hasPlayUrls = computed(() => {
@@ -21,10 +25,14 @@ const hasPlayUrls = computed(() => {
   return (
     urls.rtsp ||
     urls.rtmp ||
-    urls['http-flv'] ||
-    urls['ws-flv'] ||
+    urls.httpFlv ||
+    urls.wsFlv ||
     urls.hls ||
-    urls.webrtc
+    urls.webrtc ||
+    urls.httpTs ||
+    urls.wsTs ||
+    urls.httpFmp4 ||
+    urls.wsFmp4
   );
 });
 
@@ -54,7 +62,114 @@ function show() {
 }
 
 function handleClose() {
+  // 停止播放器
+  if (playerRef.value && playerRef.value.destroy) {
+    playerRef.value.destroy();
+  }
+  
   visible.value = false;
+  currentPlayingFormat.value = '';
+}
+
+// 播放指定格式
+function playFormat(format: string, url: string) {
+  // 先校验格式支持
+  if (!isFormatSupported(format)) {
+    message.warning({
+      content: `当前浏览器不支持 ${getFormatDisplayName(format)} 格式播放`,
+      duration: 5,
+    });
+    return;
+  }
+
+  if (playerRef.value && playerRef.value.playFormat) {
+    currentPlayingFormat.value = format;
+    playerRef.value.playFormat(format);
+    console.log(`Playing ${format}: ${url}`);
+  }
+}
+
+// 获取格式显示名称
+function getFormatDisplayName(format: string): string {
+  const formatNames: Record<string, string> = {
+    'rtsp': 'RTSP',
+    'rtmp': 'RTMP', 
+    'httpFlv': 'HTTP-FLV',
+    'wsFlv': 'WS-FLV',
+    'hls': 'HLS',
+    'webrtc': 'WebRTC',
+    'httpTs': 'HTTP-TS',
+    'wsTs': 'WS-TS',
+    'httpFmp4': 'HTTP-fMP4',
+    'wsFmp4': 'WS-fMP4'
+  };
+  return formatNames[format] || format.toUpperCase();
+}
+
+// 处理不支持的格式
+function handleFormatNotSupported(data: { format: string; message: string }) {
+  message.warning({
+    content: data.message,
+    duration: 5,
+  });
+  console.warn(`Format ${data.format} not supported:`, data.message);
+}
+
+// 获取格式支持状态
+function isFormatSupported(format: string): boolean {
+  const supportedFormats = ['hls', 'httpFlv', 'wsFlv', 'httpFmp4'];
+  
+  // WS-fMP4 需要专门的WebSocket播放器，标准Video.js不支持
+  if (format === 'wsFmp4') {
+    return false; // 需要专门的WebSocket fMP4播放器如mpegts.js或Jessibuca
+  }
+  
+  // HTTP-TS 和 WS-TS 格式 - 放宽检查，让播放器尝试播放
+  if (format === 'httpTs' || format === 'wsTs') {
+    // 大部分现代浏览器都支持TS格式，即使canPlayType返回空字符串
+    // 我们允许尝试播放，让播放器自己处理兼容性
+    return true;
+  }
+  
+  return supportedFormats.includes(format);
+}
+
+// 复制URL到剪贴板
+async function copyUrl(url: string, format: string) {
+  try {
+    // 检查是否支持现代剪贴板API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+      message.success(`已复制 ${getFormatDisplayName(format)} 播放地址`);
+      return;
+    }
+  } catch (error) {
+    console.error('Modern clipboard API failed:', error);
+  }
+  
+  // 回退方案：使用传统的execCommand方法
+  try {
+    const textArea = document.createElement('textarea');
+    textArea.value = url;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    
+    if (successful) {
+      message.success(`已复制 ${getFormatDisplayName(format)} 播放地址`);
+    } else {
+      throw new Error('execCommand failed');
+    }
+  } catch (fallbackError) {
+    console.error('Fallback copy method also failed:', fallbackError);
+    message.error('复制失败，请手动复制该地址');
+  }
 }
 
 // 导出方法供父组件调用
@@ -67,11 +182,32 @@ defineExpose({
   <Modal
     v-model:open="visible"
     :title="`流信息详情 - ${mediaInfo?.app}/${mediaInfo?.stream}`"
-    :width="800"
+    :width="1000"
     :footer="null"
     @cancel="handleClose"
   >
     <div class="detail-content">
+      <!-- 视频播放器 -->
+      <div v-if="hasPlayUrls" class="player-section">
+        <h4 class="section-title">
+          视频播放
+          <span v-if="currentPlayingFormat" class="playing-format">
+            (当前: {{ getFormatDisplayName(currentPlayingFormat) }})
+          </span>
+        </h4>
+        <div class="player-wrapper">
+          <MediaPlayer
+            ref="playerRef"
+            :play-urls="playUrls"
+            :height="400"
+            :autoplay="false"
+            :controls="true"
+            :fluid="true"
+            @format-not-supported="handleFormatNotSupported"
+          />
+        </div>
+      </div>
+
       <!-- 基本信息 -->
       <div class="info-section">
         <h4 class="section-title">基本信息</h4>
@@ -89,32 +225,233 @@ defineExpose({
 
       <!-- 播放地址 -->
       <div class="info-section">
-        <h4 class="section-title">播放地址</h4>
+        <h4 class="section-title">播放地址 (点击测试播放)</h4>
         <div class="info-box">
-          <p v-if="playUrls?.rtsp">
+          <div v-if="playUrls?.rtsp" class="url-item">
             <strong>RTSP:</strong>
-            <code class="url-code">{{ playUrls.rtsp }}</code>
-          </p>
-          <p v-if="playUrls?.rtmp">
+            <div class="url-controls">
+              <button 
+                class="url-link"
+                :class="{ 
+                  active: currentPlayingFormat === 'rtsp',
+                  disabled: !isFormatSupported('rtsp')
+                }"
+                :disabled="!isFormatSupported('rtsp')"
+                @click="playFormat('rtsp', playUrls.rtsp)"
+              >
+                {{ playUrls.rtsp }}
+                <span v-if="!isFormatSupported('rtsp')" class="unsupported-label">
+                  (浏览器不支持)
+                </span>
+              </button>
+              <button 
+                class="copy-btn"
+                @click="copyUrl(playUrls.rtsp, 'rtsp')"
+                title="复制链接"
+              >
+                <Copy class="copy-icon" />
+              </button>
+            </div>
+          </div>
+          <div v-if="playUrls?.rtmp" class="url-item">
             <strong>RTMP:</strong>
-            <code class="url-code">{{ playUrls.rtmp }}</code>
-          </p>
-          <p v-if="playUrls?.['http-flv']">
+            <div class="url-controls">
+              <button 
+                class="url-link"
+                :class="{ 
+                  active: currentPlayingFormat === 'rtmp',
+                  disabled: !isFormatSupported('rtmp')
+                }"
+                :disabled="!isFormatSupported('rtmp')"
+                @click="playFormat('rtmp', playUrls.rtmp)"
+              >
+                {{ playUrls.rtmp }}
+                <span v-if="!isFormatSupported('rtmp')" class="unsupported-label">
+                  (浏览器不支持)
+                </span>
+              </button>
+              <button 
+                class="copy-btn"
+                @click="copyUrl(playUrls.rtmp, 'rtmp')"
+                title="复制链接"
+              >
+                <Copy class="copy-icon" />
+              </button>
+            </div>
+          </div>
+          <div v-if="playUrls?.httpFlv" class="url-item">
             <strong>HTTP-FLV:</strong>
-            <code class="url-code">{{ playUrls['http-flv'] }}</code>
-          </p>
-          <p v-if="playUrls?.['ws-flv']">
+            <div class="url-controls">
+              <button 
+                class="url-link"
+                :class="{ active: currentPlayingFormat === 'httpFlv' }"
+                @click="playFormat('httpFlv', playUrls.httpFlv)"
+              >
+                {{ playUrls.httpFlv }}
+              </button>
+              <button 
+                class="copy-btn"
+                @click="copyUrl(playUrls.httpFlv, 'httpFlv')"
+                title="复制链接"
+              >
+                <Copy class="copy-icon" />
+              </button>
+            </div>
+          </div>
+          <div v-if="playUrls?.wsFlv" class="url-item">
             <strong>WS-FLV:</strong>
-            <code class="url-code">{{ playUrls['ws-flv'] }}</code>
-          </p>
-          <p v-if="playUrls?.hls">
+            <div class="url-controls">
+              <button 
+                class="url-link"
+                :class="{ active: currentPlayingFormat === 'wsFlv' }"
+                @click="playFormat('wsFlv', playUrls.wsFlv)"
+              >
+                {{ playUrls.wsFlv }}
+              </button>
+              <button 
+                class="copy-btn"
+                @click="copyUrl(playUrls.wsFlv, 'wsFlv')"
+                title="复制链接"
+              >
+                <Copy class="copy-icon" />
+              </button>
+            </div>
+          </div>
+          <div v-if="playUrls?.hls" class="url-item">
             <strong>HLS:</strong>
-            <code class="url-code">{{ playUrls.hls }}</code>
-          </p>
-          <p v-if="playUrls?.webrtc">
+            <div class="url-controls">
+              <button 
+                class="url-link"
+                :class="{ active: currentPlayingFormat === 'hls' }"
+                @click="playFormat('hls', playUrls.hls)"
+              >
+                {{ playUrls.hls }}
+              </button>
+              <button 
+                class="copy-btn"
+                @click="copyUrl(playUrls.hls, 'hls')"
+                title="复制链接"
+              >
+                <Copy class="copy-icon" />
+              </button>
+            </div>
+          </div>
+          <div v-if="playUrls?.webrtc" class="url-item">
             <strong>WebRTC:</strong>
-            <code class="url-code">{{ playUrls.webrtc }}</code>
-          </p>
+            <div class="url-controls">
+              <button 
+                class="url-link"
+                :class="{ 
+                  active: currentPlayingFormat === 'webrtc',
+                  disabled: !isFormatSupported('webrtc')
+                }"
+                :disabled="!isFormatSupported('webrtc')"
+                @click="playFormat('webrtc', playUrls.webrtc)"
+              >
+                {{ playUrls.webrtc }}
+                <span v-if="!isFormatSupported('webrtc')" class="unsupported-label">
+                  (需要专用客户端)
+                </span>
+              </button>
+              <button 
+                class="copy-btn"
+                @click="copyUrl(playUrls.webrtc, 'webrtc')"
+                title="复制链接"
+              >
+                <Copy class="copy-icon" />
+              </button>
+            </div>
+          </div>
+          <div v-if="playUrls?.httpTs" class="url-item">
+            <strong>HTTP-TS:</strong>
+            <div class="url-controls">
+              <button 
+                class="url-link"
+                :class="{ 
+                  active: currentPlayingFormat === 'httpTs',
+                  disabled: !isFormatSupported('httpTs')
+                }"
+                :disabled="!isFormatSupported('httpTs')"
+                @click="playFormat('httpTs', playUrls.httpTs)"
+              >
+                {{ playUrls.httpTs }}
+                <span v-if="!isFormatSupported('httpTs')" class="unsupported-label">
+                  (浏览器不支持TS格式)
+                </span>
+              </button>
+              <button 
+                class="copy-btn"
+                @click="copyUrl(playUrls.httpTs, 'httpTs')"
+                title="复制链接"
+              >
+                <Copy class="copy-icon" />
+              </button>
+            </div>
+          </div>
+          <div v-if="playUrls?.wsTs" class="url-item">
+            <strong>WS-TS:</strong>
+            <div class="url-controls">
+              <button 
+                class="url-link"
+                :class="{ 
+                  active: currentPlayingFormat === 'wsTs',
+                  disabled: !isFormatSupported('wsTs')
+                }"
+                :disabled="!isFormatSupported('wsTs')"
+                @click="playFormat('wsTs', playUrls.wsTs)"
+              >
+                {{ playUrls.wsTs }}
+                <span v-if="!isFormatSupported('wsTs')" class="unsupported-label">
+                  (浏览器不支持TS格式)
+                </span>
+              </button>
+              <button 
+                class="copy-btn"
+                @click="copyUrl(playUrls.wsTs, 'wsTs')"
+                title="复制链接"
+              >
+                <Copy class="copy-icon" />
+              </button>
+            </div>
+          </div>
+          <div v-if="playUrls?.httpFmp4" class="url-item">
+            <strong>HTTP-fMP4:</strong>
+            <div class="url-controls">
+              <button 
+                class="url-link"
+                :class="{ active: currentPlayingFormat === 'httpFmp4' }"
+                @click="playFormat('httpFmp4', playUrls.httpFmp4)"
+              >
+                {{ playUrls.httpFmp4 }}
+              </button>
+              <button 
+                class="copy-btn"
+                @click="copyUrl(playUrls.httpFmp4, 'httpFmp4')"
+                title="复制链接"
+              >
+                <Copy class="copy-icon" />
+              </button>
+            </div>
+          </div>
+          <div v-if="playUrls?.wsFmp4" class="url-item">
+            <strong>WS-fMP4:</strong>
+            <div class="url-controls">
+              <button 
+                class="url-link"
+                :class="{ active: currentPlayingFormat === 'wsFmp4' }"
+                @click="playFormat('wsFmp4', playUrls.wsFmp4)"
+              >
+                {{ playUrls.wsFmp4 }}
+              </button>
+              <button 
+                class="copy-btn"
+                @click="copyUrl(playUrls.wsFmp4, 'wsFmp4')"
+                title="复制链接"
+              >
+                <Copy class="copy-icon" />
+              </button>
+            </div>
+          </div>
           <p v-if="!hasPlayUrls" class="no-urls">暂无可用播放地址</p>
         </div>
       </div>
@@ -189,8 +526,19 @@ defineExpose({
 
 <style scoped>
 .detail-content {
-  max-height: 500px;
+  max-height: 600px;
   overflow-y: auto;
+}
+
+.player-section {
+  margin-bottom: 24px;
+}
+
+.player-wrapper {
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
 }
 
 .info-section {
@@ -202,6 +550,112 @@ defineExpose({
   color: #1890ff;
   font-size: 16px;
   font-weight: 600;
+}
+
+.playing-format {
+  color: #52c41a;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.url-item {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.url-item strong {
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.url-controls {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  align-items: flex-start;
+}
+
+.url-link {
+  background: #e6f7ff;
+  border: 1px solid #91d5ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  word-break: break-all;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #1890ff;
+  flex: 1;
+  min-height: 24px;
+}
+
+.copy-btn {
+  background: #f0f0f0;
+  border: 1px solid #d9d9d9;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover {
+  background: #e6f7ff;
+  border-color: #40a9ff;
+  color: #1890ff;
+}
+
+.copy-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.url-link:hover {
+  background: #bae7ff;
+  border-color: #40a9ff;
+  color: #096dd9;
+}
+
+.url-link.active {
+  background: #52c41a;
+  border-color: #52c41a;
+  color: white;
+  font-weight: 600;
+}
+
+.url-link.active:hover {
+  background: #389e0d;
+  border-color: #389e0d;
+}
+
+.url-link.disabled {
+  background: #f5f5f5;
+  border-color: #d9d9d9;
+  color: #bfbfbf;
+  cursor: not-allowed;
+}
+
+.url-link.disabled:hover {
+  background: #f5f5f5;
+  border-color: #d9d9d9;
+  color: #bfbfbf;
+}
+
+.unsupported-label {
+  color: #ff7875;
+  font-size: 11px;
+  font-weight: normal;
+  margin-left: 8px;
 }
 
 .info-box {

@@ -173,13 +173,21 @@ export namespace ZlmMediaApi {
     /** RTMP播放地址 */
     rtmp?: string;
     /** HTTP-FLV播放地址 */
-    'http-flv'?: string;
+    httpFlv?: string;
     /** WebSocket-FLV播放地址 */
-    'ws-flv'?: string;
+    wsFlv?: string;
     /** HLS播放地址 */
     hls?: string;
     /** WebRTC播放地址 */
     webrtc?: string;
+    /** HTTP-TS播放地址 */
+    httpTs?: string;
+    /** WebSocket-TS播放地址 */
+    wsTs?: string;
+    /** HTTP-fMP4播放地址 */
+    httpFmp4?: string;
+    /** WebSocket-fMP4播放地址 */
+    wsFmp4?: string;
   }
 
   /** 播放地址响应 */
