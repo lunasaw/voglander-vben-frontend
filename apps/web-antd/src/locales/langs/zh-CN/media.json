@@ -15,6 +15,7 @@
     "status": "在线状态",
     "statusOnline": "在线",
     "statusOffline": "离线",
+    "offlineNodeCannotAccess": "节点已离线，无法访问详情页面",
     "description": "节点描述",
     "extend": "扩展字段",
     "keepalive": "最后活跃时间",

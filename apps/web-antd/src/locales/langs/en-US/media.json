@@ -15,6 +15,7 @@
     "status": "Online Status",
     "statusOnline": "Online",
     "statusOffline": "Offline",
+    "offlineNodeCannotAccess": "Node is offline, cannot access detail page",
     "description": "Description",
     "extend": "Extended Fields",
     "keepalive": "Last Active Time",

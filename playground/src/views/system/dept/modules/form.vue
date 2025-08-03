@@ -32,7 +32,9 @@ function resetForm() {
   const resetData = formData.value || {};
   // 过滤permissions数组中的null值
   if (resetData.permissions && Array.isArray(resetData.permissions)) {
-    resetData.permissions = resetData.permissions.filter((item: any) => item !== null);
+    resetData.permissions = resetData.permissions.filter(
+      (item: any) => item !== null,
+    );
   }
   formApi.setValues(resetData);
 }
@@ -47,8 +49,15 @@ const [Modal, modalApi] = useVbenModal({
       // 过滤permissions数组中的null值
       if (data.permissions && Array.isArray(data.permissions)) {
         const originalLength = data.permissions.length;
-        data.permissions = data.permissions.filter((item: any) => item !== null);
-        console.log('过滤前permissions长度:', originalLength, '过滤后长度:', data.permissions.length);
+        data.permissions = data.permissions.filter(
+          (item: any) => item !== null,
+        );
+        console.log(
+          '过滤前permissions长度:',
+          originalLength,
+          '过滤后长度:',
+          data.permissions.length,
+        );
         console.log('过滤后的permissions:', data.permissions);
       }
 
@@ -72,7 +81,9 @@ const [Modal, modalApi] = useVbenModal({
         }
         // 过滤permissions数组中的 null 值
         if (data.permissions && Array.isArray(data.permissions)) {
-          data.permissions = data.permissions.filter((item: any) => item !== null);
+          data.permissions = data.permissions.filter(
+            (item: any) => item !== null,
+          );
         }
         formData.value = data;
         formApi.setValues(formData.value);

@@ -43,11 +43,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
 
     drawerApi.lock();
     try {
-      if (id.value) {
-        await updateUser(id.value, values);
-      } else {
-        await createUser(values);
-      }
+      await (id.value ? updateUser(id.value, values) : createUser(values));
       emits('success');
       drawerApi.close();
     } catch {

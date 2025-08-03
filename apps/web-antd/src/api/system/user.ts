@@ -1,7 +1,6 @@
-import type { Recordable } from '@vben/types';
+import type { SystemRoleApi } from './role';
 
 import { requestClient } from '#/api/request';
-import type { SystemRoleApi } from './role';
 
 export namespace SystemUserApi {
   /** 用户信息 */
@@ -87,7 +86,9 @@ async function getUserInfo() {
  * 分页查询用户列表
  */
 async function getUserList(params: SystemUserApi.UserQueryParams) {
-  return requestClient.get<SystemUserApi.UserListResp>('/user/list', { params });
+  return requestClient.get<SystemUserApi.UserListResp>('/user/list', {
+    params,
+  });
 }
 
 /**
@@ -107,7 +108,10 @@ async function createUser(data: SystemUserApi.UserCreateReq) {
 /**
  * 更新用户
  */
-async function updateUser(id: number, data: Omit<SystemUserApi.UserUpdateReq, 'id'>) {
+async function updateUser(
+  id: number,
+  data: Omit<SystemUserApi.UserUpdateReq, 'id'>,
+) {
   return requestClient.put<boolean>(`/user/${id}`, data);
 }
 
@@ -123,7 +127,9 @@ async function deleteUser(id: number) {
  */
 async function checkUsername(username: string, excludeId?: number) {
   const params = excludeId ? { excludeId } : {};
-  return requestClient.get<boolean>(`/user/check-username/${username}`, { params });
+  return requestClient.get<boolean>(`/user/check-username/${username}`, {
+    params,
+  });
 }
 
 /**

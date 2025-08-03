@@ -511,11 +511,7 @@
             "description": "角色ID列表（可选）"
           }
         },
-        "required": [
-          "username",
-          "password",
-          "status"
-        ]
+        "required": ["username", "password", "status"]
       },
       "AjaxResultBoolean": {
         "type": "object",
@@ -569,10 +565,7 @@
             "description": "角色ID列表（可选）"
           }
         },
-        "required": [
-          "id",
-          "status"
-        ]
+        "required": ["id", "status"]
       }
     },
     "securitySchemes": {}

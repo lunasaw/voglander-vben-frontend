@@ -101,10 +101,7 @@ function confirm(content: string, title: string) {
  * @param row 行数据
  * @returns 返回false则中止改变，返回其他值（undefined、true）则允许改变
  */
-async function onStatusChange(
-  newStatus: number,
-  row: SystemUserApi.UserVO,
-) {
+async function onStatusChange(newStatus: number, row: SystemUserApi.UserVO) {
   const status: Recordable<string> = {
     0: '禁用',
     1: '启用',
@@ -167,14 +164,20 @@ function onCreate() {
           {{ $t('ui.actionTitle.create', [$t('system.user.name')]) }}
         </Button>
       </template>
-            <template #roles="{ row }">
-        <span v-if="!row.roles || row.roles.length === 0" class="text-gray-400">-</span>
-        <div v-else class="flex gap-1 overflow-x-auto max-w-full" style="max-height: 32px;">
+      <template #roles="{ row }">
+        <span v-if="!row.roles || row.roles.length === 0" class="text-gray-400"
+          >-</span
+        >
+        <div
+          v-else
+          class="flex max-w-full gap-1 overflow-x-auto"
+          style="max-height: 32px"
+        >
           <Tag
             v-for="role in row.roles"
             :key="role.id"
             color="blue"
-            class="whitespace-nowrap flex-shrink-0"
+            class="flex-shrink-0 whitespace-nowrap"
           >
             {{ role.name }}
           </Tag>

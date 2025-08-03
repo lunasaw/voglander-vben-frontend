@@ -38,11 +38,9 @@ const [Drawer, drawerApi] = useVbenDrawer({
 
     drawerApi.lock();
     try {
-      if (id.value) {
-        await updateMediaNode({ ...values, id: id.value });
-      } else {
-        await createMediaNode(values);
-      }
+      await (id.value
+        ? updateMediaNode({ ...values, id: id.value })
+        : createMediaNode(values));
       emits('success');
       drawerApi.close();
     } catch {

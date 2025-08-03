@@ -81,51 +81,71 @@ export namespace MediaNodeApi {
  * 根据ID获取节点
  */
 async function getMediaNodeById(id: number) {
-  return requestClient.get<MediaNodeApi.MediaNodeVO>(`/api/v1/medianode/get/${id}`);
+  return requestClient.get<MediaNodeApi.MediaNodeVO>(
+    `/api/v1/medianode/get/${id}`,
+  );
 }
 
 /**
  * 根据节点ID获取节点
  */
 async function getMediaNodeByServerId(serverId: string) {
-  return requestClient.get<MediaNodeApi.MediaNodeVO>(`/api/v1/medianode/getByServerId/${serverId}`);
+  return requestClient.get<MediaNodeApi.MediaNodeVO>(
+    `/api/v1/medianode/getByServerId/${serverId}`,
+  );
 }
 
 /**
  * 根据条件查询节点
  */
-async function getMediaNodeByCondition(params: MediaNodeApi.MediaNodeQueryParams) {
-  return requestClient.get<MediaNodeApi.MediaNodeVO>('/api/v1/medianode/get', { params });
+async function getMediaNodeByCondition(
+  params: MediaNodeApi.MediaNodeQueryParams,
+) {
+  return requestClient.get<MediaNodeApi.MediaNodeVO>('/api/v1/medianode/get', {
+    params,
+  });
 }
 
 /**
  * 获取节点列表
  */
 async function getMediaNodeList(params?: MediaNodeApi.MediaNodeQueryParams) {
-  return requestClient.get<MediaNodeApi.MediaNodeListResp>('/api/v1/medianode/list', { params });
+  return requestClient.get<MediaNodeApi.MediaNodeListResp>(
+    '/api/v1/medianode/list',
+    { params },
+  );
 }
 
 /**
  * 获取启用的节点列表
  */
 async function getEnabledMediaNodeList() {
-  return requestClient.get<MediaNodeApi.MediaNodeListResp>('/api/v1/medianode/listEnabled');
+  return requestClient.get<MediaNodeApi.MediaNodeListResp>(
+    '/api/v1/medianode/listEnabled',
+  );
 }
 
 /**
  * 获取在线的节点列表
  */
 async function getOnlineMediaNodeList() {
-  return requestClient.get<MediaNodeApi.MediaNodeListResp>('/api/v1/medianode/listOnline');
+  return requestClient.get<MediaNodeApi.MediaNodeListResp>(
+    '/api/v1/medianode/listOnline',
+  );
 }
 
 /**
  * 分页查询节点
  */
-async function getMediaNodePageList(params: MediaNodeApi.MediaNodeQueryParams & { pageNum: number; pageSize: number }) {
+async function getMediaNodePageList(
+  params: MediaNodeApi.MediaNodeQueryParams & {
+    pageNum: number;
+    pageSize: number;
+  },
+) {
   return requestClient.get<MediaNodeApi.MediaNodeListResp>(
     `/api/v1/medianode/pageListByEntity/${params.pageNum}/${params.pageSize}`,
-    { params: { ...params, pageNum: undefined, pageSize: undefined } }
+    { params: { ...params, pageNum: undefined, pageSize: undefined } },
   );
 }
 
@@ -133,7 +153,9 @@ async function getMediaNodePageList(params: MediaNodeApi.MediaNodeQueryParams & 
  * 简单分页查询
  */
 async function getSimpleMediaNodePageList(pageNum: number, pageSize: number) {
-  return requestClient.get<MediaNodeApi.MediaNodeListResp>(`/api/v1/medianode/pageList/${pageNum}/${pageSize}`);
+  return requestClient.get<MediaNodeApi.MediaNodeListResp>(
+    `/api/v1/medianode/pageList/${pageNum}/${pageSize}`,
+  );
 }
 
 /**
@@ -167,12 +189,20 @@ async function updateMediaNodeBatch(data: MediaNodeApi.MediaNodeUpdateReq[]) {
 /**
  * 更新节点状态
  */
-async function updateMediaNodeStatus(serverId: string, status: number, keepalive?: number) {
+async function updateMediaNodeStatus(
+  serverId: string,
+  status: number,
+  keepalive?: number,
+) {
   const params: Recordable<any> = { status };
   if (keepalive !== undefined) {
     params.keepalive = keepalive;
   }
-  return requestClient.put<any>(`/api/v1/medianode/updateStatus/${serverId}`, null, { params });
+  return requestClient.put<any>(
+    `/api/v1/medianode/updateStatus/${serverId}`,
+    null,
+    { params },
+  );
 }
 
 /**
@@ -186,21 +216,27 @@ async function deleteMediaNode(id: number) {
  * 根据节点ID删除
  */
 async function deleteMediaNodeByServerId(serverId: string) {
-  return requestClient.delete<any>(`/api/v1/medianode/deleteByServerId/${serverId}`);
+  return requestClient.delete<any>(
+    `/api/v1/medianode/deleteByServerId/${serverId}`,
+  );
 }
 
 /**
  * 批量删除节点
  */
 async function deleteMediaNodeBatch(ids: number[]) {
-  return requestClient.delete<any>('/api/v1/medianode/deleteIds', { data: ids });
+  return requestClient.delete<any>('/api/v1/medianode/deleteIds', {
+    data: ids,
+  });
 }
 
 /**
  * 根据条件删除节点
  */
 async function deleteMediaNodeByCondition(condition: MediaNodeApi.MediaNodeVO) {
-  return requestClient.delete<any>('/api/v1/medianode/deleteByCondition', { data: condition });
+  return requestClient.delete<any>('/api/v1/medianode/deleteByCondition', {
+    data: condition,
+  });
 }
 
 export {
@@ -211,8 +247,8 @@ export {
   deleteMediaNodeByCondition,
   deleteMediaNodeByServerId,
   getEnabledMediaNodeList,
-  getMediaNodeById,
   getMediaNodeByCondition,
+  getMediaNodeById,
   getMediaNodeByServerId,
   getMediaNodeList,
   getMediaNodePageList,
