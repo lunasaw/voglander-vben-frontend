@@ -11,14 +11,14 @@ import { useAccess } from '@vben/access';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
-import { Button, message, Modal } from 'ant-design-vue';
+import { Button, message, Modal, Tag } from 'ant-design-vue';
 import { useRouter } from 'vue-router';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteMediaNode, getMediaNodePageList, updateMediaNode } from '#/api/media/medianode';
 import { $t } from '#/locales';
 
-import { useColumns, useGridFormSchema } from './data';
+import { useColumns, useGridFormSchema, isNodeOnline } from './data';
 import Form from './modules/form.vue';
 
 const { hasAccessByCodes } = useAccess();
@@ -239,6 +239,11 @@ async function onHookEnabledChange(
         <Button type="link" size="small" @click="onServerIdClick(row)">
           {{ row.serverId }}
         </Button>
+      </template>
+      <template #onlineStatus="{ row }">
+        <Tag :color="isNodeOnline(row.keepalive) ? 'success' : 'error'">
+          {{ isNodeOnline(row.keepalive) ? $t('media.node.statusOnline') : $t('media.node.statusOffline') }}
+        </Tag>
       </template>
     </Grid>
   </Page>

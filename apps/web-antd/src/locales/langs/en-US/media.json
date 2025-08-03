@@ -56,7 +56,7 @@
       "configSaved": "Configuration saved successfully",
       "saveFailed": "Save failed",
       "doubleClickEditTip": "Double click config value to edit, press Enter or click Save to submit, click elsewhere to cancel editing",
-      "nodeManagement": "Node Management",
+      "nodeManagement": "Node Selection",
       "nodeSwitch": "Node Switch",
       "selectNode": "Select Node",
       "currentNode": "Current Node",

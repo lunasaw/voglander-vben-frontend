@@ -8,13 +8,14 @@ import { z } from '#/adapter/form';
 
 /**
  * 判断节点是否在线
- * @param keepalive 最后活跃时间字符串
+ * @param keepalive 最后活跃时间（字符串或数字）
  * @returns 是否在线
  */
-function isNodeOnline(keepalive?: string): boolean {
+export function isNodeOnline(keepalive?: string | number): boolean {
   if (!keepalive) return false;
 
-  const keepaliveTime = new Date(keepalive).getTime();
+  // 如果是数字，直接使用；如果是字符串，转换为数字
+  const keepaliveTime = typeof keepalive === 'number' ? keepalive : new Date(keepalive).getTime();
   const currentTime = new Date().getTime();
   const diffMinutes = (currentTime - keepaliveTime) / (1000 * 60);
 
@@ -349,21 +350,12 @@ export function useColumns<T = MediaNodeApi.MediaNodeVO>(
       width: 100,
       align: 'center',
     },
-    {
-      cellRender: {
-        name: 'CellTag',
-        options: [
-          { label: $t('media.node.statusOnline'), value: 1, color: 'success' },
-          { label: $t('media.node.statusOffline'), value: 0, color: 'error' },
-        ],
-      },
-      field: 'status',
-      formatter: ({ row }: { row: any }) => {
-        return isNodeOnline(row.keepalive) ? 1 : 0;
-      },
+        {
+      field: 'onlineStatus', // 使用虚拟字段名
       title: $t('media.node.status'),
       width: 100,
       align: 'center',
+      slots: { default: 'onlineStatus' }, // 使用模板插槽
     },
     {
       field: 'description',
@@ -371,15 +363,17 @@ export function useColumns<T = MediaNodeApi.MediaNodeVO>(
       width: 200,
       showOverflow: 'tooltip',
     },
-    {
+        {
       field: 'keepalive',
       title: $t('media.node.keepalive'),
       width: 180,
+      formatter: 'formatDateTime',
     },
     {
       field: 'createTime',
       title: $t('media.node.createTime'),
       width: 180,
+      formatter: 'formatDateTime',
     },
     {
       align: 'center',
