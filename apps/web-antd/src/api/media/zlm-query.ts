@@ -60,7 +60,7 @@ export namespace ZlmQueryApi {
 
   /** 服务器配置项 */
   export interface ServerConfigItem {
-    [key: string]: string | null;
+    [key: string]: null | string;
   }
 
   /** 服务器配置 - 修复为数组结构 */
@@ -78,6 +78,14 @@ export namespace ZlmQueryApi {
   export interface ServerResponseListString {
     code: number;
     data: string[];
+    msg: string;
+    result: string;
+  }
+
+  /** 服务器重启响应 */
+  export interface ServerResponseObject {
+    code: number;
+    data: Record<string, any>;
     msg: string;
     result: string;
   }
@@ -145,9 +153,12 @@ export async function getZlmStatistic(nodeKey?: string) {
     headers['X-Node-Key'] = nodeKey;
   }
 
-  return requestClient.get<ZlmQueryApi.ImportantObjectNum>('/zlm/api/statistic', {
-    headers,
-  });
+  return requestClient.get<ZlmQueryApi.ImportantObjectNum>(
+    '/zlm/api/statistic',
+    {
+      headers,
+    },
+  );
 }
 
 /**
@@ -160,9 +171,12 @@ export async function getZlmWorkThreadsLoad(nodeKey?: string) {
     headers['X-Node-Key'] = nodeKey;
   }
 
-  return requestClient.get<ZlmQueryApi.ThreadLoad[]>('/zlm/api/work-threads/load', {
-    headers,
-  });
+  return requestClient.get<ZlmQueryApi.ThreadLoad[]>(
+    '/zlm/api/work-threads/load',
+    {
+      headers,
+    },
+  );
 }
 
 /**
@@ -175,9 +189,12 @@ export async function getZlmServerConfig(nodeKey?: string) {
     headers['X-Node-Key'] = nodeKey;
   }
 
-  return requestClient.get<ZlmQueryApi.ServerNodeConfig>('/zlm/api/server/config', {
-    headers,
-  });
+  return requestClient.get<ZlmQueryApi.ServerNodeConfig>(
+    '/zlm/api/server/config',
+    {
+      headers,
+    },
+  );
 }
 
 /**
@@ -185,7 +202,10 @@ export async function getZlmServerConfig(nodeKey?: string) {
  * @param config 配置参数对象
  * @param nodeKey 节点Key，通过X-Node-Key header传递
  */
-export async function setZlmServerConfig(config: Record<string, string>, nodeKey?: string) {
+export async function setZlmServerConfig(
+  config: Record<string, string>,
+  nodeKey?: string,
+) {
   const headers: Record<string, string> = {};
   if (nodeKey) {
     headers['X-Node-Key'] = nodeKey;
@@ -194,4 +214,23 @@ export async function setZlmServerConfig(config: Record<string, string>, nodeKey
   return requestClient.post<string>('/zlm/api/server/config', config, {
     headers,
   });
+}
+
+/**
+ * 重启服务器
+ * @param nodeKey 节点Key，通过X-Node-Key header传递
+ */
+export async function restartZlmServer(nodeKey?: string) {
+  const headers: Record<string, string> = {};
+  if (nodeKey) {
+    headers['X-Node-Key'] = nodeKey;
+  }
+
+  return requestClient.post<Record<string, any>>(
+    '/zlm/api/server/restart',
+    {},
+    {
+      headers,
+    },
+  );
 }

@@ -469,13 +469,7 @@
             "description": "菜单元数据"
           }
         },
-        "required": [
-          "authCode",
-          "name",
-          "path",
-          "pid",
-          "type"
-        ]
+        "required": ["authCode", "name", "path", "pid", "type"]
       }
     },
     "securitySchemes": {}

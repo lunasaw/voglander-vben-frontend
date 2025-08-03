@@ -190,5 +190,8 @@ catalog:
   vxe-pc-ui: ^4.7.12
   vxe-table: ^4.14.4
   watermark-js-plus: ^1.6.2
+  video.js: ^8.21.1
+  flv.js: ^1.6.2
+  hls.js: ^1.6.7
   zod: ^3.25.67
   zod-defaults: ^0.1.3

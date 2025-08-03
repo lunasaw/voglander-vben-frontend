@@ -15,6 +15,7 @@
     "status": "Online Status",
     "statusOnline": "Online",
     "statusOffline": "Offline",
+    "offlineNodeCannotAccess": "Node is offline, cannot access detail page",
     "description": "Description",
     "extend": "Extended Fields",
     "keepalive": "Last Active Time",
@@ -55,7 +56,87 @@
       "doubleClickToEdit": "Double Click to Edit",
       "configSaved": "Configuration saved successfully",
       "saveFailed": "Save failed",
-      "doubleClickEditTip": "Double-click on configuration values to edit them, press Enter or click Save button to submit changes, click elsewhere to cancel editing"
+      "doubleClickEditTip": "Double click config value to edit, press Enter or click Save to submit, click elsewhere to cancel editing",
+      "nodeManagement": "Node Selection",
+      "nodeSwitch": "Node Switch",
+      "selectNode": "Select Node",
+      "currentNode": "Current Node",
+      "switchSuccess": "Node switched successfully",
+      "loadNodeListFailed": "Failed to load node list"
+    }
+  },
+  "list": {
+    "title": "Media Stream List",
+    "streams": "streams",
+    "defaultVhost": "Default Virtual Host",
+    "originType": {
+      "unknown": "Unknown",
+      "rtmpPush": "RTMP Push",
+      "rtspPush": "RTSP Push",
+      "rtpPush": "RTP Push",
+      "pull": "Pull",
+      "ffmpegPull": "FFmpeg Pull",
+      "mp4Vod": "MP4 VOD",
+      "deviceChn": "Device Channel"
+    },
+    "trackType": {
+      "video": "Video",
+      "audio": "Audio",
+      "unknown": "Unknown"
+    },
+    "time": {
+      "seconds": "s",
+      "minutes": "m",
+      "hours": "h",
+      "days": "d"
+    },
+    "columns": {
+      "schema": "Protocol",
+      "app": "App",
+      "stream": "Stream ID",
+      "vhost": "Virtual Host",
+      "readerCount": "Viewers",
+      "totalReaderCount": "Total Viewers",
+      "originType": "Origin Type",
+      "bytesSpeed": "Transfer Rate",
+      "tracks": "Tracks",
+      "createTime": "Created",
+      "aliveTime": "Alive Time",
+      "originUrl": "Origin URL",
+      "actions": "Actions"
+    },
+    "search": {
+      "node": "Node",
+      "selectNode": "Select Node",
+      "allNodes": "All Nodes",
+      "schema": "Protocol",
+      "app": "App Name",
+      "stream": "Stream ID",
+      "vhost": "Virtual Host",
+      "all": "All",
+      "appPlaceholder": "Enter app name",
+      "streamPlaceholder": "Enter stream ID",
+      "vhostPlaceholder": "Enter virtual host"
+    },
+    "actions": {
+      "search": "Search",
+      "reset": "Reset",
+      "refresh": "Refresh",
+      "export": "Export",
+      "advancedSearch": "Advanced Search",
+      "view": "View",
+      "close": "Close",
+      "batchClose": "Batch Close",
+      "confirmClose": "Confirm Close",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "clearSelection": "Clear Selection"
+    },
+    "detail": {
+      "title": "Media Stream Details",
+      "basicInfo": "Basic Information",
+      "statistics": "Statistics",
+      "tracks": "Audio/Video Tracks"
     }
   }
 }

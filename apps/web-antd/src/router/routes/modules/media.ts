@@ -14,7 +14,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '/media/node',
-        name: 'MediaNode',
+        name: 'media.node',
         meta: {
           icon: 'mdi:server-network',
           title: $t('media.node.title'),
@@ -23,13 +23,22 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: '/media/node/detail/:nodeKey',
-        name: 'MediaNodeDetail',
+        name: 'media.node.detail',
         meta: {
           hideInMenu: true,
           icon: 'mdi:server-network',
           title: $t('media.node.detail'),
         },
         component: () => import('#/views/media/node/detail.vue'),
+      },
+      {
+        path: '/media/list',
+        name: 'media.list',
+        meta: {
+          icon: 'mdi:video-outline',
+          title: $t('media.list.title'),
+        },
+        component: () => import('#/views/media/list/list.vue'),
       },
     ],
   },

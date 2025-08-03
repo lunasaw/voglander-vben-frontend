@@ -75,9 +75,31 @@ const [Drawer, drawerApi] = useVbenDrawer({
       if (data) {
         formData.value = data;
         id.value = data.id;
-        formApi.setValues(data);
+        // 先设置其他字段
+        formApi.setValues({
+          name: data.name,
+          status: data.status,
+          remark: data.remark,
+        });
+        
+        // 权限数据需要在权限树加载完成后设置
+        const setPermissionsData = () => {
+          if (data.permissions && Array.isArray(data.permissions)) {
+            console.log('设置角色权限数据:', data.permissions);
+            formApi.setFieldValue('permissions', data.permissions);
+          }
+        };
+        
+        if (permissions.value.length === 0) {
+          loadPermissions().then(() => {
+            setPermissionsData();
+          });
+        } else {
+          setPermissionsData();
+        }
       } else {
         id.value = undefined;
+        formApi.setFieldValue('permissions', []);
       }
 
       if (permissions.value.length === 0) {

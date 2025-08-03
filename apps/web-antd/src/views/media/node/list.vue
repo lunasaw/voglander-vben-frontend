@@ -1,24 +1,27 @@
 <script lang="ts" setup>
-import type { Recordable } from '@vben/types';
-
 import type {
   OnActionClickParams,
   VxeTableGridOptions,
 } from '#/adapter/vxe-table';
 import type { MediaNodeApi } from '#/api/media/medianode';
 
+import { useRouter } from 'vue-router';
+
 import { useAccess } from '@vben/access';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
-import { Button, message, Modal } from 'ant-design-vue';
-import { useRouter } from 'vue-router';
+import { Button, message, Modal, Tag } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteMediaNode, getMediaNodePageList, updateMediaNode } from '#/api/media/medianode';
+import {
+  deleteMediaNode,
+  getMediaNodePageList,
+  updateMediaNode,
+} from '#/api/media/medianode';
 import { $t } from '#/locales';
 
-import { useColumns, useGridFormSchema } from './data';
+import { isNodeOnline, useColumns, useGridFormSchema } from './data';
 import Form from './modules/form.vue';
 
 const { hasAccessByCodes } = useAccess();
@@ -36,7 +39,13 @@ const [Grid, gridApi] = useVbenVxeGrid({
     submitOnChange: true,
   },
   gridOptions: {
-    columns: useColumns(onActionClick, undefined, onEnabledChange, onHookEnabledChange, onServerIdClick),
+    columns: useColumns(
+      onActionClick,
+      undefined,
+      onEnabledChange,
+      onHookEnabledChange,
+      onServerIdClick,
+    ),
     height: 'auto',
     keepSource: true,
     proxyConfig: {
@@ -125,7 +134,9 @@ function onDelete(row: MediaNodeApi.MediaNodeVO) {
   deleteMediaNode(row.id!)
     .then(() => {
       message.success({
-        content: $t('ui.actionMessage.deleteSuccess', [row.name || row.serverId]),
+        content: $t('ui.actionMessage.deleteSuccess', [
+          row.name || row.serverId,
+        ]),
         key: 'action_process_msg',
       });
       onRefresh();
@@ -157,14 +168,20 @@ function onServerIdClick(row: MediaNodeApi.MediaNodeVO) {
     return;
   }
 
+  // 检查节点是否离线，如果离线则拦截跳转
+  if (!isNodeOnline(row.keepalive)) {
+    message.warning($t('media.node.offlineNodeCannotAccess'));
+    return;
+  }
+
   router.push({
     name: 'media.node.detail',
     params: {
-      nodeKey: row.serverId
+      nodeKey: row.serverId,
     },
     query: {
-      nodeName: row.name || row.serverId
-    }
+      nodeName: row.name || row.serverId,
+    },
   });
 }
 
@@ -239,6 +256,15 @@ async function onHookEnabledChange(
         <Button type="link" size="small" @click="onServerIdClick(row)">
           {{ row.serverId }}
         </Button>
+      </template>
+      <template #onlineStatus="{ row }">
+        <Tag :color="isNodeOnline(row.keepalive) ? 'success' : 'error'">
+          {{
+            isNodeOnline(row.keepalive)
+              ? $t('media.node.statusOnline')
+              : $t('media.node.statusOffline')
+          }}
+        </Tag>
       </template>
     </Grid>
   </Page>

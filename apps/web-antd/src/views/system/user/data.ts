@@ -3,9 +3,10 @@ import type { OnActionClickFn, VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { SystemUserApi } from '#/api';
 
 import { useAccess } from '@vben/access';
-import { $t } from '#/locales';
-import { getRoleList } from '#/api';
+
 import { z } from '#/adapter/form';
+import { getRoleList } from '#/api';
+import { $t } from '#/locales';
 
 export function useFormSchema(): VbenFormSchema[] {
   return [

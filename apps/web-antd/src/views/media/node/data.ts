@@ -3,19 +3,21 @@ import type { OnActionClickFn, VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { MediaNodeApi } from '#/api/media/medianode';
 
 import { useAccess } from '@vben/access';
+
 import { $t } from '#/locales';
-import { z } from '#/adapter/form';
 
 /**
  * 判断节点是否在线
- * @param keepalive 最后活跃时间字符串
+ * @param keepalive 最后活跃时间（字符串或数字）
  * @returns 是否在线
  */
-function isNodeOnline(keepalive?: string): boolean {
+export function isNodeOnline(keepalive?: number | string): boolean {
   if (!keepalive) return false;
 
-  const keepaliveTime = new Date(keepalive).getTime();
-  const currentTime = new Date().getTime();
+  // 如果是数字，直接使用；如果是字符串，转换为数字
+  const keepaliveTime =
+    typeof keepalive === 'number' ? keepalive : new Date(keepalive).getTime();
+  const currentTime = Date.now();
   const diffMinutes = (currentTime - keepaliveTime) / (1000 * 60);
 
   return diffMinutes < 5;
@@ -273,8 +275,14 @@ export function useGridFormSchema(): VbenFormSchema[] {
 export function useColumns<T = MediaNodeApi.MediaNodeVO>(
   onActionClick: OnActionClickFn<T>,
   onStatusChange?: (newStatus: any, row: T) => PromiseLike<boolean | undefined>,
-  onEnabledChange?: (newEnabled: boolean, row: T) => PromiseLike<boolean | undefined>,
-  onHookEnabledChange?: (newHookEnabled: boolean, row: T) => PromiseLike<boolean | undefined>,
+  onEnabledChange?: (
+    newEnabled: boolean,
+    row: T,
+  ) => PromiseLike<boolean | undefined>,
+  onHookEnabledChange?: (
+    newHookEnabled: boolean,
+    row: T,
+  ) => PromiseLike<boolean | undefined>,
   onServerIdClick?: (row: T) => void,
 ): VxeTableGridOptions['columns'] {
   const { hasAccessByCodes } = useAccess();
@@ -314,14 +322,18 @@ export function useColumns<T = MediaNodeApi.MediaNodeVO>(
           disabled: () => !hasAccessByCodes(['Media:Node:Edit']),
         },
         name: onEnabledChange ? 'CellSwitch' : 'CellTag',
-        props: onEnabledChange ? {
-          checkedValue: true,
-          unCheckedValue: false,
-        } : undefined,
-        options: onEnabledChange ? undefined : [
-          { label: $t('common.enabled'), value: true, type: 'success' },
-          { label: $t('common.disabled'), value: false, type: 'error' },
-        ],
+        props: onEnabledChange
+          ? {
+              checkedValue: true,
+              unCheckedValue: false,
+            }
+          : undefined,
+        options: onEnabledChange
+          ? undefined
+          : [
+              { label: $t('common.enabled'), value: true, type: 'success' },
+              { label: $t('common.disabled'), value: false, type: 'error' },
+            ],
       },
       field: 'enabled',
       title: $t('media.node.enabled'),
@@ -335,14 +347,18 @@ export function useColumns<T = MediaNodeApi.MediaNodeVO>(
           disabled: () => !hasAccessByCodes(['Media:Node:Edit']),
         },
         name: onHookEnabledChange ? 'CellSwitch' : 'CellTag',
-        props: onHookEnabledChange ? {
-          checkedValue: true,
-          unCheckedValue: false,
-        } : undefined,
-        options: onHookEnabledChange ? undefined : [
-          { label: $t('common.enabled'), value: true, type: 'success' },
-          { label: $t('common.disabled'), value: false, type: 'error' },
-        ],
+        props: onHookEnabledChange
+          ? {
+              checkedValue: true,
+              unCheckedValue: false,
+            }
+          : undefined,
+        options: onHookEnabledChange
+          ? undefined
+          : [
+              { label: $t('common.enabled'), value: true, type: 'success' },
+              { label: $t('common.disabled'), value: false, type: 'error' },
+            ],
       },
       field: 'hookEnabled',
       title: $t('media.node.hookEnabled'),
@@ -350,20 +366,11 @@ export function useColumns<T = MediaNodeApi.MediaNodeVO>(
       align: 'center',
     },
     {
-      cellRender: {
-        name: 'CellTag',
-        options: [
-          { label: $t('media.node.statusOnline'), value: 1, color: 'success' },
-          { label: $t('media.node.statusOffline'), value: 0, color: 'error' },
-        ],
-      },
-      field: 'status',
-      formatter: ({ row }: { row: any }) => {
-        return isNodeOnline(row.keepalive) ? 1 : 0;
-      },
+      field: 'onlineStatus', // 使用虚拟字段名
       title: $t('media.node.status'),
       width: 100,
       align: 'center',
+      slots: { default: 'onlineStatus' }, // 使用模板插槽
     },
     {
       field: 'description',
@@ -375,11 +382,13 @@ export function useColumns<T = MediaNodeApi.MediaNodeVO>(
       field: 'keepalive',
       title: $t('media.node.keepalive'),
       width: 180,
+      formatter: 'formatDateTime',
     },
     {
       field: 'createTime',
       title: $t('media.node.createTime'),
       width: 180,
+      formatter: 'formatDateTime',
     },
     {
       align: 'center',

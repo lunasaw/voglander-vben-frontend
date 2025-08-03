@@ -67,9 +67,7 @@
                 },
                 "example": {
                   "code": 0,
-                  "data": [
-                    ""
-                  ],
+                  "data": [""],
                   "msg": "",
                   "result": ""
                 }
