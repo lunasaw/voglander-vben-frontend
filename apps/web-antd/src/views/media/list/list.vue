@@ -37,7 +37,7 @@ const currentPlayUrls = ref<null | ZlmMediaApi.PlayUrls>(null);
 
 // 节点选择状态
 const nodeListData = ref<MediaNodeApi.MediaNodeVO[]>([]);
-const currentNodeKey = ref<string>('');
+const currentNodeKey = ref<string | null>(null);
 
 // 获取启用的节点列表Ï
 async function fetchNodeList() {
@@ -206,8 +206,8 @@ async function onViewDetails(row: ZlmMediaApi.MediaData) {
 
     // 同时获取流信息和播放地址
     const [mediaInfo, playUrls] = await Promise.all([
-      getZlmMediaInfo(params, currentNodeKey.value),
-      getZlmMediaPlayUrls(params, currentNodeKey.value),
+      getZlmMediaInfo(params, currentNodeKey.value || undefined),
+      getZlmMediaPlayUrls(params, currentNodeKey.value || undefined),
     ]);
 
     message.destroy();
@@ -220,6 +220,35 @@ async function onViewDetails(row: ZlmMediaApi.MediaData) {
     message.destroy();
     console.error('获取流信息详情失败:', error);
     message.error('获取流信息详情失败');
+  }
+}
+
+// 刷新观看人数
+async function refreshViewerCount() {
+  if (!currentMediaInfo.value) {
+    message.warning('没有可刷新的流信息');
+    return;
+  }
+
+  try {
+    const params: ZlmMediaApi.MediaReq = {
+      schema: currentMediaInfo.value.schema,
+      vhost: currentMediaInfo.value.vhost,
+      app: currentMediaInfo.value.app,
+      stream: currentMediaInfo.value.stream,
+    };
+
+    // 重新获取流信息
+    const updatedMediaInfo = await getZlmMediaInfo(
+      params,
+      currentNodeKey.value || undefined,
+    );
+
+    // 更新当前显示的流信息
+    currentMediaInfo.value = updatedMediaInfo;
+  } catch (error) {
+    console.error('刷新观看人数失败:', error);
+    throw error; // 让detail-modal处理错误提示
   }
 }
 
@@ -270,6 +299,7 @@ function handleExport() {
       ref="detailModalRef"
       :media-info="currentMediaInfo"
       :play-urls="currentPlayUrls"
+      :on-refresh="refreshViewerCount"
     />
   </Page>
 </template>
@@ -286,10 +316,10 @@ function handleExport() {
 
 /* 表格固定列阴影 */
 :deep(.vxe-table .vxe-fixed--left) {
-  box-shadow: 6px 0 6px -4px rgba(0, 0, 0, 0.15);
+  box-shadow: 6px 0 6px -4px rgb(0 0 0 / 15%);
 }
 
 :deep(.vxe-table .vxe-fixed--right) {
-  box-shadow: -6px 0 6px -4px rgba(0, 0, 0, 0.15);
+  box-shadow: -6px 0 6px -4px rgb(0 0 0 / 15%);
 }
 </style>
