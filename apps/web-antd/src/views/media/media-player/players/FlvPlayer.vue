@@ -248,7 +248,6 @@ defineExpose({
   getPlayer,
   refresh: refreshPlayer,
 });
-
 </script>
 
 <template>
