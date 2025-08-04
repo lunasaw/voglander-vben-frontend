@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import type { BasePlayerProps, BasePlayerEmits } from './BasePlayer.vue';
+import type { BasePlayerEmits, BasePlayerProps } from './BasePlayer.vue';
 
-import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import videojs from 'video.js';
 
@@ -54,33 +54,31 @@ async function initPlayer() {
   // 等待多个周期确保DOM完全准备好
   await nextTick();
   await nextTick();
-  
+
   if (!videoRef.value) {
     retryCount.value++;
-    console.error(`Video element not found, retry ${retryCount.value}/${maxRetries}...`);
-    
+
     if (retryCount.value <= maxRetries) {
       // 重试机制
       setTimeout(() => {
         initPlayer();
       }, 100 * retryCount.value); // 递增延迟
     } else {
-      console.error('Video element still not found after all retries');
-      emit('player-error', { message: 'Video element not found in DOM after retries' });
+      emit('playerError', {
+        message: 'Video element not found in DOM after retries',
+      });
     }
     return;
   }
 
-  console.log(`Initializing Video.js player for ${props.format}`);
-  
   // 重置重试计数
   retryCount.value = 0;
-  
+
   // 额外等待确保DOM稳定
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise((resolve) => setTimeout(resolve, 100));
 
   // 为Video.js创建唯一ID
-  const uniqueId = `vjs-player-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const uniqueId = `vjs-player-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
   videoRef.value.id = uniqueId;
   videoRef.value.className = 'video-js vjs-default-skin';
   videoRef.value.dataset.setup = '{}';
@@ -144,36 +142,32 @@ async function initPlayer() {
     // 错误处理
     player.on('error', () => {
       const error = player?.error();
-      console.error('Video.js error:', error);
-      
+
       const errorCode = error?.code;
       const errorMessage = error?.message || 'Unknown Video.js error';
-      
-      if (props.format === 'httpTs' || props.format === 'wsTs') {
-        if (errorCode === 4) {
-          emit('format-not-supported', {
-            format: props.format,
-            message: 'Browser does not support this TS stream format',
-          });
-          return;
-        }
+
+      if (
+        (props.format === 'httpTs' || props.format === 'wsTs') &&
+        errorCode === 4
+      ) {
+        emit('formatNotSupported', {
+          format: props.format,
+          message: 'Browser does not support this TS stream format',
+        });
+        return;
       }
-      
-      emit('player-error', { code: errorCode, message: errorMessage });
+
+      emit('playerError', { code: errorCode, message: errorMessage });
     });
 
     // 播放器就绪
     player.ready(() => {
-      console.log(`Video.js player ready for ${props.format}`);
       isReady.value = true;
-      emit('player-ready');
+      emit('playerReady');
     });
-
-    console.log(`Video.js player initialized successfully for ${props.format}`);
   } catch (error) {
-    console.error('Failed to create Video.js player:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    emit('player-error', { message: errorMessage });
+    emit('playerError', { message: errorMessage });
   }
 }
 
@@ -183,9 +177,9 @@ async function play() {
     try {
       await player.play();
     } catch (error) {
-      console.error('Video.js play error:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      emit('player-error', { message: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      emit('playerError', { message: errorMessage });
     }
   }
 }
@@ -199,8 +193,6 @@ function pause() {
 
 // 销毁播放器
 function destroy() {
-  console.log('Destroying Video.js player');
-  
   if (player) {
     try {
       // 完整的Video.js清理序列
@@ -213,15 +205,14 @@ function destroy() {
       if (typeof player.reset === 'function') {
         player.reset();
       }
-      
+
       player.dispose();
-      console.log('Video.js player disposed successfully');
-    } catch (error) {
-      console.warn('Error disposing Video.js player:', error);
+    } catch {
+      // Ignore dispose errors
     }
     player = null;
   }
-  
+
   isReady.value = false;
 }
 
@@ -229,6 +220,23 @@ function destroy() {
 function getPlayer() {
   return player;
 }
+
+// 监听props变化，重新初始化播放器
+watch(
+  () => [props.url, props.format],
+  ([newUrl, newFormat], [oldUrl, oldFormat]) => {
+    // 只有在已经初始化过且URL或格式发生变化时才重新初始化
+    if (player && (newUrl !== oldUrl || newFormat !== oldFormat)) {
+      destroy();
+      // 延迟重新初始化，确保完全清理
+      setTimeout(async () => {
+        await nextTick();
+        initPlayer();
+      }, 100);
+    }
+  },
+  { flush: 'post' },
+);
 
 onMounted(async () => {
   // 确保组件完全挂载后再初始化
@@ -272,9 +280,9 @@ defineExpose({
 <style scoped>
 .videojs-player {
   width: 100%;
+  overflow: hidden;
   background: #000;
   border-radius: 8px;
-  overflow: hidden;
 }
 
 /* Video.js 样式覆盖 */
@@ -284,20 +292,20 @@ defineExpose({
 }
 
 :deep(.vjs-big-play-button) {
-  font-size: 2.5em;
-  line-height: 2.3;
-  height: 2.3em;
-  width: 2.3em;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.45);
-  border: none;
   top: 50%;
   left: 50%;
+  width: 2.3em;
+  height: 2.3em;
+  font-size: 2.5em;
+  line-height: 2.3;
+  background-color: rgb(0 0 0 / 45%);
+  border: none;
+  border-radius: 50%;
   transform: translate(-50%, -50%);
 }
 
 :deep(.vjs-control-bar) {
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  background: linear-gradient(transparent, rgb(0 0 0 / 70%));
 }
 
 :deep(.vjs-progress-control .vjs-progress-holder) {
@@ -309,10 +317,10 @@ defineExpose({
 }
 
 :deep(.vjs-progress-control .vjs-load-progress) {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgb(255 255 255 / 30%);
 }
 
 :deep(.vjs-progress-control .vjs-progress-holder .vjs-load-progress div) {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgb(255 255 255 / 20%);
 }
 </style>
