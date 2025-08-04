@@ -76,7 +76,7 @@ function handleClose() {
 }
 
 // 播放指定格式
-function playFormat(format: string, url: string) {
+function playFormat(format: string, _url: string) {
   // 先校验格式支持
   if (!isFormatSupported(format)) {
     message.warning({
@@ -87,9 +87,34 @@ function playFormat(format: string, url: string) {
   }
 
   if (playerRef.value && playerRef.value.playFormat) {
+    // 对于FLV格式之间的切换，显示切换提示
+    const isFLVSwitch =
+      (format === 'httpFlv' || format === 'wsFlv') &&
+      (currentPlayingFormat.value === 'httpFlv' ||
+        currentPlayingFormat.value === 'wsFlv') &&
+      currentPlayingFormat.value !== format;
+
+    if (isFLVSwitch) {
+      message.loading({
+        content: `正在切换到 ${getFormatDisplayName(format)}...`,
+        key: 'format-switch',
+        duration: 0, // 不自动消失
+      });
+    }
+
     currentPlayingFormat.value = format;
     playerRef.value.playFormat(format);
-    console.log(`Playing ${format}: ${url}`);
+
+    // 延迟隐藏加载提示
+    if (isFLVSwitch) {
+      setTimeout(() => {
+        message.destroy('format-switch');
+        message.success({
+          content: `已切换到 ${getFormatDisplayName(format)}`,
+          duration: 2,
+        });
+      }, 1000);
+    }
   }
 }
 
@@ -116,7 +141,6 @@ function handleFormatNotSupported(data: { format: string; message: string }) {
     content: data.message,
     duration: 5,
   });
-  console.warn(`Format ${data.format} not supported:`, data.message);
 }
 
 // 获取格式支持状态
@@ -176,6 +200,16 @@ async function copyUrl(url: string, format: string) {
   }
 }
 
+// 刷新播放器
+function handleRefreshPlayer() {
+  if (playerRef.value && playerRef.value.refresh) {
+    playerRef.value.refresh();
+    message.success('播放器已刷新');
+  } else {
+    message.warning('播放器刷新功能不可用');
+  }
+}
+
 // 刷新观看人数
 async function handleRefreshViewerCount() {
   if (!props.onRefresh) {
@@ -188,7 +222,7 @@ async function handleRefreshViewerCount() {
     await props.onRefresh();
     message.success('观看人数已刷新');
   } catch (error) {
-    console.error('刷新观看人数失败:', error);
+    console.warn('刷新观看人数失败:', error);
     message.error('刷新观看人数失败');
   } finally {
     isRefreshing.value = false;
@@ -216,6 +250,17 @@ defineExpose({
           视频播放
           <span v-if="currentPlayingFormat" class="playing-format">
             (当前: {{ getFormatDisplayName(currentPlayingFormat) }})
+          </span>
+          <span class="player-refresh-btn">
+            <Button
+              type="text"
+              @click="handleRefreshPlayer"
+              size="small"
+              title="刷新播放器"
+            >
+              <RotateCw class="refresh-icon" />
+              刷新播放器
+            </Button>
           </span>
         </h4>
         <div class="player-wrapper">
@@ -757,25 +802,34 @@ strong {
   margin-left: 8px;
 }
 
+.player-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 16px;
+}
+
 .refresh-icon {
   width: 14px;
   height: 14px;
   color: #1890ff;
 }
 
-.refresh-count-btn .ant-btn {
+.refresh-count-btn .ant-btn,
+.player-refresh-btn .ant-btn {
   height: 20px;
   padding: 2px 4px;
   background: transparent;
   border: none;
 }
 
-.refresh-count-btn .ant-btn:hover {
+.refresh-count-btn .ant-btn:hover,
+.player-refresh-btn .ant-btn:hover {
   background: #e6f7ff;
   border-color: #40a9ff;
 }
 
-.refresh-count-btn .ant-btn:disabled {
+.refresh-count-btn .ant-btn:disabled,
+.player-refresh-btn .ant-btn:disabled {
   color: #bfbfbf;
   background: transparent;
 }
