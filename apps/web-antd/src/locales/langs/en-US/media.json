@@ -138,5 +138,42 @@
       "statistics": "Statistics",
       "tracks": "Audio/Video Tracks"
     }
+  },
+  "streamProxy": {
+    "title": "Stream Proxy Management",
+    "list": "Stream Proxy List",
+    "name": "Stream Proxy",
+    "id": "Proxy ID",
+    "app": "App Name",
+    "stream": "Stream ID",
+    "url": "Pull URL",
+    "description": "Proxy Description",
+    "status": "Status",
+    "serverId": "Server ID",
+    "vhost": "Virtual Host",
+    "proxyKey": "Proxy Key",
+    "retryCount": "Retry Count",
+    "rtpType": "RTSP Pull Mode",
+    "timeoutSec": "Timeout (seconds)",
+    "enableHls": "Enable HLS-MPEGTS",
+    "enableHlsFmp4": "Enable HLS-FMP4",
+    "enableMp4": "Enable MP4 Recording",
+    "enableRtsp": "Enable RTSP",
+    "enableRtmp": "Enable RTMP/FLV",
+    "enableTs": "Enable HTTP-TS/WS-TS",
+    "enableFmp4": "Enable HTTP-FMP4/WS-FMP4",
+    "enableAudio": "Enable Audio",
+    "onlineStatus": {
+      "title": "Online Status",
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "createTime": "Create Time",
+    "updateTime": "Update Time",
+    "operation": "Operation",
+    "create": "Create Proxy",
+    "edit": "Edit Proxy",
+    "delete": "Delete Proxy",
+    "extend": "Extended Fields"
   }
 }
