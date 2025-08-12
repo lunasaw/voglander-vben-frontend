@@ -59,8 +59,6 @@ pnpm test:unit
 
 # E2E 测试
 pnpm test:e2e          # 运行 Playwright 测试
-pnpm test:e2e-ui       # 交互式 UI 模式
-pnpm test:e2e-codegen  # 生成测试
 ```
 
 ### 媒体播放器开发
@@ -84,6 +82,9 @@ pnpm update:deps
 
 # 检查未使用的依赖
 pnpm check:dep
+
+# 预览构建结果
+pnpm preview
 ```
 
 ## 架构概览
@@ -105,6 +106,8 @@ pnpm check:dep
 
 **主要开发位置**: 所有新开发工作都在 `apps/web-antd/` 中进行
 
+**作用域限制**: 所有修改只能在当前所属页面内进行，禁止修改共享组件和其他模块的内容（除非明确要求）
+
 **样式和模式参考**: `playground/src/views/` 包含权威示例：
 
 - 组件使用模式
@@ -112,7 +115,14 @@ pnpm check:dep
 - 布局结构
 - 交互行为
 
-**API 集成**: 所有 API 定义在 `apps/web-antd/api/Voglander.openapi.json` 中
+**API 集成**: API 定义分布在 `apps/web-antd/api/` 目录的多个 OpenAPI JSON 文件中：
+
+- `Voglander.openapi-menu.json` - 菜单管理 API
+- `Voglander.openapi-user.json` - 用户管理 API
+- `Voglander.openapi-stream-proxy.json` - 流代理 API
+- `Voglander.openapi-zlm.json` - ZLM 媒体服务器 API
+- `Voglander.openapi-zlm-node.json` - ZLM 节点管理 API
+- `Voglander.openapi-zlm-query.json` - ZLM 查询 API
 
 ### 技术栈
 
@@ -125,6 +135,7 @@ pnpm check:dep
 - **表格**: VXE Table 用于复杂数据网格
 - **表单**: 基于模式的动态表单与验证
 - **图标**: 统一的 `@vben/icons` 系统 (Lucide 图标)
+- **媒体播放**: Video.js、FLV.js、HLS.js 支持多种视频流格式
 
 ### 包组织结构
 
@@ -319,7 +330,7 @@ apps/web-antd/src/router/routes/modules/
 
 ### 创建新的管理页面
 
-1. 检查 `apps/web-antd/api/Voglander.openapi.json` 中的 OpenAPI 定义
+1. 检查 `apps/web-antd/api/` 目录中的相关 OpenAPI 定义文件
 2. 在 `playground/src/views/examples/` 中找到类似模式
 3. 在 `apps/web-antd/src/views/[module]/[entity]/` 中创建页面结构
 4. 在 `apps/web-antd/src/api/[module]/` 中实现 API 层

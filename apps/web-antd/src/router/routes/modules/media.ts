@@ -40,6 +40,15 @@ const routes: RouteRecordRaw[] = [
         },
         component: () => import('#/views/media/list/list.vue'),
       },
+      {
+        path: '/media/stream-proxy',
+        name: 'media.streamProxy',
+        meta: {
+          icon: 'mdi:video-switch',
+          title: $t('media.streamProxy.title'),
+        },
+        component: () => import('#/views/media/stream-proxy/list.vue'),
+      },
     ],
   },
 ];

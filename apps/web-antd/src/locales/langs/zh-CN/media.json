@@ -138,5 +138,42 @@
       "statistics": "统计信息",
       "tracks": "音视频轨道"
     }
+  },
+  "streamProxy": {
+    "title": "拉流代理管理",
+    "list": "拉流代理列表",
+    "name": "拉流代理",
+    "id": "代理ID",
+    "app": "应用名称",
+    "stream": "流ID",
+    "url": "拉流地址",
+    "description": "代理描述",
+    "status": "启用状态",
+    "serverId": "节点ID",
+    "vhost": "虚拟主机",
+    "proxyKey": "代理Key",
+    "retryCount": "重试次数",
+    "rtpType": "RTSP拉流方式",
+    "timeoutSec": "超时时间(秒)",
+    "enableHls": "启用HLS-MPEGTS",
+    "enableHlsFmp4": "启用HLS-FMP4",
+    "enableMp4": "启用MP4录制",
+    "enableRtsp": "启用RTSP",
+    "enableRtmp": "启用RTMP/FLV",
+    "enableTs": "启用HTTP-TS/WS-TS",
+    "enableFmp4": "启用HTTP-FMP4/WS-FMP4",
+    "enableAudio": "启用音频",
+    "onlineStatus": {
+      "title": "在线状态",
+      "online": "在线",
+      "offline": "离线"
+    },
+    "createTime": "创建时间",
+    "updateTime": "更新时间",
+    "operation": "操作",
+    "create": "新增代理",
+    "edit": "编辑代理",
+    "delete": "删除代理",
+    "extend": "扩展字段"
   }
 }
