@@ -15,20 +15,22 @@ import { RotateCw } from '@vben/icons';
 import { Button, message, Modal } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getEnabledMediaNodeList } from '#/api/media/medianode';
 import {
   closeZlmMedia,
   getZlmMediaInfo,
   getZlmMediaList,
   getZlmMediaPlayUrls,
-  getZlmNodeMediaList,
 } from '#/api/media/zlm-media';
+import NodeSelector from '#/components/NodeSelector.vue';
 import { $t } from '#/locales';
+import { useNodeStore } from '#/store';
+import { clearCurrentNodeKey, setCurrentNodeKey } from '#/utils/node-state';
 
 import { useColumns, useSearchFormSchema } from './data';
 import DetailModal from './modules/detail-modal.vue';
 
 const { hasAccessByCodes } = useAccess();
+const nodeStore = useNodeStore();
 
 // 详情弹窗相关
 const detailModalRef = ref<InstanceType<typeof DetailModal>>();
@@ -36,33 +38,84 @@ const currentMediaInfo = ref<null | ZlmMediaApi.MediaInfoDetail>(null);
 const currentPlayUrls = ref<null | ZlmMediaApi.PlayUrls>(null);
 
 // 节点选择状态
-const nodeListData = ref<MediaNodeApi.MediaNodeVO[]>([]);
-const currentNodeKey = ref<string | null>(null);
+const currentNodeKey = ref<null | string>(null);
+const nodeSelectorRef = ref<InstanceType<typeof NodeSelector>>();
 
-// 获取启用的节点列表Ï
-async function fetchNodeList() {
-  try {
-    const response = await getEnabledMediaNodeList();
-
-    let nodeList: MediaNodeApi.MediaNodeVO[] = [];
-    if (Array.isArray(response)) {
-      nodeList = response;
-    } else if (response && typeof response === 'object') {
-      nodeList =
-        'items' in response && Array.isArray((response as any).items)
-          ? (response as any).items
-          : [response as unknown as MediaNodeApi.MediaNodeVO];
-    }
-
-    nodeListData.value = nodeList;
-  } catch (error) {
-    console.error('获取节点列表失败:', error);
-    message.error($t('media.node.query.loadNodeListFailed'));
+// 节点列表加载完成处理
+function onNodeListLoaded(_nodes: MediaNodeApi.MediaNodeVO[]) {
+  // 如果当前有选择的节点，确保全局状态也是同步的
+  if (currentNodeKey.value) {
+    nodeStore.setCurrentNodeKey(currentNodeKey.value);
+    setCurrentNodeKey(currentNodeKey.value); // 同时更新全局状态
   }
 }
 
-// 初始化时获取节点列表
-fetchNodeList();
+// 节点切换处理
+async function onNodeSwitch(
+  selectedNodeKey: null | number | string,
+  selectedNode?: MediaNodeApi.MediaNodeVO,
+) {
+  if (!selectedNodeKey) {
+    currentNodeKey.value = null;
+    nodeStore.clearCurrentNodeKey();
+    clearCurrentNodeKey(); // 清除全局状态
+    return;
+  }
+
+  const nodeKeyStr = String(selectedNodeKey);
+  if (nodeKeyStr === currentNodeKey.value) {
+    return; // 如果选择的是当前节点，不执行任何操作
+  }
+
+  // 检查权限
+  if (!hasAccessByCodes(['Media:Stream:List'])) {
+    message.error('您没有查看流媒体列表的权限');
+    return;
+  }
+
+  if (!selectedNode) {
+    message.error('节点不存在');
+    return;
+  }
+
+  // 获取节点显示名称
+  const nodeDisplayName =
+    selectedNode.name || selectedNode.serverId || selectedNode.id || '未知节点';
+
+  try {
+    // 显示切换提示，如果节点离线则在提示中包含状态信息
+    const keepaliveTime = new Date(Number(selectedNode.keepalive));
+    const now = new Date();
+    const diffMinutes = (now.getTime() - keepaliveTime.getTime()) / (1000 * 60);
+    const isOnline = diffMinutes < 5;
+
+    const statusHint = isOnline ? '' : ' (离线状态)';
+    message.loading({
+      content: `正在切换到节点: ${nodeDisplayName}${statusHint}...`,
+      duration: 2,
+      key: 'node_switch_msg',
+    });
+
+    // 更新当前节点（同时更新本地状态、Pinia状态和全局状态）
+    currentNodeKey.value = nodeKeyStr;
+    nodeStore.setCurrentNodeKey(nodeKeyStr);
+    setCurrentNodeKey(nodeKeyStr); // 更新全局状态，确保请求拦截器能获取到
+
+    // 重新加载表格数据
+    gridApi.reload();
+
+    message.success({
+      content: `已切换到节点: ${nodeDisplayName}`,
+      key: 'node_switch_msg',
+    });
+  } catch (error) {
+    console.error('节点切换失败:', error);
+    message.error({
+      content: '节点切换失败',
+      key: 'node_switch_msg',
+    });
+  }
+}
 
 const [Grid, gridApi] = useVbenVxeGrid({
   formOptions: {
@@ -77,6 +130,15 @@ const [Grid, gridApi] = useVbenVxeGrid({
       ajax: {
         query: async (_params, formValues) => {
           try {
+            // 如果没有选择节点，提示用户先选择节点
+            if (!currentNodeKey.value) {
+              message.warning('请先选择一个流媒体节点');
+              return {
+                items: [],
+                total: 0,
+              };
+            }
+
             const requestParams: ZlmMediaApi.MediaReq = {
               schema: formValues.schema || 'rtsp',
               vhost: formValues.vhost || '__defaultVhost__',
@@ -91,18 +153,8 @@ const [Grid, gridApi] = useVbenVxeGrid({
               }
             });
 
-            let data: ZlmMediaApi.MediaData[];
-
-            if (currentNodeKey.value) {
-              // 查询指定节点的流列表
-              data = await getZlmNodeMediaList(
-                currentNodeKey.value,
-                requestParams,
-              );
-            } else {
-              // 查询所有节点的流列表
-              data = await getZlmMediaList(requestParams);
-            }
+            // 查询流列表（通过请求拦截器自动添加节点头部）
+            const data = await getZlmMediaList(requestParams);
 
             return {
               items: data || [],
@@ -181,7 +233,7 @@ async function onCloseStream(row: ZlmMediaApi.MediaData) {
       stream: row.stream,
     };
 
-    await closeZlmMedia(params, currentNodeKey.value);
+    await closeZlmMedia(params);
     message.success('流关闭成功');
 
     // 重新获取列表
@@ -204,10 +256,10 @@ async function onViewDetails(row: ZlmMediaApi.MediaData) {
       stream: row.stream,
     };
 
-    // 同时获取流信息和播放地址
+    // 同时获取流信息和播放地址（通过请求拦截器自动添加节点头部）
     const [mediaInfo, playUrls] = await Promise.all([
-      getZlmMediaInfo(params, currentNodeKey.value || undefined),
-      getZlmMediaPlayUrls(params, currentNodeKey.value || undefined),
+      getZlmMediaInfo(params),
+      getZlmMediaPlayUrls(params),
     ]);
 
     message.destroy();
@@ -238,11 +290,8 @@ async function refreshViewerCount() {
       stream: currentMediaInfo.value.stream,
     };
 
-    // 重新获取流信息
-    const updatedMediaInfo = await getZlmMediaInfo(
-      params,
-      currentNodeKey.value || undefined,
-    );
+    // 重新获取流信息（通过请求拦截器自动添加节点头部）
+    const updatedMediaInfo = await getZlmMediaInfo(params);
 
     // 更新当前显示的流信息
     currentMediaInfo.value = updatedMediaInfo;
@@ -273,14 +322,23 @@ function handleExport() {
 <template>
   <Page auto-content-height>
     <template #header>
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <h1 class="text-2xl font-bold">
-            {{ $t('media.list.title') }}
-          </h1>
-        </div>
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-bold">
+          {{ $t('media.list.title') }}
+        </h1>
       </div>
     </template>
+
+    <!-- 节点选择区域 -->
+    <NodeSelector
+      ref="nodeSelectorRef"
+      v-model="currentNodeKey"
+      :title="$t('media.node.selector.title')"
+      :placeholder="$t('media.node.selector.placeholder')"
+      @node-switch="onNodeSwitch"
+      @node-list-loaded="onNodeListLoaded"
+      style="min-width: 300px"
+    />
 
     <Grid>
       <template #toolbar-buttons>
