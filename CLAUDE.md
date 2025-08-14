@@ -392,12 +392,15 @@ apps/web-antd/src/router/routes/modules/
 export function useFormSchema(isEditMode = false): VbenFormSchema[] {
   return [
     {
-      component: 'Input',               // 组件类型
-      componentProps: { /* ... */ },   // 组件属性
-      fieldName: 'app',                // 字段名
+      component: 'Input', // 组件类型
+      componentProps: {
+        /* ... */
+      }, // 组件属性
+      fieldName: 'app', // 字段名
       label: $t('media.streamProxy.app'), // 国际化标签
-      rules: 'required',               // 验证规则
-      dependencies: {                  // 依赖关系
+      rules: 'required', // 验证规则
+      dependencies: {
+        // 依赖关系
         show: (values) => !!values.showAdvanced,
         triggerFields: ['showAdvanced'],
       },
@@ -415,7 +418,7 @@ export function useFormSchema(isEditMode = false): VbenFormSchema[] {
 const components: Partial<Record<ComponentType, Component>> = {
   Input: withDefaultPlaceholder(Input, 'input'),
   Select: withDefaultPlaceholder(Select, 'select'),
-  NodeSelector,  // 自定义业务组件
+  NodeSelector, // 自定义业务组件
 };
 ```
 
@@ -469,11 +472,11 @@ export function usePlayerDetection() {
   const getBestFormat = (playUrls: PlayUrls) => {
     // 格式检测逻辑
   };
-  
+
   const getPlayerForFormat = (format: string) => {
     // 播放器选择逻辑
   };
-  
+
   return {
     getBestFormat,
     getPlayerForFormat,
@@ -496,9 +499,13 @@ const sortedNodeList = computed(() => {
 });
 
 // 监听器
-watch(() => props.playUrls, () => {
-  // 响应逻辑
-}, { immediate: true, deep: true });
+watch(
+  () => props.playUrls,
+  () => {
+    // 响应逻辑
+  },
+  { immediate: true, deep: true },
+);
 ```
 
 ### 业务组件开发模式
@@ -555,13 +562,19 @@ onMounted(() => {
 
 ```typescript
 // 表单配置
-export function useFormSchema(): VbenFormSchema[] { /* ... */ }
+export function useFormSchema(): VbenFormSchema[] {
+  /* ... */
+}
 
 // 表格列配置
-export function useColumns(onActionClick, onStatusChange): VxeTableColumn[] { /* ... */ }
+export function useColumns(onActionClick, onStatusChange): VxeTableColumn[] {
+  /* ... */
+}
 
 // 搜索表单配置
-export function useGridFormSchema(): VbenFormSchema[] { /* ... */ }
+export function useGridFormSchema(): VbenFormSchema[] {
+  /* ... */
+}
 ```
 
 ### 页面组件组合模式
@@ -577,9 +590,9 @@ import { getPageList, deleteItem } from '#/api';
 // 2. 配置表格和表单
 const [Grid, gridApi] = useVbenVxeGrid({
   formOptions: { schema: useGridFormSchema() },
-  gridOptions: { 
+  gridOptions: {
     columns: useColumns(onActionClick),
-    proxyConfig: { ajax: { query: getPageList } }
+    proxyConfig: { ajax: { query: getPageList } },
   },
 });
 
@@ -590,8 +603,12 @@ const [FormDrawer, formDrawerApi] = useVbenDrawer({
 // 3. 事件处理
 function onActionClick(e) {
   switch (e.code) {
-    case 'edit': onEdit(e.row); break;
-    case 'delete': onDelete(e.row); break;
+    case 'edit':
+      onEdit(e.row);
+      break;
+    case 'delete':
+      onDelete(e.row);
+      break;
   }
 }
 </script>
@@ -604,10 +621,10 @@ function onActionClick(e) {
         <Plus /> {{ $t('common.create') }}
       </Button>
     </template>
-    
+
     <!-- 数据表格 -->
     <Grid />
-    
+
     <!-- 表单抽屉 -->
     <FormDrawer />
   </Page>
@@ -635,11 +652,11 @@ function onEdit(row: any) {
 
 ```vue
 <!-- 父组件向子组件传递数据 -->
-<NodeSelector 
+<NodeSelector
   v-model="selectedNode"
   :loading="loading"
   @change="onNodeChange"
-  @nodeListLoaded="onNodeListLoaded" 
+  @nodeListLoaded="onNodeListLoaded"
 />
 ```
 
@@ -679,7 +696,7 @@ playerRef.value?.refresh();
 
 ```typescript
 const AsyncComponent = defineAsyncComponent(
-  () => import('./HeavyComponent.vue')
+  () => import('./HeavyComponent.vue'),
 );
 ```
 
@@ -713,11 +730,13 @@ function getComponent(type: string) {
 项目中的媒体播放器系统是组件化思想的典型应用：
 
 **核心组件**：
+
 - **MediaPlayerManager.vue**: 中央管理器，处理播放器类型检测和切换
 - **BasePlayer.vue**: 抽象基类，定义播放器接口
 - **HlsPlayer.vue/FlvPlayer.vue/VideoJsPlayer.vue**: 具体播放器实现
 
 **设计特点**：
+
 - **策略模式**: 根据媒体格式自动选择合适的播放器
 - **适配器模式**: 统一不同播放器的接口
 - **组合模式**: 播放器管理器组合多个播放器实例
