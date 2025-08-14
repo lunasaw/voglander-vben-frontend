@@ -13,7 +13,7 @@ import {
 } from '#/api/media/stream-proxy';
 import { $t } from '#/locales';
 
-import { fetchOnlineNodes, useFormSchema } from '../data';
+import { useFormSchema } from '../data';
 
 interface Props {
   formData?: StreamProxyApi.StreamProxyVO;
@@ -43,21 +43,6 @@ const [Form, formApi] = useVbenForm({
   schema: useFormSchema(false),
   showDefaultActions: false,
   wrapperClass: 'grid-cols-2 gap-x-4',
-  // 添加自定义样式来处理分隔线
-  customStyle: `
-    .ant-divider {
-      margin: 0 -16px !important;
-      width: calc(100% + 32px) !important;
-    }
-    .ant-divider-inner-text {
-      white-space: pre-line !important;
-      line-height: 1.5 !important;
-    }
-    .ant-divider::before {
-      content: "\\A";
-      white-space: pre;
-    }
-  `,
 });
 
 const [Drawer, drawerApi] = useVbenDrawer({
@@ -130,15 +115,12 @@ const [Drawer, drawerApi] = useVbenDrawer({
           formApi.setValues(localFormData.value);
         }
       } else {
+        // 创建模式设置schema
+        formApi.setState({ schema: useFormSchema(false) });
         formApi.resetForm();
         localFormData.value = {};
         isEditMode.value = false;
       }
-
-      // 获取在线节点列表并更新表单选项
-      fetchOnlineNodes().catch((error) => {
-        console.error('获取节点列表失败:', error);
-      });
     }
   },
 });

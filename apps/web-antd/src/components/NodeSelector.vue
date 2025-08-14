@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { MediaNodeApi } from '#/api/media/medianode';
 
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 import { message, Select, Tag } from 'ant-design-vue';
 
@@ -10,7 +10,7 @@ import { $t } from '#/locales';
 import { clearCurrentNodeKey, setCurrentNodeKey } from '#/utils/node-state';
 
 export interface NodeSelectorProps {
-  modelValue: null | number | string;
+  modelValue?: null | number | string;
   placeholder?: string;
   loading?: boolean;
   disabled?: boolean;
@@ -18,7 +18,7 @@ export interface NodeSelectorProps {
   showSearch?: boolean;
   size?: 'large' | 'middle' | 'small';
   style?: Record<string, any>;
-  class: string;
+  class?: string;
   title?: string;
   showContainer?: boolean;
 }
@@ -57,6 +57,9 @@ const emit = defineEmits<NodeSelectorEmits>();
 // 节点选择状态
 const nodeListData = ref<MediaNodeApi.MediaNodeVO[]>([]);
 const nodeListLoading = ref(false);
+
+// 定时刷新
+let refreshTimer: NodeJS.Timeout | null = null;
 
 // 判断节点是否在线
 function isNodeOnline(keepalive?: number | string): boolean {
@@ -181,6 +184,31 @@ async function refresh() {
   await fetchNodeList();
 }
 
+// 启动定时刷新
+function startRefreshTimer() {
+  // 清除现有定时器
+  if (refreshTimer) {
+    clearInterval(refreshTimer);
+  }
+
+  // 设置定时器，每10秒刷新一次节点状态
+  refreshTimer = setInterval(async () => {
+    try {
+      await fetchNodeList();
+    } catch (error) {
+      console.error('定时刷新节点列表失败:', error);
+    }
+  }, 10_000);
+}
+
+// 停止定时刷新
+function stopRefreshTimer() {
+  if (refreshTimer) {
+    clearInterval(refreshTimer);
+    refreshTimer = null;
+  }
+}
+
 // 导出刷新方法供父组件调用
 defineExpose({
   refresh,
@@ -191,9 +219,15 @@ defineExpose({
 // 监听外部loading变化，内部loading优先
 const combinedLoading = computed(() => props.loading || nodeListLoading.value);
 
-// 组件挂载时获取节点列表
+// 组件挂载时获取节点列表并启动定时刷新
 onMounted(async () => {
   await fetchNodeList();
+  startRefreshTimer();
+});
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  stopRefreshTimer();
 });
 </script>
 

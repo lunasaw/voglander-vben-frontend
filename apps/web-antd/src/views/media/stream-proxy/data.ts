@@ -1,46 +1,10 @@
 import type { VbenFormSchema } from '#/adapter/form';
 import type { OnActionClickFn, VxeTableGridOptions } from '#/adapter/vxe-table';
-import type { MediaNodeApi } from '#/api/media/medianode';
 import type { StreamProxyApi } from '#/api/media/stream-proxy';
-
-import { ref } from 'vue';
 
 import { useAccess } from '@vben/access';
 
-import { getOnlineMediaNodeList } from '#/api/media/medianode';
 import { $t } from '#/locales';
-
-// 在线节点列表缓存
-const onlineNodes = ref<MediaNodeApi.MediaNodeVO[]>([]);
-
-// 获取在线节点列表
-export async function fetchOnlineNodes() {
-  try {
-    const response = await getOnlineMediaNodeList();
-    let nodeList: MediaNodeApi.MediaNodeVO[] = [];
-    if (Array.isArray(response)) {
-      nodeList = response;
-    } else if (response && typeof response === 'object') {
-      nodeList =
-        'items' in response && Array.isArray((response as any).items)
-          ? (response as any).items
-          : [response as unknown as MediaNodeApi.MediaNodeVO];
-    }
-    onlineNodes.value = nodeList;
-    return nodeList;
-  } catch (error) {
-    console.error('获取在线节点列表失败:', error);
-    return [];
-  }
-}
-
-// 获取节点选项
-export function getNodeOptions() {
-  return onlineNodes.value.map((node) => ({
-    label: `${node.name || node.serverId} (${node.host})`,
-    value: node.serverId,
-  }));
-}
 
 export function useFormSchema(isEditMode = false): VbenFormSchema[] {
   // 编辑模式时不使用默认值，创建模式时使用默认值
@@ -85,14 +49,11 @@ export function useFormSchema(isEditMode = false): VbenFormSchema[] {
 
     // 第三行：节点选择和虚拟主机
     {
-      component: 'Select',
+      component: 'NodeSelector',
       componentProps: {
         placeholder: '请选择在线节点',
-        options: getNodeOptions(),
-        showSearch: true,
-        filterOption: (input: string, option: any) => {
-          return option.label.toLowerCase().includes(input.toLowerCase());
-        },
+        showContainer: false,
+        class: 'w-full',
       },
       fieldName: 'serverId',
       label: $t('media.streamProxy.serverId'),
@@ -535,15 +496,12 @@ export function useGridFormSchema(): VbenFormSchema[] {
       label: $t('media.streamProxy.url'),
     },
     {
-      component: 'Select',
+      component: 'NodeSelector',
       componentProps: {
         placeholder: '请选择节点',
-        options: getNodeOptions(),
         allowClear: true,
-        showSearch: true,
-        filterOption: (input: string, option: any) => {
-          return option.label.toLowerCase().includes(input.toLowerCase());
-        },
+        showContainer: false,
+        class: 'w-full',
       },
       fieldName: 'serverId',
       label: $t('media.streamProxy.serverId'),

@@ -5,6 +5,7 @@ import type {
 } from '#/adapter/vxe-table';
 import type { StreamProxyApi } from '#/api/media/stream-proxy';
 
+
 import { useAccess } from '@vben/access';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
@@ -19,15 +20,10 @@ import {
 } from '#/api/media/stream-proxy';
 import { $t } from '#/locales';
 
-import { fetchOnlineNodes, useColumns, useGridFormSchema } from './data';
+import { useColumns, useGridFormSchema } from './data';
 import Form from './modules/form.vue';
 
 const { hasAccessByCodes } = useAccess();
-
-// 初始化时获取节点列表
-fetchOnlineNodes().catch((error) => {
-  console.error('获取节点列表失败:', error);
-});
 
 const [FormDrawer, formDrawerApi] = useVbenDrawer({
   connectedComponent: Form,
@@ -181,6 +177,7 @@ async function onStatusChange(
     return false;
   }
 }
+
 </script>
 
 <template>

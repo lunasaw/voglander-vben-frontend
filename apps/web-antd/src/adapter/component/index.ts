@@ -61,6 +61,11 @@ const TreeSelect = defineAsyncComponent(
 );
 const Upload = defineAsyncComponent(() => import('ant-design-vue/es/upload'));
 
+// 导入自定义组件
+const NodeSelector = defineAsyncComponent(
+  () => import('#/components/NodeSelector.vue'),
+);
+
 const withDefaultPlaceholder = <T extends Component>(
   component: T,
   type: 'input' | 'select',
@@ -110,6 +115,7 @@ export type ComponentType =
   | 'InputNumber'
   | 'InputPassword'
   | 'Mentions'
+  | 'NodeSelector'
   | 'PrimaryButton'
   | 'Radio'
   | 'RadioGroup'
@@ -162,6 +168,7 @@ async function initComponentAdapter() {
     InputNumber: withDefaultPlaceholder(InputNumber, 'input'),
     InputPassword: withDefaultPlaceholder(InputPassword, 'input'),
     Mentions: withDefaultPlaceholder(Mentions, 'input'),
+    NodeSelector,
     // 自定义主要按钮
     PrimaryButton: (props, { attrs, slots }) => {
       return h(Button, { ...props, attrs, type: 'primary' }, slots);
