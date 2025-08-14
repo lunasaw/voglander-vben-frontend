@@ -25,13 +25,11 @@ import {
   message,
   Modal,
   Row,
-  Select,
   Spin,
   Table,
   Tag,
 } from 'ant-design-vue';
 
-import { getEnabledMediaNodeList } from '#/api/media/medianode';
 import {
   getZlmApiList,
   getZlmServerConfig,
@@ -42,13 +40,16 @@ import {
   restartZlmServer,
   setZlmServerConfig,
 } from '#/api/media/zlm-query';
+import NodeSelector from '#/components/NodeSelector.vue';
 import { $t } from '#/locales';
+import { useNodeStore } from '#/store';
 
 import { isNodeOnline } from './data';
 
 const { hasAccessByCodes } = useAccess();
 const route = useRoute();
 const router = useRouter();
+const nodeStore = useNodeStore();
 
 // 获取节点Key参数
 const nodeKey = computed(() => route.params.nodeKey as string);
@@ -64,8 +65,10 @@ const threadsLoadLoading = ref(false);
 const workThreadsLoadLoading = ref(false);
 const statisticLoading = ref(false);
 const serverConfigLoading = ref(false);
-const nodeListLoading = ref(false);
 const restartLoading = ref(false);
+
+// 节点选择器引用
+const nodeSelectorRef = ref<InstanceType<typeof NodeSelector>>();
 
 // 数据状态
 const versionData = ref<null | ZlmQueryApi.Version>(null);
@@ -74,7 +77,6 @@ const threadsLoadData = ref<ZlmQueryApi.ThreadLoad[]>([]);
 const workThreadsLoadData = ref<ZlmQueryApi.ThreadLoad[]>([]);
 const statisticData = ref<null | ZlmQueryApi.ImportantObjectNum>(null);
 const serverConfigData = ref<ZlmQueryApi.ServerNodeConfig>([]);
-const nodeListData = ref<MediaNodeApi.MediaNodeVO[]>([]);
 
 // 配置项编辑状态
 const editingConfig = ref<null | string>(null);
@@ -174,39 +176,11 @@ async function fetchServerConfig() {
   }
 }
 
-// 获取启用的节点列表
-async function fetchNodeList() {
-  nodeListLoading.value = true;
-  try {
-    const response = await getEnabledMediaNodeList();
-
-    // 由于requestClient配置了responseReturn: 'data'，所以response已经是解构后的数据
-    // 需要检查response的结构：
-    // 1. 如果是数组，直接使用
-    // 2. 如果是对象且有items字段，使用items
-    // 3. 如果是对象但直接包含节点数据，转为数组
-    let nodeList: MediaNodeApi.MediaNodeVO[] = [];
-
-    if (Array.isArray(response)) {
-      // 情况1：直接是数组
-      nodeList = response;
-    } else if (response && typeof response === 'object') {
-      if ('items' in response && Array.isArray((response as any).items)) {
-        // 情况2：有items字段
-        nodeList = (response as any).items;
-      } else {
-        // 情况3：可能是单个节点对象，转为数组
-        nodeList = [response as unknown as MediaNodeApi.MediaNodeVO];
-      }
-    }
-
-    nodeListData.value = nodeList;
-    console.log('节点列表:', nodeListData.value);
-  } catch (error) {
-    console.error('获取节点列表失败:', error);
-    message.error($t('media.node.query.loadNodeListFailed'));
-  } finally {
-    nodeListLoading.value = false;
+// 节点列表加载完成的处理
+function onNodeListLoaded(_nodes: MediaNodeApi.MediaNodeVO[]) {
+  // 确保当前节点Key也设置到全局状态
+  if (nodeKey.value) {
+    nodeStore.setCurrentNodeKey(nodeKey.value);
   }
 }
 
@@ -283,8 +257,12 @@ async function refreshAllData() {
       fetchWorkThreadsLoad(),
       fetchStatistic(),
       fetchServerConfig(),
-      fetchNodeList(),
     ]);
+
+    // 同时刷新节点列表
+    if (nodeSelectorRef.value) {
+      await nodeSelectorRef.value.refresh();
+    }
 
     // 统计成功和失败的数量
     const successful = results.filter(
@@ -314,7 +292,6 @@ async function refreshAllData() {
           '后台线程负载',
           '对象统计',
           '服务器配置',
-          '节点列表',
         ];
         console.error(`${apiNames[index]}获取失败:`, result.reason);
       }
@@ -365,7 +342,7 @@ async function restartServer() {
     setTimeout(() => {
       refreshAllData();
       restartLoading.value = false;
-    }, 10000);
+    }, 10_000);
   } catch (error) {
     console.error('重启服务器失败:', error);
     message.error('重启服务器失败');
@@ -373,11 +350,15 @@ async function restartServer() {
   }
 }
 
-// 节点切换
+// 节点切换处理
 async function onNodeSwitch(
-  selectedNodeKey: (number | string)[] | number | string | undefined,
+  selectedNodeKey: null | number | string,
+  selectedNode?: MediaNodeApi.MediaNodeVO,
 ) {
-  if (!selectedNodeKey || Array.isArray(selectedNodeKey)) return;
+  if (!selectedNodeKey) {
+    nodeStore.clearCurrentNodeKey();
+    return;
+  }
 
   const nodeKeyStr = String(selectedNodeKey);
   if (nodeKeyStr === nodeKey.value) {
@@ -390,9 +371,6 @@ async function onNodeSwitch(
     return;
   }
 
-  const selectedNode = nodeListData.value.find(
-    (node) => String(node.serverId || node.id) === nodeKeyStr,
-  );
   if (!selectedNode) {
     message.error('节点不存在');
     return;
@@ -412,6 +390,9 @@ async function onNodeSwitch(
       duration: 2,
       key: 'node_switch_msg',
     });
+
+    // 更新全局节点状态
+    nodeStore.setCurrentNodeKey(nodeKeyStr);
 
     // 更新路由参数
     await router.push({
@@ -436,22 +417,6 @@ async function onNodeSwitch(
 
 // 搜索框引用
 const searchInputRef = ref();
-
-// 节点选择器的过滤函数
-function filterOption(input: string, option: any) {
-  const node = sortedNodeList.value.find(
-    (n) => (n.serverId || n.id) === option.value,
-  );
-  if (!node) return false;
-  const searchText = input.toLowerCase();
-  return (
-    (node.name || '').toLowerCase().includes(searchText) ||
-    String(node.serverId || node.id || '')
-      .toLowerCase()
-      .includes(searchText) ||
-    (node.host || '').toLowerCase().includes(searchText)
-  );
-}
 
 // 键盘快捷键处理
 function handleKeyDown(event: KeyboardEvent) {
@@ -661,9 +626,10 @@ const serverConfigTableData = computed(() => {
   if (!serverConfigData.value || serverConfigData.value.length === 0) return [];
 
   // 如果是数组格式，需要将数组中的对象合并为一个对象，然后转换为表格数据
-  const configObj = serverConfigData.value.reduce((acc, item) => {
-    return { ...acc, ...item };
-  }, {});
+  let configObj = {};
+  for (const item of serverConfigData.value) {
+    configObj = { ...configObj, ...item };
+  }
 
   // 转换为表格数据并按照配置分组顺序排序
   let filteredData = Object.entries(configObj)
@@ -710,39 +676,6 @@ const configStats = computed(() => {
     totalOriginal,
     isFiltered: configSearchText.value.trim() !== '',
   };
-});
-
-// 排序后的节点列表 - 当前节点置顶，在线节点优先
-const sortedNodeList = computed(() => {
-  if (!nodeListData.value || nodeListData.value.length === 0) {
-    return [];
-  }
-
-  return [...nodeListData.value].sort((a, b) => {
-    const aNodeId = a.serverId || a.id;
-    const bNodeId = b.serverId || b.id;
-
-    // 当前节点最优先
-    if (aNodeId === nodeKey.value) return -1;
-    if (bNodeId === nodeKey.value) return 1;
-
-    // 在线状态优先（使用isNodeOnline函数计算）
-    const aOnline = isNodeOnline(a.keepalive);
-    const bOnline = isNodeOnline(b.keepalive);
-    if (aOnline !== bOnline) {
-      return bOnline ? 1 : -1; // 在线的排在前面
-    }
-
-    // 启用状态优先
-    if (a.enabled !== b.enabled) {
-      return (b.enabled ? 1 : 0) - (a.enabled ? 1 : 0);
-    }
-
-    // 按名称排序
-    const nameA = a.name || String(aNodeId || '未知节点');
-    const nameB = b.name || String(bNodeId || '未知节点');
-    return nameA.localeCompare(nameB);
-  });
 });
 
 // 监听节点Key变化，自动刷新数据
@@ -808,60 +741,18 @@ onUnmounted(() => {
             <div class="flex items-center gap-3">
               <!-- 节点切换选择器 -->
               <div class="flex flex-1 items-center gap-2">
-                <span class="shrink-0 text-sm font-medium text-gray-700"
-                  >{{ $t('media.node.query.selectNode') }}:</span
-                >
-                <Select
-                  :value="nodeKey"
-                  :loading="nodeListLoading"
+                <span class="shrink-0 text-sm font-medium text-gray-700">
+                  {{ $t('media.node.query.selectNode') }}:
+                </span>
+                <NodeSelector
+                  ref="nodeSelectorRef"
+                  :model-value="nodeKey"
+                  :show-container="false"
                   :placeholder="$t('media.node.query.selectNode')"
-                  @change="onNodeSwitch"
-                  show-search
-                  :filter-option="filterOption"
-                  :dropdown-match-select-width="true"
-                >
-                  <Select.Option
-                    v-for="node in sortedNodeList"
-                    :key="node.serverId || node.id"
-                    :value="node.serverId || node.id"
-                    :disabled="(node.serverId || node.id) === nodeKey"
-                    :style="{ padding: '8px 16px' }"
-                  >
-                    <div class="flex w-full items-center justify-between">
-                      <div class="flex min-w-0 flex-1 items-center gap-2">
-                        <span class="truncate font-medium text-gray-900">
-                          {{
-                            node.name || node.serverId || node.id || '未知节点'
-                          }}
-                        </span>
-                        <span class="truncate text-xs text-gray-500">
-                          ({{ node.host || '-' }})
-                        </span>
-                        <span
-                          v-if="(node.serverId || node.id) === nodeKey"
-                          class="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-600"
-                        >
-                          {{ $t('media.node.query.currentNode') }}
-                        </span>
-                      </div>
-                      <div class="ml-3 flex shrink-0 items-center">
-                        <Tag
-                          :color="
-                            isNodeOnline(node.keepalive) ? 'green' : 'red'
-                          "
-                          size="small"
-                          class="m-0"
-                        >
-                          {{
-                            isNodeOnline(node.keepalive)
-                              ? $t('media.node.statusOnline')
-                              : $t('media.node.statusOffline')
-                          }}
-                        </Tag>
-                      </div>
-                    </div>
-                  </Select.Option>
-                </Select>
+                  @node-switch="onNodeSwitch"
+                  @node-list-loaded="onNodeListLoaded"
+                  style="min-width: 300px"
+                />
               </div>
               <!-- 刷新所有数据按钮 -->
               <Button
@@ -1066,13 +957,13 @@ onUnmounted(() => {
               <div>💡 {{ $t('media.node.query.doubleClickEditTip') }}</div>
               <div class="text-xs text-blue-500">
                 🔍 快捷键:
-                <kbd class="rounded bg-white px-1 py-0.5 text-gray-600"
-                  >Ctrl+F</kbd
-                >
+                <kbd class="rounded bg-white px-1 py-0.5 text-gray-600">
+                  Ctrl+F
+                </kbd>
                 搜索配置项,
-                <kbd class="rounded bg-white px-1 py-0.5 text-gray-600"
-                  >ESC</kbd
-                >
+                <kbd class="rounded bg-white px-1 py-0.5 text-gray-600">
+                  ESC
+                </kbd>
                 清除搜索
               </div>
             </div>
