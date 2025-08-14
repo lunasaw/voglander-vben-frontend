@@ -361,31 +361,375 @@ apps/web-antd/src/router/routes/modules/
 - **分支命名**: 遵循规范模式
 - **代码质量**: 提交前所有检查必须通过
 
-## 媒体播放器架构
+## 组件化开发规范
 
-项目包含位于 `apps/web-antd/src/views/media/` 的综合媒体流系统：
+基于企业级Vue 3项目的完整组件化开发规范和模式。
 
-### 核心组件
+### 核心组件化思想
 
-- **MediaPlayerManager.vue**: 处理播放器类型检测和切换的中央管理器
-- **BasePlayer.vue**: 所有播放器实现的抽象基类
-- **HlsPlayer.vue**: HLS 流播放器实现
-- **FlvPlayer.vue**: FLV 流播放器实现
-- **VideoJsPlayer.vue**: 基于 VideoJS 的播放器实现
+**1. 分层组件架构**
 
-### 媒体播放器功能
+```
+├── 适配器层 (Adapter Layer)        # 统一组件接口和默认配置
+│   ├── component/index.ts          # 组件注册和类型定义
+│   ├── form.ts                     # 表单适配器配置
+│   └── vxe-table.ts               # 表格适配器配置
+├── 业务组件层 (Business Layer)      # 特定业务逻辑的复用组件
+│   ├── NodeSelector.vue           # 节点选择器
+│   └── MediaPlayerManager.vue     # 媒体播放器管理器
+└── 页面组件层 (Page Layer)          # 组合各种组件的页面级组件
+    ├── list.vue                   # 列表页面
+    ├── data.ts                    # 页面配置和数据逻辑
+    └── modules/form.vue           # 表单子组件
+```
 
-- **自动检测**: 基于流格式的自动播放器类型选择
-- **格式支持**: HLS (.m3u8)、FLV (.flv) 和标准视频格式
-- **实时更新**: 实时观看人数显示与刷新功能
-- **错误恢复**: 播放器故障的回退机制
-- **URL 管理**: 流 URL 的复制到剪贴板功能
-- **响应式设计**: 自适应播放器大小和控件
+**2. Schema驱动的组件设计**
 
-### 媒体组件开发模式
+所有复杂组件都采用配置驱动的方式，通过Schema定义组件行为：
 
-- 使用 `MediaPlayerManager` 作为所有媒体播放的入口点
-- 实现适当的错误边界和回退处理
-- 遵循既定的播放器接口以保持一致性
-- 在适用的地方包含观看人数集成
-- 确保组件卸载时媒体资源的适当清理
+```typescript
+// 表单Schema示例
+export function useFormSchema(isEditMode = false): VbenFormSchema[] {
+  return [
+    {
+      component: 'Input',               // 组件类型
+      componentProps: { /* ... */ },   // 组件属性
+      fieldName: 'app',                // 字段名
+      label: $t('media.streamProxy.app'), // 国际化标签
+      rules: 'required',               // 验证规则
+      dependencies: {                  // 依赖关系
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+  ];
+}
+```
+
+**3. 组件适配器模式**
+
+统一不同UI库的组件接口，提供一致的开发体验：
+
+```typescript
+// 组件适配器注册
+const components: Partial<Record<ComponentType, Component>> = {
+  Input: withDefaultPlaceholder(Input, 'input'),
+  Select: withDefaultPlaceholder(Select, 'select'),
+  NodeSelector,  // 自定义业务组件
+};
+```
+
+### 组件开发标准规范
+
+**1. 组件文件组织**
+
+```
+component-name/
+├── index.vue          # 主组件文件
+├── data.ts           # 配置数据和逻辑函数
+├── composables/      # 组合式函数
+│   └── useFeature.ts
+├── components/       # 子组件
+│   └── SubComponent.vue
+└── types.ts          # TypeScript类型定义
+```
+
+**2. 组件接口设计规范**
+
+```typescript
+// Props接口定义
+export interface ComponentProps {
+  modelValue?: string | number | null;
+  loading?: boolean;
+  disabled?: boolean;
+  // ... 其他属性
+}
+
+// Emits事件定义
+export interface ComponentEmits {
+  (e: 'update:modelValue', value: string | number | null): void;
+  (e: 'change', value: string | number | null, extra?: any): void;
+}
+
+// 组件暴露的方法
+defineExpose({
+  refresh,
+  validate,
+  reset,
+});
+```
+
+**3. 组合式函数封装**
+
+将复用逻辑抽取为组合式函数：
+
+```typescript
+// composables/usePlayerDetection.ts
+export function usePlayerDetection() {
+  const getBestFormat = (playUrls: PlayUrls) => {
+    // 格式检测逻辑
+  };
+  
+  const getPlayerForFormat = (format: string) => {
+    // 播放器选择逻辑
+  };
+  
+  return {
+    getBestFormat,
+    getPlayerForFormat,
+  };
+}
+```
+
+**4. 响应式状态管理**
+
+```typescript
+// 状态定义
+const nodeListData = ref<MediaNodeVO[]>([]);
+const nodeListLoading = ref(false);
+
+// 计算属性
+const sortedNodeList = computed(() => {
+  return [...nodeListData.value].sort((a, b) => {
+    // 排序逻辑
+  });
+});
+
+// 监听器
+watch(() => props.playUrls, () => {
+  // 响应逻辑
+}, { immediate: true, deep: true });
+```
+
+### 业务组件开发模式
+
+**1. 管理器组件模式** - `MediaPlayerManager`
+
+用于管理多个相关组件的中央协调器：
+
+```typescript
+// 组件映射
+const playerComponents = {
+  VideoJsPlayer,
+  FlvPlayer,
+  HlsPlayer,
+};
+
+// 动态组件渲染
+const currentPlayerComponent = shallowRef();
+
+// 组件切换逻辑
+function switchPlayer(format: string) {
+  const playerInfo = getPlayerForFormat(format);
+  currentPlayerComponent.value = playerComponents[playerInfo.component];
+}
+```
+
+**2. 选择器组件模式** - `NodeSelector`
+
+具有数据获取、过滤、排序功能的选择组件：
+
+```typescript
+// 数据获取
+async function fetchNodeList() {
+  nodeListLoading.value = true;
+  try {
+    const response = await getEnabledMediaNodeList();
+    nodeListData.value = response;
+    emit('nodeListLoaded', response);
+  } finally {
+    nodeListLoading.value = false;
+  }
+}
+
+// 定时刷新
+onMounted(() => {
+  fetchNodeList();
+  startRefreshTimer();
+});
+```
+
+**3. 数据配置组件模式** - `data.ts`
+
+将组件配置和业务逻辑分离：
+
+```typescript
+// 表单配置
+export function useFormSchema(): VbenFormSchema[] { /* ... */ }
+
+// 表格列配置
+export function useColumns(onActionClick, onStatusChange): VxeTableColumn[] { /* ... */ }
+
+// 搜索表单配置
+export function useGridFormSchema(): VbenFormSchema[] { /* ... */ }
+```
+
+### 页面组件组合模式
+
+**1. 标准CRUD页面结构**
+
+```vue
+<script setup>
+// 1. 导入适配器和API
+import { useVbenVxeGrid, useVbenDrawer } from '#/adapter';
+import { getPageList, deleteItem } from '#/api';
+
+// 2. 配置表格和表单
+const [Grid, gridApi] = useVbenVxeGrid({
+  formOptions: { schema: useGridFormSchema() },
+  gridOptions: { 
+    columns: useColumns(onActionClick),
+    proxyConfig: { ajax: { query: getPageList } }
+  },
+});
+
+const [FormDrawer, formDrawerApi] = useVbenDrawer({
+  connectedComponent: Form,
+});
+
+// 3. 事件处理
+function onActionClick(e) {
+  switch (e.code) {
+    case 'edit': onEdit(e.row); break;
+    case 'delete': onDelete(e.row); break;
+  }
+}
+</script>
+
+<template>
+  <Page>
+    <!-- 操作工具栏 -->
+    <template #header>
+      <Button @click="onCreate" v-if="hasAccess(['Create'])">
+        <Plus /> {{ $t('common.create') }}
+      </Button>
+    </template>
+    
+    <!-- 数据表格 -->
+    <Grid />
+    
+    <!-- 表单抽屉 -->
+    <FormDrawer />
+  </Page>
+</template>
+```
+
+**2. 权限控制模式**
+
+```typescript
+// 双重权限保护
+const showEdit = () => hasAccessByCodes(['Module:Entity:Edit']);
+
+function onEdit(row: any) {
+  if (!hasAccessByCodes(['Module:Entity:Edit'])) {
+    message.error('您没有编辑权限');
+    return;
+  }
+  // 执行编辑逻辑
+}
+```
+
+### 组件通信和状态管理
+
+**1. Props Down / Events Up**
+
+```vue
+<!-- 父组件向子组件传递数据 -->
+<NodeSelector 
+  v-model="selectedNode"
+  :loading="loading"
+  @change="onNodeChange"
+  @nodeListLoaded="onNodeListLoaded" 
+/>
+```
+
+**2. 全局状态管理**
+
+```typescript
+// utils/node-state.ts
+const currentNodeKey = ref<string | null>(null);
+
+export function setCurrentNodeKey(key: string) {
+  currentNodeKey.value = key;
+}
+
+export function getCurrentNodeKey() {
+  return currentNodeKey.value;
+}
+```
+
+**3. 组件间通信**
+
+```typescript
+// 暴露方法给父组件
+defineExpose({
+  refresh: refreshCurrentPlayer,
+  destroy: destroyCurrentPlayer,
+  getCurrentPlayer: () => currentPlayerRef.value,
+});
+
+// 父组件调用子组件方法
+const playerRef = ref();
+playerRef.value?.refresh();
+```
+
+### 组件性能优化
+
+**1. 懒加载和异步组件**
+
+```typescript
+const AsyncComponent = defineAsyncComponent(
+  () => import('./HeavyComponent.vue')
+);
+```
+
+**2. 响应式优化**
+
+```typescript
+// 使用shallowRef避免深度响应式
+const currentPlayerComponent = shallowRef();
+
+// 使用computed缓存计算结果
+const sortedData = computed(() => {
+  return expensiveComputation(rawData.value);
+});
+```
+
+**3. 组件缓存和复用**
+
+```typescript
+// 组件映射缓存
+const componentCache = new Map();
+function getComponent(type: string) {
+  if (!componentCache.has(type)) {
+    componentCache.set(type, createComponent(type));
+  }
+  return componentCache.get(type);
+}
+```
+
+### 媒体播放器架构实例
+
+项目中的媒体播放器系统是组件化思想的典型应用：
+
+**核心组件**：
+- **MediaPlayerManager.vue**: 中央管理器，处理播放器类型检测和切换
+- **BasePlayer.vue**: 抽象基类，定义播放器接口
+- **HlsPlayer.vue/FlvPlayer.vue/VideoJsPlayer.vue**: 具体播放器实现
+
+**设计特点**：
+- **策略模式**: 根据媒体格式自动选择合适的播放器
+- **适配器模式**: 统一不同播放器的接口
+- **组合模式**: 播放器管理器组合多个播放器实例
+- **观察者模式**: 事件驱动的播放器状态管理
+
+### 组件开发最佳实践
+
+1. **单一职责**: 每个组件只负责一个明确的功能
+2. **接口一致**: 使用统一的Props和Events接口
+3. **配置驱动**: 通过配置而非代码控制组件行为
+4. **类型安全**: 完整的TypeScript类型定义
+5. **可测试性**: 逻辑与视图分离，便于单元测试
+6. **可访问性**: 支持键盘导航和屏幕阅读器
+7. **国际化**: 所有用户界面文本支持多语言
+8. **性能优化**: 合理使用缓存和懒加载策略

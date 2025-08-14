@@ -7,7 +7,7 @@
   },
   "tags": [],
   "paths": {
-    "/api/v1/medianode/get/{id}": {
+    "/api/v1/mediaNode/get/{id}": {
       "get": {
         "summary": "根据ID获取节点",
         "deprecated": false,
@@ -30,7 +30,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AjaxResult",
+                  "$ref": "#/components/schemas/AjaxResultMediaNodeVO",
                   "description": "获取成功"
                 },
                 "example": {
@@ -44,7 +44,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/getByServerId/{serverId}": {
+    "/api/v1/mediaNode/getByServerId/{serverId}": {
       "get": {
         "summary": "根据节点ID获取节点",
         "deprecated": false,
@@ -67,7 +67,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AjaxResult",
+                  "$ref": "#/components/schemas/AjaxResultMediaNodeVO",
                   "description": "获取成功"
                 },
                 "example": {
@@ -81,7 +81,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/get": {
+    "/api/v1/mediaNode/get": {
       "get": {
         "summary": "根据条件查询节点",
         "deprecated": false,
@@ -223,8 +223,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "$ref": "#/components/schemas/AjaxResultMediaNodeVO"
                 },
                 "example": {
                   "": {}
@@ -237,7 +236,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/list": {
+    "/api/v1/mediaNode/list": {
       "get": {
         "summary": "获取节点列表",
         "deprecated": false,
@@ -379,8 +378,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "$ref": "#/components/schemas/AjaxResultListMediaNodeVO"
                 },
                 "example": {
                   "": {}
@@ -393,7 +391,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/listEnabled": {
+    "/api/v1/mediaNode/listEnabled": {
       "get": {
         "summary": "获取启用的节点列表",
         "deprecated": false,
@@ -406,8 +404,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "$ref": "#/components/schemas/AjaxResultListMediaNodeVO"
                 },
                 "example": {
                   "": {}
@@ -420,7 +417,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/listOnline": {
+    "/api/v1/mediaNode/listOnline": {
       "get": {
         "summary": "获取在线的节点列表",
         "deprecated": false,
@@ -433,8 +430,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "$ref": "#/components/schemas/AjaxResultListMediaNodeVO"
                 },
                 "example": {
                   "": {}
@@ -447,7 +443,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/pageListByEntity/{page}/{size}": {
+    "/api/v1/mediaNode/pageListByEntity/{page}/{size}": {
       "get": {
         "summary": "分页查询节点",
         "deprecated": false,
@@ -607,8 +603,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "$ref": "#/components/schemas/AjaxResultMediaNodeListResp",
+                  "description": "查询成功"
                 },
                 "example": {
                   "": {}
@@ -621,7 +617,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/pageList/{page}/{size}": {
+    "/api/v1/mediaNode/pageList/{page}/{size}": {
       "get": {
         "summary": "简单分页查询",
         "deprecated": false,
@@ -653,8 +649,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "$ref": "#/components/schemas/AjaxResultMediaNodeListResp",
+                  "description": "查询成功"
                 },
                 "example": {
                   "": {}
@@ -667,7 +663,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/insert": {
+    "/api/v1/mediaNode/insert": {
       "post": {
         "summary": "创建节点",
         "deprecated": false,
@@ -694,7 +690,7 @@
                   "description": "创建成功"
                 },
                 "example": {
-                  "": {}
+                  "": null
                 }
               }
             },
@@ -704,7 +700,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/insertBatch": {
+    "/api/v1/mediaNode/insertBatch": {
       "post": {
         "summary": "批量创建节点",
         "deprecated": false,
@@ -732,10 +728,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "description": "操作消息提醒\n支持泛型的返回结果封装类"
                 },
                 "example": {
-                  "": {}
+                  "": null
                 }
               }
             },
@@ -745,7 +741,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/update": {
+    "/api/v1/mediaNode/update": {
       "put": {
         "summary": "更新节点",
         "deprecated": false,
@@ -769,10 +765,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "description": "操作消息提醒\n支持泛型的返回结果封装类"
                 },
                 "example": {
-                  "": {}
+                  "": null
                 }
               }
             },
@@ -782,7 +778,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/updateBatch": {
+    "/api/v1/mediaNode/updateBatch": {
       "put": {
         "summary": "批量更新节点",
         "deprecated": false,
@@ -810,10 +806,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "description": "操作消息提醒\n支持泛型的返回结果封装类"
                 },
                 "example": {
-                  "": {}
+                  "": null
                 }
               }
             },
@@ -823,7 +819,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/updateStatus/{serverId}": {
+    "/api/v1/mediaNode/updateStatus/{serverId}": {
       "put": {
         "summary": "更新节点状态",
         "deprecated": false,
@@ -865,10 +861,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "description": "操作消息提醒\n支持泛型的返回结果封装类"
                 },
                 "example": {
-                  "": {}
+                  "": null
                 }
               }
             },
@@ -878,7 +874,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/delete/{id}": {
+    "/api/v1/mediaNode/delete/{id}": {
       "delete": {
         "summary": "删除节点",
         "deprecated": false,
@@ -902,10 +898,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "description": "操作消息提醒\n支持泛型的返回结果封装类"
                 },
                 "example": {
-                  "": {}
+                  "": null
                 }
               }
             },
@@ -915,7 +911,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/deleteByServerId/{serverId}": {
+    "/api/v1/mediaNode/deleteByServerId/{serverId}": {
       "delete": {
         "summary": "根据节点ID删除",
         "deprecated": false,
@@ -939,10 +935,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "description": "操作消息提醒\n支持泛型的返回结果封装类"
                 },
                 "example": {
-                  "": {}
+                  "": null
                 }
               }
             },
@@ -952,7 +948,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/deleteIds": {
+    "/api/v1/mediaNode/deleteIds": {
       "delete": {
         "summary": "批量删除节点",
         "deprecated": false,
@@ -979,10 +975,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "description": "操作消息提醒\n支持泛型的返回结果封装类"
                 },
                 "example": {
-                  "": {}
+                  "": null
                 }
               }
             },
@@ -992,7 +988,7 @@
         "security": []
       }
     },
-    "/api/v1/medianode/deleteByCondition": {
+    "/api/v1/mediaNode/deleteByCondition": {
       "delete": {
         "summary": "根据条件删除节点",
         "deprecated": false,
@@ -1016,10 +1012,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AjaxResult",
-                  "description": "操作消息提醒"
+                  "description": "操作消息提醒\n支持泛型的返回结果封装类"
                 },
                 "example": {
-                  "": {}
+                  "": null
                 }
               }
             },
@@ -1033,6 +1029,14 @@
   "components": {
     "schemas": {
       "AjaxResult": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "null"
+          }
+        }
+      },
+      "AjaxResultMediaNodeVO": {
         "type": "object",
         "properties": {
           "key": {
@@ -1083,7 +1087,19 @@
             "description": "扩展字段"
           }
         },
-        "required": ["serverId", "host"]
+        "required": [
+          "serverId",
+          "host"
+        ]
+      },
+      "AjaxResultListMediaNodeVO": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "object",
+            "properties": {}
+          }
+        }
       },
       "MediaNodeUpdateReq": {
         "type": "object",
@@ -1132,7 +1148,18 @@
             "description": "扩展字段"
           }
         },
-        "required": ["id"]
+        "required": [
+          "id"
+        ]
+      },
+      "AjaxResultMediaNodeListResp": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "object",
+            "properties": {}
+          }
+        }
       },
       "MediaNodeDO": {
         "type": "object",
