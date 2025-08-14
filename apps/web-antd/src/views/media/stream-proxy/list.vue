@@ -5,7 +5,6 @@ import type {
 } from '#/adapter/vxe-table';
 import type { StreamProxyApi } from '#/api/media/stream-proxy';
 
-
 import { useAccess } from '@vben/access';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
@@ -177,7 +176,6 @@ async function onStatusChange(
     return false;
   }
 }
-
 </script>
 
 <template>
