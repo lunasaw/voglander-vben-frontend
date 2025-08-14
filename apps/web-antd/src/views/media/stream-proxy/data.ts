@@ -1,65 +1,115 @@
 import type { VbenFormSchema } from '#/adapter/form';
 import type { OnActionClickFn, VxeTableGridOptions } from '#/adapter/vxe-table';
+import type { MediaNodeApi } from '#/api/media/medianode';
 import type { StreamProxyApi } from '#/api/media/stream-proxy';
+
+import { ref } from 'vue';
 
 import { useAccess } from '@vben/access';
 
+import { getOnlineMediaNodeList } from '#/api/media/medianode';
 import { $t } from '#/locales';
 
-export function useFormSchema(): VbenFormSchema[] {
+// 在线节点列表缓存
+const onlineNodes = ref<MediaNodeApi.MediaNodeVO[]>([]);
+
+// 获取在线节点列表
+export async function fetchOnlineNodes() {
+  try {
+    const response = await getOnlineMediaNodeList();
+    let nodeList: MediaNodeApi.MediaNodeVO[] = [];
+    if (Array.isArray(response)) {
+      nodeList = response;
+    } else if (response && typeof response === 'object') {
+      nodeList =
+        'items' in response && Array.isArray((response as any).items)
+          ? (response as any).items
+          : [response as unknown as MediaNodeApi.MediaNodeVO];
+    }
+    onlineNodes.value = nodeList;
+    return nodeList;
+  } catch (error) {
+    console.error('获取在线节点列表失败:', error);
+    return [];
+  }
+}
+
+// 获取节点选项
+export function getNodeOptions() {
+  return onlineNodes.value.map((node) => ({
+    label: `${node.name || node.serverId} (${node.host})`,
+    value: node.serverId,
+  }));
+}
+
+export function useFormSchema(isEditMode = false): VbenFormSchema[] {
+  // 编辑模式时不使用默认值，创建模式时使用默认值
+  const getDefaultValue = (defaultVal: any) =>
+    isEditMode ? undefined : defaultVal;
+
   return [
+    // 第一行：应用名称和流ID
     {
       component: 'Input',
       componentProps: {
-        placeholder: '请输入应用名称',
+        placeholder: '请输入应用名称，如：live',
       },
       fieldName: 'app',
       label: $t('media.streamProxy.app'),
       rules: 'required',
+      help: '应用名称用于组织和管理不同类型的流',
     },
     {
       component: 'Input',
       componentProps: {
-        placeholder: '请输入流ID',
+        placeholder: '请输入流ID，如：test_stream',
       },
       fieldName: 'stream',
       label: $t('media.streamProxy.stream'),
       rules: 'required',
+      help: '唯一标识此拉流代理的流ID',
     },
+
+    // 第二行：拉流地址（占满整行）
     {
       component: 'Input',
       componentProps: {
-        placeholder: '请输入拉流地址',
+        placeholder: '请输入拉流地址，如：rtsp://example.com/stream',
       },
       fieldName: 'url',
       label: $t('media.streamProxy.url'),
       rules: 'required',
+      help: '支持 RTSP、RTMP、HTTP 等协议的流媒体地址',
+      formItemClass: 'col-span-2',
     },
+
+    // 第三行：节点选择和虚拟主机
     {
-      component: 'Input',
+      component: 'Select',
       componentProps: {
-        placeholder: '请输入节点ID',
+        placeholder: '请选择在线节点',
+        options: getNodeOptions(),
+        showSearch: true,
+        filterOption: (input: string, option: any) => {
+          return option.label.toLowerCase().includes(input.toLowerCase());
+        },
       },
       fieldName: 'serverId',
       label: $t('media.streamProxy.serverId'),
+      rules: 'required',
     },
     {
       component: 'Input',
       componentProps: {
         placeholder: '请输入虚拟主机',
       },
-      fieldName: 'vhost',
+      fieldName: 'streamProxyExtendReq.vhost',
       label: $t('media.streamProxy.vhost'),
+      rules: 'required',
+      defaultValue: getDefaultValue('__defaultVhost__'),
     },
-    {
-      component: 'Textarea',
-      componentProps: {
-        placeholder: '请输入代理描述',
-        rows: 3,
-      },
-      fieldName: 'description',
-      label: $t('media.streamProxy.description'),
-    },
+
+    // 第四行：状态选择（占满整行）
     {
       component: 'RadioGroup',
       componentProps: {
@@ -70,22 +120,39 @@ export function useFormSchema(): VbenFormSchema[] {
         ],
         optionType: 'button',
       },
-      defaultValue: 1,
+      defaultValue: getDefaultValue(1),
       fieldName: 'status',
       label: $t('media.streamProxy.status'),
       rules: 'required',
+      formItemClass: 'col-span-2',
     },
+
+    // 第五行：描述（占满整行）
     {
-      component: 'InputNumber',
+      component: 'Textarea',
       componentProps: {
-        min: -1,
-        max: 999,
-        placeholder: '请输入重试次数',
+        placeholder: '请输入代理描述',
+        rows: isEditMode ? 5 : 3,
       },
-      fieldName: 'retryCount',
-      label: $t('media.streamProxy.retryCount'),
-      defaultValue: -1,
+      fieldName: 'description',
+      label: $t('media.streamProxy.description'),
+      rules: 'required',
+      formItemClass: 'col-span-2',
     },
+
+    // 扩展配置区域 - 可展开收缩
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      defaultValue: getDefaultValue(false),
+      fieldName: 'showAdvanced',
+      label: $t('media.streamProxy.advancedSettings'),
+      formItemClass: 'col-span-2',
+    },
+
+    // RTSP配置和重试次数
     {
       component: 'Select',
       componentProps: {
@@ -96,10 +163,31 @@ export function useFormSchema(): VbenFormSchema[] {
           { label: '组播', value: 2 },
         ],
       },
-      fieldName: 'rtpType',
+      fieldName: 'streamProxyExtendReq.rtpType',
       label: $t('media.streamProxy.rtpType'),
-      defaultValue: 0,
+      defaultValue: getDefaultValue(0),
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
     },
+    {
+      component: 'InputNumber',
+      componentProps: {
+        min: -1,
+        max: 999,
+        placeholder: '请输入重试次数',
+      },
+      fieldName: 'streamProxyExtendReq.retryCount',
+      label: $t('media.streamProxy.retryCount'),
+      defaultValue: getDefaultValue(-1),
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+
+    // 超时时间（占满整行）
     {
       component: 'InputNumber',
       componentProps: {
@@ -107,130 +195,315 @@ export function useFormSchema(): VbenFormSchema[] {
         max: 300,
         placeholder: '请输入超时时间',
       },
-      fieldName: 'timeoutSec',
+      fieldName: 'streamProxyExtendReq.timeoutSec',
       label: $t('media.streamProxy.timeoutSec'),
-      defaultValue: 10,
+      defaultValue: getDefaultValue(10),
+      formItemClass: 'col-span-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
     },
-    {
-      component: 'Switch',
-      fieldName: 'enableHls',
-      label: $t('media.streamProxy.enableHls'),
-      defaultValue: true,
-    },
-    {
-      component: 'Switch',
-      fieldName: 'enableHlsFmp4',
-      label: $t('media.streamProxy.enableHlsFmp4'),
-      defaultValue: false,
-    },
-    {
-      component: 'Switch',
-      fieldName: 'enableMp4',
-      label: $t('media.streamProxy.enableMp4'),
-      defaultValue: false,
-    },
-    {
-      component: 'Switch',
-      fieldName: 'enableRtsp',
-      label: $t('media.streamProxy.enableRtsp'),
-      defaultValue: true,
-    },
-    {
-      component: 'Switch',
-      fieldName: 'enableRtmp',
-      label: $t('media.streamProxy.enableRtmp'),
-      defaultValue: true,
-    },
-    {
-      component: 'Switch',
-      fieldName: 'enableTs',
-      label: $t('media.streamProxy.enableTs'),
-      defaultValue: false,
-    },
-    {
-      component: 'Switch',
-      fieldName: 'enableFmp4',
-      label: $t('media.streamProxy.enableFmp4'),
-      defaultValue: false,
-    },
-    {
-      component: 'Switch',
-      fieldName: 'enableAudio',
-      label: $t('media.streamProxy.enableAudio'),
-      defaultValue: true,
-    },
-  ];
-}
 
-export function useEditFormSchema(): VbenFormSchema[] {
-  return [
+    // 协议支持配置 - 两列布局
     {
-      component: 'Input',
+      component: 'Switch',
       componentProps: {
-        disabled: true,
-        placeholder: '应用名称不可修改',
+        class: 'w-auto',
       },
-      fieldName: 'app',
-      label: $t('media.streamProxy.app'),
+      fieldName: 'streamProxyExtendReq.enableHls',
+      label: $t('media.streamProxy.enableHls'),
+      defaultValue: getDefaultValue(true),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.enableHlsFmp4',
+      label: $t('media.streamProxy.enableHlsFmp4'),
+      defaultValue: getDefaultValue(false),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.enableMp4',
+      label: $t('media.streamProxy.enableMp4'),
+      defaultValue: getDefaultValue(false),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.enableRtsp',
+      label: $t('media.streamProxy.enableRtsp'),
+      defaultValue: getDefaultValue(true),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.enableRtmp',
+      label: $t('media.streamProxy.enableRtmp'),
+      defaultValue: getDefaultValue(true),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.enableTs',
+      label: $t('media.streamProxy.enableTs'),
+      defaultValue: getDefaultValue(false),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.enableFmp4',
+      label: $t('media.streamProxy.enableFmp4'),
+      defaultValue: getDefaultValue(false),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.enableAudio',
+      label: $t('media.streamProxy.enableAudio'),
+      defaultValue: getDefaultValue(true),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.addMuteAudio',
+      label: $t('media.streamProxy.addMuteAudio'),
+      defaultValue: getDefaultValue(false),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.hlsDemand',
+      label: $t('media.streamProxy.hlsDemand'),
+      defaultValue: getDefaultValue(false),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.rtspDemand',
+      label: $t('media.streamProxy.rtspDemand'),
+      defaultValue: getDefaultValue(false),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.rtmpDemand',
+      label: $t('media.streamProxy.rtmpDemand'),
+      defaultValue: getDefaultValue(false),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.tsDemand',
+      label: $t('media.streamProxy.tsDemand'),
+      defaultValue: getDefaultValue(false),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.fmp4Demand',
+      label: $t('media.streamProxy.fmp4Demand'),
+      defaultValue: getDefaultValue(false),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.autoClose',
+      label: $t('media.streamProxy.autoClose'),
+      defaultValue: getDefaultValue(false),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
     },
     {
       component: 'Input',
       componentProps: {
-        disabled: true,
-        placeholder: '流ID不可修改',
+        placeholder: '请输入MP4保存路径',
       },
-      fieldName: 'stream',
-      label: $t('media.streamProxy.stream'),
+      fieldName: 'streamProxyExtendReq.mp4SavePath',
+      label: $t('media.streamProxy.mp4SavePath'),
+      formItemClass: 'col-span-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'InputNumber',
+      componentProps: {
+        min: 1,
+        max: 3600,
+        placeholder: '请输入MP4切片大小',
+      },
+      fieldName: 'streamProxyExtendReq.mp4MaxSecond',
+      label: $t('media.streamProxy.mp4MaxSecond'),
+      defaultValue: getDefaultValue(300),
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
+    },
+    {
+      component: 'Switch',
+      componentProps: {
+        class: 'w-auto',
+      },
+      fieldName: 'streamProxyExtendReq.mp4AsPlayer',
+      label: $t('media.streamProxy.mp4AsPlayer'),
+      defaultValue: getDefaultValue(false),
+      labelClass: 'whitespace-normal break-words text-sm flex-1',
+      formItemClass: 'flex items-center justify-between py-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
     },
     {
       component: 'Input',
       componentProps: {
-        placeholder: '请输入拉流地址',
+        placeholder: '请输入HLS保存路径',
       },
-      fieldName: 'url',
-      label: $t('media.streamProxy.url'),
-      rules: 'required',
+      fieldName: 'streamProxyExtendReq.hlsSavePath',
+      label: $t('media.streamProxy.hlsSavePath'),
+      formItemClass: 'col-span-2',
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
+      },
     },
     {
-      component: 'Input',
+      component: 'Select',
       componentProps: {
-        disabled: true,
-        placeholder: '节点ID不可修改',
-      },
-      fieldName: 'serverId',
-      label: $t('media.streamProxy.serverId'),
-    },
-    {
-      component: 'Textarea',
-      componentProps: {
-        placeholder: '请输入代理描述',
-        rows: 3,
-      },
-      fieldName: 'description',
-      label: $t('media.streamProxy.description'),
-    },
-    {
-      component: 'RadioGroup',
-      componentProps: {
-        buttonStyle: 'solid',
+        placeholder: '请选择时间戳模式',
         options: [
-          { label: $t('common.enabled'), value: 1 },
-          { label: $t('common.disabled'), value: 0 },
+          { label: '绝对时间戳', value: 0 },
+          { label: '系统时间戳', value: 1 },
+          { label: '相对时间戳', value: 2 },
         ],
-        optionType: 'button',
       },
-      fieldName: 'status',
-      label: $t('media.streamProxy.status'),
-      rules: 'required',
-    },
-    {
-      component: 'Textarea',
-      componentProps: {
-        placeholder: '请输入扩展字段',
-        rows: 2,
+      fieldName: 'streamProxyExtendReq.modifyStamp',
+      label: $t('media.streamProxy.modifyStamp'),
+      defaultValue: getDefaultValue(0),
+      dependencies: {
+        show: (values) => !!values.showAdvanced,
+        triggerFields: ['showAdvanced'],
       },
-      fieldName: 'extend',
-      label: $t('media.streamProxy.extend'),
     },
   ];
 }
@@ -262,9 +535,15 @@ export function useGridFormSchema(): VbenFormSchema[] {
       label: $t('media.streamProxy.url'),
     },
     {
-      component: 'Input',
+      component: 'Select',
       componentProps: {
-        placeholder: '请输入节点ID',
+        placeholder: '请选择节点',
+        options: getNodeOptions(),
+        allowClear: true,
+        showSearch: true,
+        filterOption: (input: string, option: any) => {
+          return option.label.toLowerCase().includes(input.toLowerCase());
+        },
       },
       fieldName: 'serverId',
       label: $t('media.streamProxy.serverId'),
@@ -339,6 +618,10 @@ export function useColumns<T = StreamProxyApi.StreamProxyVO>(
       title: $t('media.streamProxy.vhost'),
       width: 120,
       showOverflow: 'tooltip',
+      formatter: ({ row }) => {
+        // 优先从extendObj中获取vhost，如果没有则使用直接字段
+        return row.extendObj?.vhost || row.vhost || '__defaultVhost__';
+      },
     },
     {
       cellRender: {
