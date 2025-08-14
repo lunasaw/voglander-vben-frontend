@@ -499,6 +499,20 @@
             "description": "节点ID，指定创建代理的ZLM节点",
             "example": "zlm-node-1"
           },
+          "streamProxyExtendReq": {
+            "$ref": "#/components/schemas/StreamProxyExtendReq",
+            "description": "================================\nZLM扩展参数对象"
+          }
+        },
+        "required": [
+          "app",
+          "stream",
+          "url"
+        ]
+      },
+      "StreamProxyExtendReq": {
+        "type": "object",
+        "properties": {
           "vhost": {
             "type": "string",
             "description": "虚拟主机",
@@ -617,12 +631,7 @@
             "description": "无人观看是否自动关闭流(不触发无人观看hook)",
             "example": false
           }
-        },
-        "required": [
-          "app",
-          "stream",
-          "url"
-        ]
+        }
       },
       "AjaxResultLong": {
         "type": "object",
@@ -674,6 +683,10 @@
           "extend": {
             "type": "string",
             "description": "扩展字段"
+          },
+          "streamProxyExtendReq": {
+            "$ref": "#/components/schemas/StreamProxyExtendReq",
+            "description": "================================\nZLM扩展参数对象"
           }
         },
         "required": [

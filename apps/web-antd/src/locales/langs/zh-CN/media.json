@@ -63,6 +63,10 @@
       "currentNode": "当前节点",
       "switchSuccess": "节点切换成功",
       "loadNodeListFailed": "获取节点列表失败"
+    },
+    "selector": {
+      "title": "流媒体列表",
+      "placeholder": "请选择节点"
     }
   },
   "list": {
@@ -161,8 +165,20 @@
     "enableRtsp": "启用RTSP",
     "enableRtmp": "启用RTMP/FLV",
     "enableTs": "启用HTTP-TS/WS-TS",
-    "enableFmp4": "启用HTTP-FMP4/WS-FMP4",
+    "enableFmp4": "启用HTTP-FMP4",
     "enableAudio": "启用音频",
+    "hlsDemand": "HLS按需生成",
+    "rtspDemand": "RTSP按需生成",
+    "rtmpDemand": "RTMP按需生成",
+    "tsDemand": "TS按需生成",
+    "fmp4Demand": "FMP4按需生成",
+    "addMuteAudio": "添加静音音频",
+    "mp4SavePath": "MP4保存路径",
+    "mp4MaxSecond": "MP4切片大小(秒)",
+    "mp4AsPlayer": "MP4计入播放数",
+    "hlsSavePath": "HLS保存路径",
+    "modifyStamp": "时间戳模式",
+    "autoClose": "自动关闭",
     "onlineStatus": {
       "title": "在线状态",
       "online": "在线",
@@ -174,6 +190,7 @@
     "create": "新增代理",
     "edit": "编辑代理",
     "delete": "删除代理",
-    "extend": "扩展字段"
+    "extend": "扩展字段",
+    "advancedSettings": "高级配置"
   }
 }

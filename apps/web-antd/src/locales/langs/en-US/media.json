@@ -63,6 +63,10 @@
       "currentNode": "Current Node",
       "switchSuccess": "Node switched successfully",
       "loadNodeListFailed": "Failed to load node list"
+    },
+    "selector": {
+      "title": "Media Stream List",
+      "placeholder": "Please select a node"
     }
   },
   "list": {
@@ -161,8 +165,20 @@
     "enableRtsp": "Enable RTSP",
     "enableRtmp": "Enable RTMP/FLV",
     "enableTs": "Enable HTTP-TS/WS-TS",
-    "enableFmp4": "Enable HTTP-FMP4/WS-FMP4",
+    "enableFmp4": "Enable HTTP-FMP4",
     "enableAudio": "Enable Audio",
+    "hlsDemand": "HLS On-Demand",
+    "rtspDemand": "RTSP On-Demand",
+    "rtmpDemand": "RTMP On-Demand",
+    "tsDemand": "TS On-Demand",
+    "fmp4Demand": "FMP4 On-Demand",
+    "addMuteAudio": "Add Mute Audio",
+    "mp4SavePath": "MP4 Save Path",
+    "mp4MaxSecond": "MP4 Slice Size (seconds)",
+    "mp4AsPlayer": "MP4 Count as Player",
+    "hlsSavePath": "HLS Save Path",
+    "modifyStamp": "Timestamp Mode",
+    "autoClose": "Auto Close",
     "onlineStatus": {
       "title": "Online Status",
       "online": "Online",
@@ -174,6 +190,7 @@
     "create": "Create Proxy",
     "edit": "Edit Proxy",
     "delete": "Delete Proxy",
-    "extend": "Extended Fields"
+    "extend": "Extended Fields",
+    "advancedSettings": "Advanced Settings"
   }
 }

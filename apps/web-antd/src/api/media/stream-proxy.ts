@@ -3,6 +3,34 @@ import type { Recordable } from '@vben/types';
 import { requestClient } from '#/api/request';
 
 export namespace StreamProxyApi {
+  /** ZLM扩展参数对象 */
+  export interface StreamProxyExtendReq {
+    vhost?: string;
+    retryCount?: number;
+    rtpType?: number;
+    timeoutSec?: number;
+    enableHls?: boolean;
+    enableHlsFmp4?: boolean;
+    enableMp4?: boolean;
+    enableRtsp?: boolean;
+    enableRtmp?: boolean;
+    enableTs?: boolean;
+    enableFmp4?: boolean;
+    hlsDemand?: boolean;
+    rtspDemand?: boolean;
+    rtmpDemand?: boolean;
+    tsDemand?: boolean;
+    fmp4Demand?: boolean;
+    enableAudio?: boolean;
+    addMuteAudio?: boolean;
+    mp4SavePath?: string;
+    mp4MaxSecond?: number;
+    mp4AsPlayer?: boolean;
+    hlsSavePath?: string;
+    modifyStamp?: number;
+    autoClose?: boolean;
+  }
+
   /** 拉流代理信息 */
   export interface StreamProxyVO {
     id?: number;
@@ -41,6 +69,7 @@ export namespace StreamProxyApi {
     modifyStamp?: number;
     autoClose?: boolean;
     extend?: string;
+    extendObj?: StreamProxyExtendReq;
   }
 
   /** 拉流代理列表响应 */
@@ -59,30 +88,7 @@ export namespace StreamProxyApi {
     description?: string;
     status?: number;
     serverId?: string;
-    vhost?: string;
-    retryCount?: number;
-    rtpType?: number;
-    timeoutSec?: number;
-    enableHls?: boolean;
-    enableHlsFmp4?: boolean;
-    enableMp4?: boolean;
-    enableRtsp?: boolean;
-    enableRtmp?: boolean;
-    enableTs?: boolean;
-    enableFmp4?: boolean;
-    hlsDemand?: boolean;
-    rtspDemand?: boolean;
-    rtmpDemand?: boolean;
-    tsDemand?: boolean;
-    fmp4Demand?: boolean;
-    enableAudio?: boolean;
-    addMuteAudio?: boolean;
-    mp4SavePath?: string;
-    mp4MaxSecond?: number;
-    mp4AsPlayer?: boolean;
-    hlsSavePath?: string;
-    modifyStamp?: number;
-    autoClose?: boolean;
+    streamProxyExtendReq?: StreamProxyExtendReq;
   }
 
   /** 拉流代理更新请求 */
@@ -95,6 +101,7 @@ export namespace StreamProxyApi {
     status?: number;
     serverId?: string;
     extend?: string;
+    streamProxyExtendReq?: StreamProxyExtendReq;
   }
 
   /** 拉流代理查询请求 */

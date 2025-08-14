@@ -16,6 +16,7 @@ import { useAccessStore } from '@vben/stores';
 import { message } from 'ant-design-vue';
 
 import { useAuthStore } from '#/store';
+import { getCurrentNodeKey } from '#/utils/node-state';
 
 import { refreshTokenApi } from './core';
 
@@ -67,6 +68,17 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
 
       config.headers.Authorization = formatToken(accessStore.accessToken);
       config.headers['Accept-Language'] = preferences.app.locale;
+
+      if (config.url?.includes('/zlm/api')) {
+        const currentNodeKey = getCurrentNodeKey();
+
+        if (currentNodeKey) {
+          config.headers['X-Node-Key'] = currentNodeKey;
+        } else {
+          console.error('❌ No node key available for ZLM API request');
+        }
+      }
+
       return config;
     },
   });
