@@ -496,17 +496,6 @@ export function useGridFormSchema(): VbenFormSchema[] {
       label: $t('media.streamProxy.url'),
     },
     {
-      component: 'NodeSelector',
-      componentProps: {
-        placeholder: '请选择节点',
-        allowClear: true,
-        showContainer: false,
-        class: 'w-full',
-      },
-      fieldName: 'serverId',
-      label: $t('media.streamProxy.serverId'),
-    },
-    {
       component: 'Select',
       componentProps: {
         allowClear: true,
@@ -650,6 +639,11 @@ export function useColumns<T = StreamProxyApi.StreamProxyVO>(
         name: 'CellOperation',
         options: [
           {
+            code: 'play',
+            text: $t('media.streamProxy.play'),
+            show: () => hasAccessByCodes(['Media:StreamProxy:Play']),
+          },
+          {
             code: 'edit',
             text: $t('common.edit'),
             show: () => hasAccessByCodes(['Media:StreamProxy:Edit']),
@@ -664,7 +658,7 @@ export function useColumns<T = StreamProxyApi.StreamProxyVO>(
       field: 'operation',
       fixed: 'right',
       title: $t('media.streamProxy.operation'),
-      width: 130,
+      width: 220,
     },
   ];
 }

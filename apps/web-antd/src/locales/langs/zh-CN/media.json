@@ -1,7 +1,7 @@
 {
   "title": "媒体管理",
   "node": {
-    "title": "流媒体节点管理",
+    "title": "服务节点管理",
     "list": "节点列表",
     "detail": "节点详情",
     "name": "流媒体节点",
@@ -66,11 +66,13 @@
     },
     "selector": {
       "title": "流媒体列表",
-      "placeholder": "请选择节点"
+      "placeholder": "请选择节点",
+      "noNodeSelected": "请先选择一个流媒体节点",
+      "selectNodeHint": "在上方选择器中选择一个节点后，即可查看和管理该节点的流代理"
     }
   },
   "list": {
-    "title": "流媒体列表",
+    "title": "视频流管理",
     "streams": "流",
     "defaultVhost": "默认虚拟主机",
     "originType": {
@@ -140,7 +142,30 @@
       "title": "流媒体详情",
       "basicInfo": "基本信息",
       "statistics": "统计信息",
-      "tracks": "音视频轨道"
+      "tracks": "音视频轨道",
+      "networkInfo": "网络信息",
+      "refresh": "刷新",
+      "retry": "重试",
+      "noData": "暂无流媒体信息",
+      "loadFailed": "获取流媒体信息失败，请稍后重试",
+      "status": {
+        "online": "在线",
+        "offline": "离线"
+      },
+      "codec": {
+        "h264": "H.264",
+        "h265": "H.265",
+        "aac": "AAC",
+        "g711a": "G711A",
+        "g711u": "G711U",
+        "unknown": "未知编码"
+      },
+      "track": {
+        "video": "视频",
+        "audio": "音频",
+        "ready": "就绪",
+        "notReady": "未就绪"
+      }
     }
   },
   "streamProxy": {
@@ -190,6 +215,7 @@
     "create": "新增代理",
     "edit": "编辑代理",
     "delete": "删除代理",
+    "play": "播放",
     "extend": "扩展字段",
     "advancedSettings": "高级配置"
   }

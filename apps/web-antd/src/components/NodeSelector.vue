@@ -179,6 +179,26 @@ function filterOption(input: string, option: any) {
   );
 }
 
+// 选择默认节点（在线节点优先）
+function selectDefaultNode() {
+  if (props.modelValue || nodeListData.value.length === 0) {
+    return; // 已经有选择的节点或没有可用节点
+  }
+
+  const firstOnlineNode = nodeListData.value.find((node) =>
+    isNodeOnline(node.keepalive),
+  );
+  const defaultNode = firstOnlineNode || nodeListData.value[0];
+  const defaultValue = String(defaultNode.serverId || defaultNode.id);
+
+  // 更新全局状态
+  setCurrentNodeKey(defaultValue);
+
+  emit('update:modelValue', defaultValue);
+  emit('change', defaultValue, defaultNode);
+  emit('nodeSwitch', defaultValue, defaultNode);
+}
+
 // 刷新节点列表
 async function refresh() {
   await fetchNodeList();
@@ -212,6 +232,7 @@ function stopRefreshTimer() {
 // 导出刷新方法供父组件调用
 defineExpose({
   refresh,
+  selectDefaultNode,
   nodeList: nodeListData,
   isLoading: nodeListLoading,
 });

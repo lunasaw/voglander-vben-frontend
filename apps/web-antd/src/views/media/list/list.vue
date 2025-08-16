@@ -59,19 +59,13 @@ async function onNodeSwitch(
     currentNodeKey.value = null;
     nodeStore.clearCurrentNodeKey();
     clearCurrentNodeKey(); // 清除全局状态
+    // 清空表格数据
+    gridApi.clearData();
     return;
   }
 
   const nodeKeyStr = String(selectedNodeKey);
-  if (nodeKeyStr === currentNodeKey.value) {
-    return; // 如果选择的是当前节点，不执行任何操作
-  }
-
-  // 检查权限
-  if (!hasAccessByCodes(['Media:Stream:List'])) {
-    message.error('您没有查看流媒体列表的权限');
-    return;
-  }
+  const previousNodeKey = currentNodeKey.value; // 保存之前的节点，用于判断是否是切换
 
   if (!selectedNode) {
     message.error('节点不存在');
@@ -83,31 +77,38 @@ async function onNodeSwitch(
     selectedNode.name || selectedNode.serverId || selectedNode.id || '未知节点';
 
   try {
-    // 显示切换提示，如果节点离线则在提示中包含状态信息
-    const keepaliveTime = new Date(Number(selectedNode.keepalive));
-    const now = new Date();
-    const diffMinutes = (now.getTime() - keepaliveTime.getTime()) / (1000 * 60);
-    const isOnline = diffMinutes < 5;
+    // 如果是切换到新节点（不是初始选择），显示切换提示
+    if (previousNodeKey && nodeKeyStr !== previousNodeKey) {
+      // 显示切换提示，如果节点离线则在提示中包含状态信息
+      const keepaliveTime = new Date(Number(selectedNode.keepalive));
+      const now = new Date();
+      const diffMinutes =
+        (now.getTime() - keepaliveTime.getTime()) / (1000 * 60);
+      const isOnline = diffMinutes < 5;
 
-    const statusHint = isOnline ? '' : ' (离线状态)';
-    message.loading({
-      content: `正在切换到节点: ${nodeDisplayName}${statusHint}...`,
-      duration: 2,
-      key: 'node_switch_msg',
-    });
+      const statusHint = isOnline ? '' : ' (离线状态)';
+      message.loading({
+        content: `正在切换到节点: ${nodeDisplayName}${statusHint}...`,
+        duration: 2,
+        key: 'node_switch_msg',
+      });
+    }
 
     // 更新当前节点（同时更新本地状态、Pinia状态和全局状态）
     currentNodeKey.value = nodeKeyStr;
     nodeStore.setCurrentNodeKey(nodeKeyStr);
     setCurrentNodeKey(nodeKeyStr); // 更新全局状态，确保请求拦截器能获取到
 
-    // 重新加载表格数据
-    gridApi.reload();
+    // 触发表格数据加载
+    await gridApi.query();
 
-    message.success({
-      content: `已切换到节点: ${nodeDisplayName}`,
-      key: 'node_switch_msg',
-    });
+    // 如果是节点切换（不是初始选择），显示成功提示
+    if (previousNodeKey && nodeKeyStr !== previousNodeKey) {
+      message.success({
+        content: `已切换到节点: ${nodeDisplayName}`,
+        key: 'node_switch_msg',
+      });
+    }
   } catch (error) {
     console.error('节点切换失败:', error);
     message.error({
@@ -130,9 +131,8 @@ const [Grid, gridApi] = useVbenVxeGrid({
       ajax: {
         query: async (_params, formValues) => {
           try {
-            // 如果没有选择节点，提示用户先选择节点
+            // 如果没有选择节点，不进行查询
             if (!currentNodeKey.value) {
-              message.warning('请先选择一个流媒体节点');
               return {
                 items: [],
                 total: 0,
@@ -170,6 +170,7 @@ const [Grid, gridApi] = useVbenVxeGrid({
           }
         },
       },
+      autoLoad: false, // 禁用自动加载，改由节点选择回调触发
     },
     rowConfig: {
       keyField: 'stream', // 使用 stream 作为唯一键

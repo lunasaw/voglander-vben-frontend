@@ -491,14 +491,18 @@ VALUES
 -- 删除拉流代理按钮
 (30403, 304, 'MediaStreamProxyDelete', 'media.streamProxy.delete', 3, null, null, '', 3, 1, 'Media:StreamProxy:Delete',
  '{"title": "media.streamProxy.delete", "hideInMenu": true}'),
-
 -- 查看拉流代理详情按钮
-(30404, 304, 'MediaStreamProxyView', 'media.streamProxy.view', 3, null, null, '', 4, 1, 'Media:StreamProxy:View',
- '{"title": "media.streamProxy.view", "hideInMenu": true}'),
+(30404, 304, 'MediaStreamProxyView', 'common.detail', 3, null, null, '', 4, 1, 'Media:StreamProxy:View',
+ '{"title": "common.detail", "hideInMenu": true}'),
+
 
 -- 启用/禁用拉流代理按钮
 (30405, 304, 'MediaStreamProxyStatus', 'media.streamProxy.status', 3, null, null, '', 5, 1, 'Media:StreamProxy:Status',
- '{"title": "media.streamProxy.status", "hideInMenu": true}');
+ '{"title": "media.streamProxy.status", "hideInMenu": true}'),
+
+-- 播放拉流代理按钮
+(30406, 304, 'MediaStreamProxyPlay', 'media.streamProxy.play', 3, null, null, '', 6, 1, 'Media:StreamProxy:Play',
+ '{"title": "media.streamProxy.play", "hideInMenu": true}');
 
 -- ----------------------------
 -- 给管理员角色分配新菜单权限
@@ -506,7 +510,7 @@ VALUES
 INSERT OR REPLACE INTO tb_role_menu (role_id, menu_id)
 SELECT 1, id
 FROM tb_menu
-WHERE id IN (304, 30401, 30402, 30403, 30404, 30405);
+WHERE id IN (304, 30401, 30402, 30403, 30404, 30405, 30406);
 
 -- ----------------------------
 -- 验证插入结果
@@ -525,7 +529,7 @@ SELECT
   m.permission,
   json_extract(m.meta, '$.title') as meta_title
 FROM tb_menu m
-WHERE m.id IN (304, 30401, 30402, 30403, 30404, 30405)
+WHERE m.id IN (304, 30401, 30402, 30403, 30404, 30405, 30406)
 ORDER BY m.id;
 
 -- ----------------------------
@@ -538,7 +542,7 @@ SELECT
   m.permission
 FROM tb_role_menu rm
        JOIN tb_menu m ON rm.menu_id = m.id
-WHERE rm.menu_id IN (304, 30401, 30402, 30403, 30404, 30405)
+WHERE rm.menu_id IN (304, 30401, 30402, 30403, 30404, 30405, 30406)
 ORDER BY rm.menu_id;
 
 PRAGMA foreign_keys = ON;

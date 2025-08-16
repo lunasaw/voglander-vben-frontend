@@ -361,7 +361,7 @@ export async function getZlmMediaPlayUrls(
     headers['X-Node-Key'] = nodeKey;
   }
 
-  return requestClient.post<ZlmMediaApi.PlayUrls>(
+  return requestClient.post<ZlmMediaApi.ServerResponsePlayUrls>(
     '/zlm/api/media/play-urls',
     params,
     {
