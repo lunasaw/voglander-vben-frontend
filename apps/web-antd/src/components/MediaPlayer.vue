@@ -126,7 +126,9 @@ function handleFormatNotSupported(data: { format: string; message: string }) {
           </div>
           <div>
             <span class="font-medium text-gray-600">虚拟主机:</span>
-            <span class="ml-2">{{ mediaInfo.vhost || '__defaultVhost__' }}</span>
+            <span class="ml-2">{{
+              mediaInfo.vhost || '__defaultVhost__'
+            }}</span>
           </div>
           <div v-if="mediaInfo.serverId">
             <span class="font-medium text-gray-600">节点ID:</span>

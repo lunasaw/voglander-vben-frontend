@@ -127,6 +127,7 @@ const [FormDrawer, formDrawerApi] = useVbenDrawer({
 // 流详情弹窗状态
 const showStreamDetailModal = ref(false);
 const streamParams = ref<null | {
+  schema: string;
   app: string;
   stream: string;
   vhost: string;
@@ -284,6 +285,7 @@ function onDetail(row: PushProxyApi.PushProxyVO) {
 
   // 设置流参数
   streamParams.value = {
+    schema: row.schema || 'rtsp',
     app: row.app,
     stream: row.stream,
     vhost: row.extendObj?.vhost || '__defaultVhost__',
@@ -305,6 +307,7 @@ async function onPlay(row: PushProxyApi.PushProxyVO) {
 
   // 设置流参数，仅显示播放器（不显示详情）
   streamParams.value = {
+    schema: row.schema || 'rtsp',
     app: row.app,
     stream: row.stream,
     vhost: row.extendObj?.vhost || '__defaultVhost__',

@@ -135,7 +135,10 @@ async function onSubmit() {
       const formValues = await formApi.getValues();
 
       // 构建提交数据
-      const data: Partial<StreamProxyApi.StreamProxyCreateReq & StreamProxyApi.StreamProxyUpdateReq> = {
+      const data: Partial<
+        StreamProxyApi.StreamProxyCreateReq &
+          StreamProxyApi.StreamProxyUpdateReq
+      > = {
         ...formValues,
         // 如果是编辑模式且高级选项被展开，将扩展配置序列化到extend字段
         ...(localFormData.value?.id && formValues.showAdvanced
