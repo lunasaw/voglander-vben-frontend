@@ -3,15 +3,21 @@ import type { ZlmMediaApi } from '#/api/media/zlm-media';
 
 import { computed, ref, watch } from 'vue';
 
-import { Copy, RotateCw } from '@vben/icons';
+import { Copy, RotateCw, Square } from '@vben/icons';
 
 import { Button, message, Modal, Spin } from 'ant-design-vue';
 
-import { getZlmMediaInfo, getZlmMediaPlayUrls } from '#/api/media/zlm-media';
+import {
+  getZlmMediaInfo,
+  getZlmMediaPlayUrls,
+  getZlmMediaSnapshotUrl,
+} from '#/api/media/zlm-media';
 
 import MediaPlayer from '../views/media/media-player/index.vue';
 
 interface StreamParams {
+  /** 协议，例如 rtsp或rtmp */
+  schema: string;
   /** 虚拟主机，例如__defaultVhost__ */
   vhost: string;
   /** 应用名，例如 main */
@@ -56,6 +62,8 @@ const loading = ref(false);
 const playerRef = ref();
 const currentPlayingFormat = ref('');
 const isRefreshing = ref(false);
+const isServerScreenshotting = ref(false);
+const isClientScreenshotting = ref(false);
 
 // 数据状态
 const mediaInfo = ref<null | ZlmMediaApi.MediaInfoDetail>(null);
@@ -65,7 +73,7 @@ const playUrls = ref<null | ZlmMediaApi.PlayUrls>(null);
 const modalTitle = computed(() => {
   if (props.title) return props.title;
   if (props.streamParams) {
-    return `流信息详情 - ${props.streamParams.app}/${props.streamParams.stream}`;
+    return `流信息详情 - ${props.streamParams.schema}/${props.streamParams.app}/${props.streamParams.stream}`;
   }
   return '流信息详情';
 });
@@ -110,12 +118,12 @@ const formatTotalBytes = computed(() => {
 // 监听流参数变化，自动加载数据
 watch(
   () => [props.streamParams, props.open],
-  async ([newParams, newOpen]) => {
-    if (newOpen && newParams) {
+  async ([newParams, newOpen], [oldParams, oldOpen]) => {
+    // 只有在模态框从关闭状态打开，且有流参数时才加载数据
+    if (newOpen && newParams && (!oldOpen || !oldParams)) {
       await loadStreamData();
     }
   },
-  { immediate: true },
 );
 
 // 加载流数据
@@ -137,13 +145,13 @@ async function loadStreamData() {
     }
 
     if (playUrlsResponse) {
-      // 检查是否是包装的响应格式 {code, data, msg}const { code, data } = playUrlsResponse || {};
+      // 检查是否是包装的响应格式 {code, data, msg}
       playUrls.value =
         typeof playUrlsResponse === 'object' &&
         'code' in playUrlsResponse &&
         'data' in playUrlsResponse
           ? playUrlsResponse.data
-          : playUrlsResponse;
+          : (playUrlsResponse as ZlmMediaApi.PlayUrls);
     }
   } catch (error) {
     console.error('加载流数据失败:', error);
@@ -319,6 +327,231 @@ function handleRefreshPlayer() {
   }
 }
 
+// 服务端截图
+async function handleServerScreenshot() {
+  if (!playUrls.value || !hasPlayUrls.value) {
+    message.warning('当前没有可用的播放地址');
+    return;
+  }
+
+  // 获取截图URL，优先使用RTSP格式（FFmpeg支持最好）
+  let screenshotUrl = '';
+
+  // 截图优先级：RTSP > HTTP-FLV > HLS > HTTP-FMP4 > RTMP
+  const screenshotUrlPriority = ['rtsp', 'httpFlv', 'hls', 'httpFmp4', 'rtmp'];
+
+  for (const format of screenshotUrlPriority) {
+    if (playUrls.value[format as keyof ZlmMediaApi.PlayUrls]) {
+      screenshotUrl = playUrls.value[
+        format as keyof ZlmMediaApi.PlayUrls
+      ] as string;
+      break;
+    }
+  }
+
+  if (!screenshotUrl) {
+    message.warning('没有找到可用的截图地址');
+    return;
+  }
+
+  // 检测使用的协议类型，为不同协议设置合适的超时时间
+  const isRtspUrl = screenshotUrl.toLowerCase().startsWith('rtsp://');
+  const timeoutSec = isRtspUrl ? 60 : 30; // RTSP流给更长超时时间
+
+  // 获取使用的协议名称用于提示
+  const protocolName = screenshotUrl.split('://')[0].toUpperCase();
+
+  // 显示正在截图的提示信息
+  message.loading({
+    content: `正在使用 ${protocolName} 协议进行服务端截图...`,
+    duration: 0,
+    key: 'server_screenshot_loading',
+  });
+
+  isServerScreenshotting.value = true;
+  try {
+    const response = await getZlmMediaSnapshotUrl(
+      {
+        url: screenshotUrl,
+        timeout_sec: timeoutSec,
+        expire_sec: 5,
+      },
+      props.nodeKey,
+    );
+
+    // 打印完整响应以便调试
+    console.warn('服务端截图响应:', response);
+
+    // 处理不同的响应格式
+    let imageUrl = '';
+    let isSuccess = false;
+    let errorMessage = '';
+
+    if (typeof response === 'string' && response.startsWith('http')) {
+      // 直接返回URL字符串的情况
+      imageUrl = response;
+      isSuccess = true;
+    } else if (response && typeof response === 'object') {
+      // 返回对象格式的情况
+      if (response.code === 0 && response.data) {
+        imageUrl = response.data;
+        isSuccess = true;
+      } else {
+        errorMessage = response.msg || '未知错误';
+      }
+    } else {
+      errorMessage = '响应格式不正确';
+    }
+
+    if (isSuccess && imageUrl) {
+      try {
+        // 使用 fetch 获取图片数据并下载
+        const imageResponse = await fetch(imageUrl);
+        if (imageResponse.ok) {
+          const blob = await imageResponse.blob();
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `server_screenshot_${Date.now()}.jpg`;
+          document.body.append(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+
+          message.success({
+            content: `${protocolName} 协议服务端截图下载成功`,
+            key: 'server_screenshot_loading',
+          });
+        } else {
+          throw new Error(`HTTP ${imageResponse.status}`);
+        }
+      } catch (downloadError) {
+        console.error('下载截图失败:', downloadError);
+        // 如果下载失败，回退到打开新标签页
+        window.open(imageUrl, '_blank');
+        message.success({
+          content: `${protocolName} 协议服务端截图获取成功，已在新标签页打开`,
+          key: 'server_screenshot_loading',
+        });
+      }
+    } else {
+      message.error({
+        content: `${protocolName} 协议服务端截图失败：${errorMessage}`,
+        key: 'server_screenshot_loading',
+      });
+    }
+  } catch (error) {
+    console.error('服务端截图失败:', error);
+    message.error({
+      content: `${protocolName} 协议服务端截图失败，请稍后重试`,
+      key: 'server_screenshot_loading',
+    });
+  } finally {
+    isServerScreenshotting.value = false;
+  }
+}
+
+// 客户端截图
+async function handleClientScreenshot() {
+  if (!playerRef.value) {
+    message.warning('播放器尚未初始化');
+    return;
+  }
+
+  isClientScreenshotting.value = true;
+  try {
+    // 获取当前播放器实例
+    const currentPlayer = playerRef.value.getCurrentPlayer();
+
+    if (!currentPlayer) {
+      message.warning('无法获取当前播放器实例');
+      return;
+    }
+
+    let videoElement: HTMLVideoElement | null = null;
+
+    // 尝试不同的方式获取video元素
+    if (currentPlayer.getPlayer) {
+      // VideoJs 播放器
+      const vjsPlayer = currentPlayer.getPlayer();
+      if (vjsPlayer && vjsPlayer.el) {
+        videoElement = vjsPlayer.el().querySelector('video') || vjsPlayer.el();
+      }
+    } else if (currentPlayer.$el || currentPlayer.el) {
+      // 其他类型播放器，尝试从组件根元素查找video
+      const rootElement = currentPlayer.$el || currentPlayer.el;
+      videoElement = rootElement.querySelector
+        ? rootElement.querySelector('video')
+        : null;
+    }
+
+    // 如果还没找到，尝试直接查找当前组件内的video元素
+    if (!videoElement && currentPlayer.$el) {
+      const componentElement = currentPlayer.$el;
+      videoElement = componentElement.querySelectorAll('video')[0];
+    }
+
+    if (!videoElement) {
+      message.warning('无法找到视频元素');
+      return;
+    }
+
+    // 检查视频是否已加载并有有效尺寸
+    if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
+      message.warning('视频尚未加载完成或视频尺寸无效');
+      return;
+    }
+
+    // 检查是否存在CORS问题
+    try {
+      // 创建canvas进行截图
+      const canvas = document.createElement('canvas');
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        message.error('无法创建canvas上下文');
+        return;
+      }
+
+      // 绘制视频帧到canvas
+      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+      // 将canvas转换为图片并下载
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `client_screenshot_${Date.now()}.png`;
+          document.body.append(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+          message.success('客户端截图保存成功');
+        } else {
+          message.error('截图生成失败');
+        }
+      }, 'image/png');
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'SecurityError') {
+        message.warning(
+          '由于CORS限制，无法进行客户端截图。请使用服务端截图功能。',
+        );
+      } else {
+        console.error('客户端截图失败:', error);
+        message.error('客户端截图失败，请尝试服务端截图');
+      }
+    }
+  } catch (error) {
+    console.error('客户端截图失败:', error);
+    message.error('客户端截图失败');
+  } finally {
+    isClientScreenshotting.value = false;
+  }
+}
+
 // 导出方法供父组件调用
 defineExpose({
   refreshData,
@@ -352,14 +585,14 @@ defineExpose({
             <span v-if="currentPlayingFormat" class="playing-format">
               (当前: {{ getFormatDisplayName(currentPlayingFormat) }})
             </span>
-            <span class="player-refresh-btn">
+            <span class="player-action-buttons">
               <Button
                 type="text"
                 @click="handleRefreshPlayer"
                 size="small"
                 title="刷新播放器"
               >
-                <RotateCw class="refresh-icon" />
+                <RotateCw class="action-icon" />
                 刷新播放器
               </Button>
               <Button
@@ -370,8 +603,28 @@ defineExpose({
                 :disabled="isRefreshing"
                 title="刷新数据"
               >
-                <RotateCw class="refresh-icon" />
+                <RotateCw class="action-icon" />
                 刷新数据
+              </Button>
+              <Button
+                type="text"
+                :loading="isServerScreenshotting"
+                @click="handleServerScreenshot"
+                :disabled="isServerScreenshotting"
+                title="服务端截图"
+              >
+                <Square class="action-icon" />
+                服务端截图
+              </Button>
+              <Button
+                type="text"
+                :loading="isClientScreenshotting"
+                @click="handleClientScreenshot"
+                :disabled="isClientScreenshotting"
+                title="客户端截图"
+              >
+                <Square class="action-icon" />
+                客户端截图
               </Button>
             </span>
           </h4>
@@ -952,26 +1205,27 @@ strong {
   color: #333;
 }
 
-.player-refresh-btn {
+.player-action-buttons {
   display: inline-flex;
+  gap: 8px;
   align-items: center;
   margin-left: 16px;
 }
 
-.refresh-icon {
+.action-icon {
   width: 14px;
   height: 14px;
   color: #1890ff;
 }
 
-.player-refresh-btn .ant-btn {
+.player-action-buttons .ant-btn {
   height: 20px;
   padding: 2px 4px;
   background: transparent;
   border: none;
 }
 
-.player-refresh-btn .ant-btn:hover {
+.player-action-buttons .ant-btn:hover {
   background: #e6f7ff;
   border-color: #40a9ff;
 }

@@ -8,10 +8,11 @@ import { Modal } from 'ant-design-vue';
 import MediaPlayerManager from '#/views/media/media-player/MediaPlayerManager.vue';
 
 interface MediaInfo {
+  schema: string;
   app: string;
   stream: string;
-  serverId?: string;
   vhost?: string;
+  serverId?: string;
   description?: string;
 }
 
@@ -77,7 +78,7 @@ const modalTitle = computed(() => {
   }
 
   if (props.mediaInfo) {
-    return `播放: ${props.mediaInfo.app}/${props.mediaInfo.stream}`;
+    return `播放: ${props.mediaInfo.schema}/${props.mediaInfo.app}/${props.mediaInfo.stream}`;
   }
 
   return '视频播放';
@@ -112,6 +113,10 @@ function handleFormatNotSupported(data: { format: string; message: string }) {
       >
         <div class="grid grid-cols-2 gap-2 text-sm">
           <div>
+            <span class="font-medium text-gray-600">协议:</span>
+            <span class="ml-2">{{ mediaInfo.schema }}</span>
+          </div>
+          <div>
             <span class="font-medium text-gray-600">应用名称:</span>
             <span class="ml-2">{{ mediaInfo.app }}</span>
           </div>
@@ -119,13 +124,13 @@ function handleFormatNotSupported(data: { format: string; message: string }) {
             <span class="font-medium text-gray-600">流ID:</span>
             <span class="ml-2">{{ mediaInfo.stream }}</span>
           </div>
+          <div>
+            <span class="font-medium text-gray-600">虚拟主机:</span>
+            <span class="ml-2">{{ mediaInfo.vhost || '__defaultVhost__' }}</span>
+          </div>
           <div v-if="mediaInfo.serverId">
             <span class="font-medium text-gray-600">节点ID:</span>
             <span class="ml-2">{{ mediaInfo.serverId }}</span>
-          </div>
-          <div v-if="mediaInfo.vhost">
-            <span class="font-medium text-gray-600">虚拟主机:</span>
-            <span class="ml-2">{{ mediaInfo.vhost }}</span>
           </div>
           <div v-if="mediaInfo.description" class="col-span-2">
             <span class="font-medium text-gray-600">描述:</span>

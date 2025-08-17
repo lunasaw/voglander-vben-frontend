@@ -55,7 +55,7 @@ async function onNodeSwitch(
     nodeStore.clearCurrentNodeKey();
     clearCurrentNodeKey(); // 清除全局状态
     // 清空表格数据
-    gridApi.clearData();
+    gridApi.getVxeInstance().clear();
     return;
   }
 
@@ -127,6 +127,7 @@ const [FormDrawer, formDrawerApi] = useVbenDrawer({
 // 流详情弹窗状态
 const showStreamDetailModal = ref(false);
 const streamParams = ref<null | {
+  schema: string;
   app: string;
   stream: string;
   vhost: string;
@@ -284,6 +285,7 @@ function onDetail(row: StreamProxyApi.StreamProxyVO) {
 
   // 设置流参数
   streamParams.value = {
+    schema: row.schema || 'rtsp',
     app: row.app,
     stream: row.stream,
     vhost: row.extendObj?.vhost || '__defaultVhost__',
@@ -305,6 +307,7 @@ async function onPlay(row: StreamProxyApi.StreamProxyVO) {
 
   // 设置流参数，仅显示播放器（不显示详情）
   streamParams.value = {
+    schema: row.schema || 'rtsp',
     app: row.app,
     stream: row.stream,
     vhost: row.extendObj?.vhost || '__defaultVhost__',
@@ -374,8 +377,7 @@ async function onStatusChange(
 
     <!-- 流详情弹窗 -->
     <StreamDetailModal
-      :open="showStreamDetailModal"
-      @update:open="showStreamDetailModal = $event"
+      v-model:open="showStreamDetailModal"
       :stream-params="streamParams"
       :node-key="currentNodeKey"
       :show-details="true"

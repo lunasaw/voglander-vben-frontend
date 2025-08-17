@@ -205,6 +205,25 @@ export namespace ZlmMediaApi {
     msg: string;
     result: string;
   }
+
+  /** 截图请求参数 */
+  export interface SnapshotReq {
+    /** 需要截图的url，可以是本机的，也可以是远程主机的 */
+    url: string;
+    /** 截图失败超时时间，防止FFmpeg一直等待截图 */
+    timeout_sec?: number;
+    /** 截图的过期时间，该时间内产生的截图都会作为缓存返回 */
+    expire_sec?: number;
+    /** 保存路径（后端使用） */
+    savePath?: string;
+  }
+
+  /** 截图响应 */
+  export interface SnapshotResponse {
+    code: number;
+    data: string;
+    msg: string;
+  }
 }
 
 /**
@@ -221,12 +240,8 @@ export async function getZlmMediaList(
     headers['X-Node-Key'] = nodeKey;
   }
 
-  // 设置默认参数
-  const requestParams: ZlmMediaApi.MediaReq = {
-    schema: 'rtsp',
-    vhost: '__defaultVhost__',
-    ...params,
-  };
+  // 不设置默认参数，使用用户提供的参数
+  const requestParams: ZlmMediaApi.MediaReq = params || {};
 
   return requestClient.post<ZlmMediaApi.MediaData[]>(
     '/zlm/api/media/list',
@@ -246,12 +261,8 @@ export async function getZlmNodeMediaList(
   nodeId: string,
   params?: ZlmMediaApi.MediaReq,
 ) {
-  // 设置默认参数
-  const requestParams: ZlmMediaApi.MediaReq = {
-    schema: 'rtsp',
-    vhost: '__defaultVhost__',
-    ...params,
-  };
+  // 不设置默认参数，使用用户提供的参数
+  const requestParams: ZlmMediaApi.MediaReq = params || {};
 
   return requestClient.post<ZlmMediaApi.MediaData[]>(
     `/zlm/api/node/${nodeId}/media/list`,
@@ -386,6 +397,29 @@ export async function getZlmMediaPlayerList(
 
   return requestClient.post<ZlmMediaApi.MediaPlayer>(
     '/zlm/api/media/player/list',
+    params,
+    {
+      headers,
+    },
+  );
+}
+
+/**
+ * 获取媒体流截图URL
+ * @param params 截图请求参数
+ * @param nodeKey 节点Key，通过X-Node-Key header传递
+ */
+export async function getZlmMediaSnapshotUrl(
+  params: ZlmMediaApi.SnapshotReq,
+  nodeKey?: string,
+) {
+  const headers: Record<string, string> = {};
+  if (nodeKey) {
+    headers['X-Node-Key'] = nodeKey;
+  }
+
+  return requestClient.post<ZlmMediaApi.SnapshotResponse>(
+    '/zlm/api/snapshot-url',
     params,
     {
       headers,

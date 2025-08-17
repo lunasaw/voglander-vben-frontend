@@ -5,6 +5,7 @@ import { requestClient } from '#/api/request';
 export namespace StreamProxyApi {
   /** ZLM扩展参数对象 */
   export interface StreamProxyExtendReq {
+    schema?: string;
     vhost?: string;
     retryCount?: number;
     rtpType?: number;
@@ -39,6 +40,7 @@ export namespace StreamProxyApi {
     app: string;
     stream: string;
     url: string;
+    schema?: string;
     description?: string;
     status?: number;
     serverId?: string;

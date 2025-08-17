@@ -19,7 +19,8 @@ const streamDetailModalRef = ref();
 const streamParams = computed(() => {
   if (!props.mediaInfo) return null;
   return {
-    vhost: props.mediaInfo.vhost,
+    schema: props.mediaInfo.schema,
+    vhost: props.mediaInfo.vhost || '__defaultVhost__',
     app: props.mediaInfo.app,
     stream: props.mediaInfo.stream,
   };

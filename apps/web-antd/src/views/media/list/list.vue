@@ -139,19 +139,20 @@ const [Grid, gridApi] = useVbenVxeGrid({
               };
             }
 
-            const requestParams: ZlmMediaApi.MediaReq = {
-              schema: formValues.schema || 'rtsp',
-              vhost: formValues.vhost || '__defaultVhost__',
-              app: formValues.app || undefined,
-              stream: formValues.stream || undefined,
-            };
-
-            // 过滤掉空值
-            Object.keys(requestParams).forEach((key) => {
-              if (!requestParams[key as keyof ZlmMediaApi.MediaReq]) {
-                delete requestParams[key as keyof ZlmMediaApi.MediaReq];
-              }
-            });
+            // 构建请求参数，只包含有值的字段
+            const requestParams: ZlmMediaApi.MediaReq = {};
+            if (formValues.schema) {
+              requestParams.schema = formValues.schema;
+            }
+            if (formValues.vhost) {
+              requestParams.vhost = formValues.vhost;
+            }
+            if (formValues.app) {
+              requestParams.app = formValues.app;
+            }
+            if (formValues.stream) {
+              requestParams.stream = formValues.stream;
+            }
 
             // 查询流列表（通过请求拦截器自动添加节点头部）
             const data = await getZlmMediaList(requestParams);

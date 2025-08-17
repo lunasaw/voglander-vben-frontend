@@ -176,6 +176,7 @@
     "app": "应用名称",
     "stream": "流ID",
     "url": "拉流地址",
+    "schema": "拉流协议",
     "description": "代理描述",
     "status": "启用状态",
     "serverId": "节点ID",

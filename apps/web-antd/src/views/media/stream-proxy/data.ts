@@ -47,7 +47,26 @@ export function useFormSchema(isEditMode = false): VbenFormSchema[] {
       formItemClass: 'col-span-2',
     },
 
-    // 第三行：节点选择和虚拟主机
+    // 第三行：拉流类型选择（占满整行）
+    {
+      component: 'Select',
+      componentProps: {
+        placeholder: '请选择拉流类型',
+        options: [
+          { label: 'RTSP', value: 'rtsp' },
+          { label: 'RTMP', value: 'rtmp' },
+          { label: 'HLS', value: 'hls' },
+        ],
+      },
+      fieldName: 'streamProxyExtendReq.schema',
+      label: $t('media.streamProxy.schema'),
+      rules: 'required',
+      defaultValue: getDefaultValue('rtsp'),
+      formItemClass: 'col-span-2',
+      help: '指定拉流的协议类型，影响流媒体处理方式',
+    },
+
+    // 第四行：节点选择和虚拟主机
     {
       component: 'NodeSelector',
       componentProps: {
@@ -70,7 +89,7 @@ export function useFormSchema(isEditMode = false): VbenFormSchema[] {
       defaultValue: getDefaultValue('__defaultVhost__'),
     },
 
-    // 第四行：状态选择（占满整行）
+    // 第五行：状态选择（占满整行）
     {
       component: 'RadioGroup',
       componentProps: {
@@ -88,7 +107,7 @@ export function useFormSchema(isEditMode = false): VbenFormSchema[] {
       formItemClass: 'col-span-2',
     },
 
-    // 第五行：描述（占满整行）
+    // 第六行：描述（占满整行）
     {
       component: 'Textarea',
       componentProps: {
@@ -500,6 +519,20 @@ export function useGridFormSchema(): VbenFormSchema[] {
       componentProps: {
         allowClear: true,
         options: [
+          { label: 'RTSP', value: 'rtsp' },
+          { label: 'RTMP', value: 'rtmp' },
+          { label: 'HLS', value: 'hls' },
+        ],
+        placeholder: '请选择拉流类型',
+      },
+      fieldName: 'schema',
+      label: $t('media.streamProxy.schema'),
+    },
+    {
+      component: 'Select',
+      componentProps: {
+        allowClear: true,
+        options: [
           { label: $t('common.enabled'), value: 1 },
           { label: $t('common.disabled'), value: 0 },
         ],
@@ -553,6 +586,24 @@ export function useColumns<T = StreamProxyApi.StreamProxyVO>(
       title: $t('media.streamProxy.url'),
       width: 300,
       showOverflow: 'tooltip',
+    },
+    {
+      cellRender: {
+        name: 'CellTag',
+        options: [
+          { label: 'RTSP', value: 'rtsp', type: 'primary' },
+          { label: 'RTMP', value: 'rtmp', type: 'success' },
+          { label: 'HLS', value: 'hls', type: 'warning' },
+        ],
+      },
+      field: 'schema',
+      title: $t('media.streamProxy.schema'),
+      width: 100,
+      align: 'center',
+      formatter: ({ row }) => {
+        // 优先从extendObj中获取schema，如果没有则使用直接字段，默认为rtsp
+        return row.extendObj?.schema || row.schema || 'rtsp';
+      },
     },
     {
       field: 'serverId',

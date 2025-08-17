@@ -60,7 +60,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
         // 处理编辑模式的数据映射
         if (data.id) {
           // 从 extendObj 或 extend 字段中提取扩展配置
-          let extendData = {};
+          let extendData: Partial<StreamProxyApi.StreamProxyExtendReq> = {};
           let showAdvanced = false;
 
           if (data.extendObj && typeof data.extendObj === 'object') {
@@ -81,6 +81,8 @@ const [Drawer, drawerApi] = useVbenDrawer({
             ...data,
             showAdvanced,
             streamProxyExtendReq: {
+              // schema回显：优先从extendObj中获取，其次从直接字段，最后使用默认值
+              schema: extendData.schema || data.schema || 'rtsp',
               vhost: extendData.vhost || '__defaultVhost__',
               retryCount: extendData.retryCount ?? data.retryCount ?? -1,
               rtpType: extendData.rtpType ?? data.rtpType ?? 0,
@@ -118,7 +120,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
         // 创建模式设置schema
         formApi.setState({ schema: useFormSchema(false) });
         formApi.resetForm();
-        localFormData.value = {};
+        localFormData.value = {} as StreamProxyApi.StreamProxyVO;
         isEditMode.value = false;
       }
     }
@@ -133,9 +135,7 @@ async function onSubmit() {
       const formValues = await formApi.getValues();
 
       // 构建提交数据
-      const data:
-        | StreamProxyApi.StreamProxyCreateReq
-        | StreamProxyApi.StreamProxyUpdateReq = {
+      const data: Partial<StreamProxyApi.StreamProxyCreateReq & StreamProxyApi.StreamProxyUpdateReq> = {
         ...formValues,
         // 如果是编辑模式且高级选项被展开，将扩展配置序列化到extend字段
         ...(localFormData.value?.id && formValues.showAdvanced

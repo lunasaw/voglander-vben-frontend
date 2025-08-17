@@ -151,6 +151,7 @@
     "app": "App Name",
     "stream": "Stream ID",
     "url": "Pull URL",
+    "schema": "Pull Protocol",
     "description": "Proxy Description",
     "status": "Status",
     "serverId": "Server ID",

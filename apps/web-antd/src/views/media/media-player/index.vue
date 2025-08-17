@@ -58,13 +58,13 @@ function refresh() {
 }
 
 // 获取当前播放器
-function player() {
+function getCurrentPlayer() {
   return playerManagerRef.value?.getCurrentPlayer();
 }
 
 // 暴露方法给父组件（保持向后兼容）
 defineExpose({
-  player,
+  getCurrentPlayer, // 新增getCurrentPlayer方法
   reinit,
   destroy,
   playFormat,
