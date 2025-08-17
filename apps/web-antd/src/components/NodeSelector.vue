@@ -46,7 +46,7 @@ const props = withDefaults(defineProps<NodeSelectorProps>(), {
   allowClear: true,
   showSearch: true,
   size: 'middle',
-  style: () => ({ minWidth: '300px' }),
+  style: () => ({ minWidth: '200px', width: '250px' }),
   class: '',
   title: undefined, // 将通过$t动态提供
   showContainer: true,

@@ -45,12 +45,12 @@
     "@vueuse/core": "catalog:",
     "ant-design-vue": "catalog:",
     "dayjs": "catalog:",
+    "flv.js": "catalog:",
+    "hls.js": "catalog:",
     "json-bigint": "catalog:",
     "pinia": "catalog:",
-    "vue": "catalog:",
-    "vue-router": "catalog:",
     "video.js": "catalog:",
-    "flv.js": "catalog:",
-    "hls.js": "catalog:"
+    "vue": "catalog:",
+    "vue-router": "catalog:"
   }
 }

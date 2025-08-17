@@ -1087,10 +1087,7 @@
             "description": "扩展字段"
           }
         },
-        "required": [
-          "serverId",
-          "host"
-        ]
+        "required": ["serverId", "host"]
       },
       "AjaxResultListMediaNodeVO": {
         "type": "object",
@@ -1148,9 +1145,7 @@
             "description": "扩展字段"
           }
         },
-        "required": [
-          "id"
-        ]
+        "required": ["id"]
       },
       "AjaxResultMediaNodeListResp": {
         "type": "object",

@@ -10,7 +10,9 @@
       "Bash(pnpm add:*)",
       "Bash(npm install:*)",
       "Bash(pnpm install:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }

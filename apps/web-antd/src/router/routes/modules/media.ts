@@ -49,6 +49,15 @@ const routes: RouteRecordRaw[] = [
         },
         component: () => import('#/views/media/stream-proxy/list.vue'),
       },
+      {
+        path: '/media/push-proxy',
+        name: 'media.pushProxy',
+        meta: {
+          icon: 'mdi:video-switch-outline',
+          title: $t('media.pushProxy.title'),
+        },
+        component: () => import('#/views/media/push-proxy/list.vue'),
+      },
     ],
   },
 ];

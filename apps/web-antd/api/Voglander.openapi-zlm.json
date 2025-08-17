@@ -69,9 +69,7 @@
                 },
                 "example": {
                   "code": 0,
-                  "data": [
-                    ""
-                  ],
+                  "data": [""],
                   "msg": "",
                   "result": ""
                 }
@@ -1349,9 +1347,7 @@
                 "example": {
                   "code": 0,
                   "data": {
-                    "paths": [
-                      ""
-                    ],
+                    "paths": [""],
                     "rootPath": ""
                   },
                   "msg": "",

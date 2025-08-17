@@ -1,5 +1,5 @@
 export interface PlayerInfo {
-  type: 'videojs' | 'flv' | 'hls';
+  type: 'flv' | 'hls' | 'videojs';
   component: string;
   supported: boolean;
   reason?: string;
@@ -8,17 +8,13 @@ export interface PlayerInfo {
 // 格式到播放器的映射
 export function getPlayerForFormat(format: string): PlayerInfo {
   switch (format) {
-    case 'httpFmp4':
-    case 'wsFmp4':
-    case 'httpTs':
-    case 'wsTs': {
+    case 'hls': {
       return {
-        type: 'videojs',
-        component: 'VideoJsPlayer',
+        type: 'hls',
+        component: 'HlsPlayer',
         supported: true,
       };
     }
-    
     case 'httpFlv':
     case 'wsFlv': {
       return {
@@ -27,17 +23,19 @@ export function getPlayerForFormat(format: string): PlayerInfo {
         supported: true,
       };
     }
-    
-    case 'hls': {
+    case 'httpFmp4':
+    case 'httpTs':
+    case 'wsFmp4':
+    case 'wsTs': {
       return {
-        type: 'hls',
-        component: 'HlsPlayer',
+        type: 'videojs',
+        component: 'VideoJsPlayer',
         supported: true,
       };
     }
-    
-    case 'rtsp':
-    case 'rtmp': {
+
+    case 'rtmp':
+    case 'rtsp': {
       return {
         type: 'videojs',
         component: 'VideoJsPlayer',
@@ -45,7 +43,7 @@ export function getPlayerForFormat(format: string): PlayerInfo {
         reason: `${format.toUpperCase()} protocol is not supported in browsers`,
       };
     }
-    
+
     case 'webrtc': {
       return {
         type: 'videojs',
@@ -54,7 +52,7 @@ export function getPlayerForFormat(format: string): PlayerInfo {
         reason: 'WebRTC requires specialized client implementation',
       };
     }
-    
+
     default: {
       return {
         type: 'videojs',
@@ -81,11 +79,11 @@ export const formatPriority = [
 ];
 
 // 获取最佳播放格式
-export function getBestFormat(playUrls: Record<string, any>): {
+export function getBestFormat(playUrls: Record<string, any>): null | {
   format: string;
-  url: string;
   playerInfo: PlayerInfo;
-} | null {
+  url: string;
+} {
   for (const format of formatPriority) {
     const url = playUrls[format];
     if (url) {

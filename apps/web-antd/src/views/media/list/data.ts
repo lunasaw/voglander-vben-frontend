@@ -1,7 +1,7 @@
-import type { ZlmMediaApi } from '#/api/media/zlm-media';
 import type { VbenFormSchema } from '@vben/common-ui';
 
-import type { VxeGridPropTypes, OnActionClickFn } from '#/adapter/vxe-table';
+import type { OnActionClickFn, VxeGridPropTypes } from '#/adapter/vxe-table';
+import type { ZlmMediaApi } from '#/api/media/zlm-media';
 
 import { $t } from '#/locales';
 
@@ -54,7 +54,7 @@ export function formatBytesSpeed(bytesSpeed: number): string {
   if (bytesSpeed === 0) return '0 B/s';
   const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
   const digitGroups = Math.floor(Math.log10(bytesSpeed) / Math.log10(1024));
-  return `${(bytesSpeed / Math.pow(1024, digitGroups)).toFixed(2)} ${units[digitGroups]}`;
+  return `${(bytesSpeed / 1024 ** digitGroups).toFixed(2)} ${units[digitGroups]}`;
 }
 
 /**
@@ -70,21 +70,24 @@ export function formatTimestamp(timestamp: number): string {
  */
 export function formatAliveTime(seconds: number): string {
   if (seconds < 60) return `${seconds}${$t('media.list.time.seconds')}`;
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}${$t('media.list.time.minutes')}`;
-  if (seconds < 86400) {
+  if (seconds < 3600)
+    return `${Math.floor(seconds / 60)}${$t('media.list.time.minutes')}`;
+  if (seconds < 86_400) {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     return `${hours}${$t('media.list.time.hours')}${minutes}${$t('media.list.time.minutes')}`;
   }
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
+  const days = Math.floor(seconds / 86_400);
+  const hours = Math.floor((seconds % 86_400) / 3600);
   return `${days}${$t('media.list.time.days')}${hours}${$t('media.list.time.hours')}`;
 }
 
 /**
  * 获取流媒体列表表格列配置
  */
-export function useColumns(onActionClick: OnActionClickFn<ZlmMediaApi.MediaData>): VxeGridPropTypes.Columns {
+export function useColumns(
+  onActionClick: OnActionClickFn<ZlmMediaApi.MediaData>,
+): VxeGridPropTypes.Columns {
   return [
     {
       type: 'checkbox',
@@ -128,7 +131,11 @@ export function useColumns(onActionClick: OnActionClickFn<ZlmMediaApi.MediaData>
       cellRender: {
         name: 'CellTag',
         options: [
-          { color: 'default', label: $t('media.list.defaultVhost'), value: '__defaultVhost__' },
+          {
+            color: 'default',
+            label: $t('media.list.defaultVhost'),
+            value: '__defaultVhost__',
+          },
         ],
       },
     },

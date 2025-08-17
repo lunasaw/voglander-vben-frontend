@@ -504,11 +504,7 @@
             "description": "================================\nZLM扩展参数对象"
           }
         },
-        "required": [
-          "app",
-          "stream",
-          "url"
-        ]
+        "required": ["app", "stream", "url"]
       },
       "StreamProxyExtendReq": {
         "type": "object",
@@ -689,9 +685,7 @@
             "description": "================================\nZLM扩展参数对象"
           }
         },
-        "required": [
-          "id"
-        ]
+        "required": ["id"]
       },
       "StreamProxyQueryReq": {
         "type": "object",
