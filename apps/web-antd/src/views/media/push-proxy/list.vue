@@ -127,8 +127,8 @@ const [FormDrawer, formDrawerApi] = useVbenDrawer({
 // 流详情弹窗状态
 const showStreamDetailModal = ref(false);
 const streamParams = ref<null | {
-  schema: string;
   app: string;
+  schema: string;
   stream: string;
   vhost: string;
 }>(null);
