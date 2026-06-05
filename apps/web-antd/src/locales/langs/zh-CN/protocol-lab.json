@@ -1,0 +1,108 @@
+{
+  "title": "GB28181 协议验证台",
+  "menu": "协议验证台",
+  "desc": "左侧作为设备端(Client)向平台注册并上报，右侧作为平台端(Server)感知设备并下发指令；指令经真实 SIP 交互后回到左侧展示，用于可视化验证 GB/T 28181 协议链路。",
+  "sse": {
+    "connected": "实时连接已建立",
+    "connecting": "连接中…",
+    "reconnecting": "连接中断，重连中…",
+    "closed": "未连接"
+  },
+  "action": {
+    "clearTimeline": "清空时间线"
+  },
+  "disabled": {
+    "title": "协议验证台未开启",
+    "desc": "后端未启用 lab profile（voglander.protocol-lab.enabled=true）。请用 dev,repo,inte,lab 多 profile 启动后端后刷新本页。"
+  },
+  "client": {
+    "title": "设备端 (Client)",
+    "clientId": "设备编码",
+    "endpoint": "设备地址",
+    "target": "目标平台",
+    "register": "注册",
+    "unregister": "注销",
+    "keepalive": "心跳",
+    "autoKeepalive": "自动心跳",
+    "pushCatalog": "上报目录",
+    "pushDeviceInfo": "上报设备信息",
+    "pushAlarm": "上报告警",
+    "received": "收到指令",
+    "receivedEmpty": "暂无收到的指令，右侧下发 PTZ / 查目录 / 重启后这里会实时显示"
+  },
+  "server": {
+    "title": "平台端 (Server)",
+    "devices": "在线设备",
+    "devicesEmpty": "暂无设备，点击左侧「注册」后设备会实时出现",
+    "commands": "设备指令",
+    "queryCatalog": "查询目录",
+    "queryDeviceInfo": "查询设备信息",
+    "reboot": "重启",
+    "play": "实时点播",
+    "events": "平台事件",
+    "eventsEmpty": "暂无平台事件，设备注册 / 上线 / 上报会实时显示"
+  },
+  "ptz": {
+    "up": "上",
+    "down": "下",
+    "left": "左",
+    "right": "右",
+    "upLeft": "左上",
+    "upRight": "右上",
+    "downLeft": "左下",
+    "downRight": "右下",
+    "stop": "停止",
+    "zoomIn": "变倍+",
+    "zoomOut": "变倍-"
+  },
+  "field": {
+    "seconds": "秒",
+    "channel": "通道数",
+    "channelCount": "通道数"
+  },
+  "event": {
+    "register": "设备注册",
+    "online": "上线",
+    "offline": "离线",
+    "keepalive": "心跳",
+    "catalog": "目录回包",
+    "deviceInfo": "设备信息",
+    "inviteOk": "点播成功",
+    "bye": "会话结束",
+    "alarm": "告警",
+    "registerOk": "注册成功",
+    "registerFail": "注册失败",
+    "registerChallenge": "注册鉴权",
+    "ptz": "云台控制",
+    "record": "录像控制",
+    "reboot": "远程重启",
+    "iframe": "关键帧请求",
+    "guard": "布防/撤防",
+    "alarmReset": "告警复位",
+    "queryCatalog": "目录查询",
+    "queryDeviceInfo": "设备信息查询",
+    "queryDeviceStatus": "设备状态查询",
+    "configBasicParam": "基础参数配置",
+    "broadcast": "语音广播",
+    "invite": "点播请求"
+  },
+  "timeline": {
+    "empty": "暂无事件"
+  },
+  "msg": {
+    "registerSent": "注册请求已发送",
+    "unregisterSent": "注销请求已发送",
+    "keepaliveSent": "心跳已发送",
+    "autoKeepaliveOn": "自动心跳已开启",
+    "autoKeepaliveOff": "自动心跳已关闭",
+    "catalogSent": "目录上报已发送",
+    "deviceInfoSent": "设备信息上报已发送",
+    "alarmSent": "告警上报已发送",
+    "ptzSent": "PTZ 指令已下发",
+    "queryCatalogSent": "目录查询已下发",
+    "queryDeviceInfoSent": "设备信息查询已下发",
+    "rebootSent": "重启指令已下发",
+    "liveSent": "点播请求已下发",
+    "selectOnlineDevice": "请先在设备列表选择一个在线设备"
+  }
+}

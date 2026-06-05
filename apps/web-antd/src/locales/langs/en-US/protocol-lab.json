@@ -1,0 +1,108 @@
+{
+  "title": "GB28181 Protocol Lab",
+  "menu": "Protocol Lab",
+  "desc": "The left panel acts as the device (Client) registering and reporting to the platform; the right panel acts as the platform (Server) sensing the device and sending commands. Commands travel through real SIP exchanges and return to the left panel for display, used to visually verify the GB/T 28181 protocol chain.",
+  "sse": {
+    "connected": "Live connected",
+    "connecting": "Connecting…",
+    "reconnecting": "Disconnected, reconnecting…",
+    "closed": "Disconnected"
+  },
+  "action": {
+    "clearTimeline": "Clear Timeline"
+  },
+  "disabled": {
+    "title": "Protocol Lab is not enabled",
+    "desc": "The backend lab profile (voglander.protocol-lab.enabled=true) is not active. Start the backend with profiles dev,repo,inte,lab and refresh this page."
+  },
+  "client": {
+    "title": "Device (Client)",
+    "clientId": "Device ID",
+    "endpoint": "Device Address",
+    "target": "Target Platform",
+    "register": "Register",
+    "unregister": "Unregister",
+    "keepalive": "Keepalive",
+    "autoKeepalive": "Auto Keepalive",
+    "pushCatalog": "Push Catalog",
+    "pushDeviceInfo": "Push Device Info",
+    "pushAlarm": "Push Alarm",
+    "received": "Received Commands",
+    "receivedEmpty": "No commands received yet. Send PTZ / Query Catalog / Reboot from the right panel to see them here in real time"
+  },
+  "server": {
+    "title": "Platform (Server)",
+    "devices": "Online Devices",
+    "devicesEmpty": "No devices yet. Click Register on the left and the device will appear here in real time",
+    "commands": "Device Commands",
+    "queryCatalog": "Query Catalog",
+    "queryDeviceInfo": "Query Device Info",
+    "reboot": "Reboot",
+    "play": "Live Play",
+    "events": "Platform Events",
+    "eventsEmpty": "No platform events yet. Device register / online / reports show here in real time"
+  },
+  "ptz": {
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "upLeft": "Up-Left",
+    "upRight": "Up-Right",
+    "downLeft": "Down-Left",
+    "downRight": "Down-Right",
+    "stop": "Stop",
+    "zoomIn": "Zoom+",
+    "zoomOut": "Zoom-"
+  },
+  "field": {
+    "seconds": "sec",
+    "channel": "Channels",
+    "channelCount": "Channels"
+  },
+  "event": {
+    "register": "Device Register",
+    "online": "Online",
+    "offline": "Offline",
+    "keepalive": "Keepalive",
+    "catalog": "Catalog Response",
+    "deviceInfo": "Device Info",
+    "inviteOk": "Invite OK",
+    "bye": "Session Bye",
+    "alarm": "Alarm",
+    "registerOk": "Register OK",
+    "registerFail": "Register Failed",
+    "registerChallenge": "Register Challenge",
+    "ptz": "PTZ Control",
+    "record": "Record Control",
+    "reboot": "Reboot",
+    "iframe": "I-Frame Request",
+    "guard": "Guard/Disarm",
+    "alarmReset": "Alarm Reset",
+    "queryCatalog": "Catalog Query",
+    "queryDeviceInfo": "Device Info Query",
+    "queryDeviceStatus": "Device Status Query",
+    "configBasicParam": "Basic Param Config",
+    "broadcast": "Voice Broadcast",
+    "invite": "Invite Request"
+  },
+  "timeline": {
+    "empty": "No events"
+  },
+  "msg": {
+    "registerSent": "Register request sent",
+    "unregisterSent": "Unregister request sent",
+    "keepaliveSent": "Keepalive sent",
+    "autoKeepaliveOn": "Auto keepalive enabled",
+    "autoKeepaliveOff": "Auto keepalive disabled",
+    "catalogSent": "Catalog report sent",
+    "deviceInfoSent": "Device info report sent",
+    "alarmSent": "Alarm report sent",
+    "ptzSent": "PTZ command sent",
+    "queryCatalogSent": "Catalog query sent",
+    "queryDeviceInfoSent": "Device info query sent",
+    "rebootSent": "Reboot command sent",
+    "liveSent": "Live play request sent",
+    "selectOnlineDevice": "Please select an online device from the list first"
+  }
+}
