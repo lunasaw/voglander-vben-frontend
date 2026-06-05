@@ -1,8 +1,6 @@
 # GB28181 协议验证台 — 前端（S4/S5）实现技术方案与落地报告
 
-> 版本 1.0.6 · 分支 `dev_merge_sip` · 文档日期 2026-06-05
-> 配套后端方案：[`GB28181-PROTOCOL-LAB-TECH-PLAN.md`](./GB28181-PROTOCOL-LAB-TECH-PLAN.md)（后端 S1/S2/S3 已实现并核验，36 测试全绿）
-> 本文范围：`vue-vben-admin/apps/web-antd` 前端 S4（骨架）+ S5（打磨）的**实现方案 + 已落地核验结论**
+> 版本 1.0.6 · 分支 `dev_merge_sip` · 文档日期 2026-06-05 配套后端方案：[`GB28181-PROTOCOL-LAB-TECH-PLAN.md`](./GB28181-PROTOCOL-LAB-TECH-PLAN.md)（后端 S1/S2/S3 已实现并核验，36 测试全绿）本文范围：`vue-vben-admin/apps/web-antd` 前端 S4（骨架）+ S5（打磨）的**实现方案 + 已落地核验结论**
 
 ---
 
@@ -11,8 +9,8 @@
 前端 S4 + S5 **已完整实现并通过质量门禁**：
 
 | 门禁 | 命令 | 结果 |
-|------|------|------|
-| 类型检查 | `pnpm typecheck`（vue-tsc） | 新增文件 **0 error**（media/* 既有基线错误与本次无关） |
+| --- | --- | --- |
+| 类型检查 | `pnpm typecheck`（vue-tsc） | 新增文件 **0 error**（media/\* 既有基线错误与本次无关） |
 | 代码规范 | `npx eslint <新增文件>` | **0 error / 0 warning** |
 | 生产构建 | `pnpm build:antd`（turbo） | **11/11 task 成功**，产出 `protocol-lab` / `ClientPanel` / `ServerPanel` / `SipTimeline` chunk |
 
@@ -37,7 +35,7 @@
 ### 1.1 左侧 REST（`LabClientController`，`@ConditionalOnProperty(voglander.protocol-lab.enabled=true)`）
 
 | 前端 API 函数 | 方法 | 路径 | 请求体 | 返回 |
-|--------------|------|------|--------|------|
+| --- | --- | --- | --- | --- |
 | `getLabConfig()` | GET | `/api/v1/lab/client/config` | - | `{clientId,clientIp,clientPort,serverId,serverIp,serverPort,topics[]}` |
 | `labRegister({expires})` | POST | `/api/v1/lab/client/register` | `{expires:3600}` | `AjaxResult<Void>` |
 | `labUnregister()` | POST | `/api/v1/lab/client/unregister` | `{}` | `AjaxResult<Void>` |
@@ -52,7 +50,7 @@
 ### 1.2 右侧 REST（复用既有端点，前端不新增后端）
 
 | 前端 API 函数 | 方法 | 路径 | 请求体（核对自真实 Req） |
-|--------------|------|------|------------------------|
+| --- | --- | --- | --- |
 | `ptzControl({deviceId,channelId,command,speed})` | POST | `/api/v1/ptz/control` | `PtzControlReq{deviceId,channelId,command,speed=128}` |
 | `queryCatalog(deviceId)` | POST | `/api/v1/device-cmd/query-catalog` | `Map{deviceId}` |
 | `queryDeviceInfo(deviceId)` | POST | `/api/v1/device-cmd/query-info` | `Map{deviceId}` |
@@ -64,13 +62,14 @@
 ### 1.3 SSE 事件契约（核对自 5 个 `Lab*Listener` + `Gb28181ProtocolHandler` 真实 payload）
 
 **关键机制**（决定前端如何解析）：
+
 - `RedisBackedSseEventBus.publishLocal` 用 `event().name(topic)` 发送 → **SSE `event:` 名 = 完整 topic**（如 `device.register`、`clientcmd.ptz`）。
 - `data` 是 `event.getData()` 的 JSON，即 **payload 本体**，不含 `{topic,data}` 外层包裹。
 - 订阅过滤（`SseController` → `matches()`）按**首个 `.` 之前的前缀域**匹配：订阅 `clientcmd` 可收 `clientcmd.register.ok`。
 - ∴ **订阅 URL 用前缀**（`device,session,clientcmd,alarm`），但 `addEventListener` 必须用**完整 topic**（事件名是完整 topic）→ 完整列表由 `/config` 的 `topics[]` 提供。
 
 | topic | 方向 | 前端消费面板 | data 关键字段（实测） |
-|-------|------|------------|---------------------|
+| --- | --- | --- | --- |
 | `device.register` | 右收 | ServerPanel 设备列表 + 时间线 | `deviceId,remoteIp,remotePort,transport,expire,ts` |
 | `device.online` / `device.offline` | 右收 | 设备在线态 | `deviceId,ts` |
 | `device.keepalive` | 右收 | 时间线（后端 5s 节流） | `deviceId,ts` |
@@ -170,7 +169,7 @@ export function useSseEvents(fullTopics: () => string[]) {
 ## 5. 验收矩阵映射（前端就绪项）
 
 | 编号 | 场景 | 前端实现 | 状态 |
-|------|------|---------|------|
+| --- | --- | --- | --- |
 | LAB-01 | 设备注册 | 左[注册] `labRegister` → 右设备列表出现 + 左 `register.ok` 时间线 | ✅ |
 | LAB-02 | 设备注销 | 左[注销] `labUnregister` → 右 `offline` 标灰 | ✅ |
 | LAB-03 | 心跳保活 | 左[自动心跳] `labKeepaliveAuto` 开关 → 右 `device.keepalive`（节流） | ✅ |
@@ -215,4 +214,7 @@ cd vue-vben-admin && pnpm build:antd                  # ✅ 11/11 task；产出 
 2. **视频播放器**：LAB-09 点播目前只发信令、展示 `clientcmd.invite`；接入 `FlvPlayer` 播放 `liveStart` 返回的 `playUrls.httpFlv` 依赖 ZLM 真实节点（1.0.5 在 :8082），建议联调期单独验证。
 3. **SIP 报文级时间线**（`sip.trace`，后端方案 §3 可选 Phase 3）：当前为语义事件时间线（注册/PTZ/目录…），已满足"可视化协议链路"。若需真实 SIP 请求行（method/Call-ID/CSeq），待后端加日志切面后前端订阅 `sip.trace` 即可复用 `SipTimeline`。
 4. **响应式**：已做窄屏（<1100px）单列降级；移动端方向盘触控体验可后续打磨。
+
+```
+
 ```

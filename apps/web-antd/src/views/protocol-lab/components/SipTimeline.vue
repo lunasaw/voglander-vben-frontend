@@ -110,12 +110,12 @@ function summaryOf(ev: LabEvent): string {
 
 .timeline-item {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   padding: 6px 8px;
   font-size: 13px;
-  border-radius: 4px;
   border-left: 3px solid transparent;
+  border-radius: 4px;
 }
 
 .timeline-item.dir-in {
@@ -144,8 +144,8 @@ function summaryOf(ev: LabEvent): string {
 
 .summary {
   overflow: hidden;
-  font-family: var(--font-mono, monospace);
   text-overflow: ellipsis;
+  font-family: var(--font-mono, monospace);
   white-space: nowrap;
 }
 </style>

@@ -107,6 +107,7 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+
   /* 视口高度减去顶栏/页头预留，保证两栏时间线可滚动 */
   height: calc(100vh - 220px);
   min-height: 560px;

@@ -1,12 +1,11 @@
 # Voglander 架构文档 · v1.0.6
 
-> 本目录是 **web-antd 前端** 视角下、结合 **voglander 后端** 的系统架构文档。
-> 接口明细（请求/响应字段、示例）见同级 API 文档：[`../../api/voglander-api.md`](../../api/voglander-api.md)。
+> 本目录是 **web-antd 前端** 视角下、结合 **voglander 后端** 的系统架构文档。接口明细（请求/响应字段、示例）见同级 API 文档：[`../../api/voglander-api.md`](../../api/voglander-api.md)。
 
 ## 文档导航
 
 | 文档 | 内容 |
-|------|------|
+| --- | --- |
 | [01-系统架构总览.md](./01-系统架构总览.md) | 产品定位、多仓库工作区、依赖链、端到端数据流、技术栈与部署形态 |
 | [02-后端架构.md](./02-后端架构.md) | voglander 分层架构、模块依赖、Controller 模板方法、AjaxResult 契约、鉴权、GB28181/ZLM/SSE 集成、控制器与端点全表 |
 | [03-前端架构.md](./03-前端架构.md) | web-antd Monorepo 布局、API 层、请求客户端、适配器层、Schema 驱动页面、路由与权限、状态管理、i18n、SSE、媒体播放器 |
@@ -14,13 +13,13 @@
 
 ## 版本基线
 
-| 组件 | 版本 | 说明 |
-|------|------|------|
-| 产品文档版本 | **1.0.6** | 本文档集对应的产品迭代 |
-| voglander 后端 | `1.0.2-SNAPSHOT` | 根 `pom.xml` |
-| web-antd 前端 | `5.5.8` | 基于 Vben Admin 5.x 模板 |
-| sip-gateway / gb28181 | `1.8.0` | command + 统一回调架构 |
-| zlm-spring-boot-starter | `1.0.10-SNAPSHOT` | ZLMediaKit 集成 |
+| 组件                    | 版本              | 说明                     |
+| ----------------------- | ----------------- | ------------------------ |
+| 产品文档版本            | **1.0.6**         | 本文档集对应的产品迭代   |
+| voglander 后端          | `1.0.2-SNAPSHOT`  | 根 `pom.xml`             |
+| web-antd 前端           | `5.5.8`           | 基于 Vben Admin 5.x 模板 |
+| sip-gateway / gb28181   | `1.8.0`           | command + 统一回调架构   |
+| zlm-spring-boot-starter | `1.0.10-SNAPSHOT` | ZLMediaKit 集成          |
 
 ## 一句话架构
 

@@ -3,6 +3,7 @@
 此文件为 Claude Code (claude.ai/code) 在此代码仓库中工作时提供指导。
 
 > **架构文档集（单一事实来源）**：`apps/web-antd/doc/1.0.6/`
+>
 > - [01-系统架构总览.md](apps/web-antd/doc/1.0.6/01-系统架构总览.md) — 产品定位、多仓库依赖链、端到端数据流、技术栈、部署形态
 > - [02-后端架构.md](apps/web-antd/doc/1.0.6/02-后端架构.md) — voglander 分层、Controller 模板方法、AjaxResult、鉴权、控制器与端点全表（22 个 Controller）
 > - [03-前端架构.md](apps/web-antd/doc/1.0.6/03-前端架构.md) — web-antd 布局、API 层、请求客户端、适配器、Schema 驱动页面、路由权限、状态、i18n、SSE、播放器
@@ -12,13 +13,13 @@
 
 ## 版本基线
 
-| 组件 | 版本 | 说明 |
-|------|------|------|
-| 产品文档版本 | **1.0.6** | 当前迭代 |
-| web-antd 前端 | `5.5.8` | 基于 Vben Admin 5.x |
-| voglander 后端 | `1.0.2-SNAPSHOT` | REST 提供方 |
-| sip-gateway / gb28181 | `1.8.0` | command 出站 + 统一回调 |
-| zlm-spring-boot-starter | `1.0.10-SNAPSHOT` | ZLMediaKit 集成 |
+| 组件                    | 版本              | 说明                    |
+| ----------------------- | ----------------- | ----------------------- |
+| 产品文档版本            | **1.0.6**         | 当前迭代                |
+| web-antd 前端           | `5.5.8`           | 基于 Vben Admin 5.x     |
+| voglander 后端          | `1.0.2-SNAPSHOT`  | REST 提供方             |
+| sip-gateway / gb28181   | `1.8.0`           | command 出站 + 统一回调 |
+| zlm-spring-boot-starter | `1.0.10-SNAPSHOT` | ZLMediaKit 集成         |
 
 **一句话架构**：Vue 3（web-antd）通过统一 `requestClient` 调用 voglander REST（`AjaxResult{code,msg,data}`、`code=0` 成功）；voglander 以 **Controller → Manager → Service → Repository** 分层编排业务���向上集成 **GB28181（sip-proxy）** 与 **ZLMediaKit（zlm starter）**，通过 **SSE** 向前端推送实时事件。
 
@@ -168,7 +169,7 @@ apps/web-antd/src/
 #### API 文件清单（namespace → 主要函数 → 端点）
 
 | 文件 | namespace | 主要函数 → 端点 |
-|------|-----------|----------------|
+| --- | --- | --- |
 | `core/auth.ts` | `AuthApi` | `loginApi`→`POST /auth/login`；`refreshTokenApi`→`POST /auth/refresh`；`logoutApi`→`POST /auth/logout`；`getAccessCodesApi`→`GET /auth/codes` |
 | `core/menu.ts` | — | `getAllMenusApi`→`GET /menu/all`；`getUserPermissionMenusApi`→`GET /menu/permissions` |
 | `core/user.ts` | — | `getUserInfoApi`→`GET /user/info` |
@@ -180,7 +181,7 @@ apps/web-antd/src/
 | `system/dept.ts` | `SystemDeptApi` | list/create/update/delete → `/system/dept*` |
 | `system/menu.ts` | `SystemMenuApi` | list/nameExists/pathExists/create/update/delete → `/system/menu*` |
 | `system/role.ts` | `SystemRoleApi` | list/create/update/delete → `/system/role*` |
-| `system/user.ts` | `SystemUserApi` | getUserInfo/getUserList/getUserById/create/update/delete/check-* → `/user*` |
+| `system/user.ts` | `SystemUserApi` | getUserInfo/getUserList/getUserById/create/update/delete/check-_ → `/user_` |
 | `protocol-lab.ts` | `ProtocolLabApi` | labRegister/labUnregister/labKeepaliveAuto/labPushCatalog/labPushAlarm → `/api/v1/lab/client/*`；ptzControl→`/api/v1/ptz/control`；queryCatalog/rebootDevice→`/api/v1/device-cmd/*`；liveStart→`/api/v1/live/start` |
 
 **请求客户端约定** (`src/api/request.ts`)：
@@ -188,7 +189,7 @@ apps/web-antd/src/
 `requestClient`（`responseReturn:'data'`）对接后端 `AjaxResult`，四个拦截器：
 
 | 拦截器 | 作用 |
-|--------|------|
+| --- | --- |
 | 请求拦截器 | 注入 `Authorization: Bearer <token>`（来自 `accessStore`）、`Accept-Language`（`preferences.app.locale`）；URL 含 `/zlm/api` 时从 `utils/node-state.ts` 注入 `X-Node-Key` |
 | `defaultResponseInterceptor` | `codeField:'code'` / `dataField:'data'` / **`successCode:0`** → API 函数直接拿到 `data` 本体 |
 | `authenticateResponseInterceptor` | token 过期自动 `doRefreshToken()`（`/auth/refresh`），失败 `doReAuthenticate()` 登出/弹窗 |
@@ -201,7 +202,7 @@ apps/web-antd/src/
 统一不同 UI 库接口，提供一致开发体验。**Schema 驱动**：表单/表格行为由配置定义，不写命令式代码。
 
 | 文件 | 作用 |
-|------|------|
+| --- | --- |
 | `component/index.ts` | 注册 Ant Design Vue 组件（异步导入）+ 自定义业务组件 `NodeSelector`；`withDefaultPlaceholder` 注入默认 placeholder |
 | `form.ts` | `setupVbenForm`：`baseModelPropName:'value'`，`Checkbox/Radio/Switch`→`checked`、`Upload`→`fileList`；国际化校验规则 `required`/`selectRequired`；导出 `useVbenForm` / `VbenFormSchema` / `z` |
 | `vxe-table.ts` | `setupVbenVxeTable`：全局 grid 配置（居中、可调列宽、`proxyConfig.autoLoad`）；内置 `CellSwitch`（状态切换）、Tag、Image、Popconfirm 渲染器 |
@@ -243,7 +244,7 @@ packages/
 ### 业务模块页面
 
 | 模块 | 路径 | 页面 |
-|------|------|------|
+| --- | --- | --- |
 | 媒体-节点 | `views/media/node/` | `list.vue` · `detail.vue`（ZLM 节点诊断：version/threads/statistic/config）· `modules/form.vue` |
 | 媒体-在线流 | `views/media/list/` | `list.vue` · `modules/detail-modal.vue` |
 | 媒体-拉流代理 | `views/media/stream-proxy/` | `list.vue` · `data.ts` · `modules/form.vue` |
@@ -264,13 +265,13 @@ packages/
 
 `requestClient` 的 `baseURL = /api`。vite 代理剥离 `^/api` 前缀后转发 :8081：
 
-| API 函数里的 URL | 后端实际收到（:8081） |
-|------------------|----------------------|
+| API 函数里的 URL        | 后端实际收到（:8081）      |
+| ----------------------- | -------------------------- |
 | `/api/v1/proxy/getPage` | `/api/v1/proxy/getPage` ✅ |
-| `/auth/login` | `/auth/login` ✅ |
-| `/user/info` | `/user/info` ✅ |
-| `/system/menu/all` | `/system/menu/all` ✅ |
-| `/zlm/api/media/list` | `/zlm/api/media/list` ✅ |
+| `/auth/login`           | `/auth/login` ✅           |
+| `/user/info`            | `/user/info` ✅            |
+| `/system/menu/all`      | `/system/menu/all` ✅      |
+| `/zlm/api/media/list`   | `/zlm/api/media/list` ✅   |
 
 > 业务端点写后端真实路径即可（`/api/v1/*` 因后端 `@RequestMapping` 自带该前缀；`/auth`、`/user`、`/system` 后端不带 `/api/v1`），vite 代理只剥离开发期 `/api` 网关前缀。
 
@@ -357,11 +358,12 @@ function onEdit(row: any) {
 ### 状态管理（Pinia）
 
 | Store | 文件 | 作用 |
-|-------|------|------|
+| --- | --- | --- |
 | `authStore` | `store/auth.ts` | 登录/登出编排（配合 `@vben/stores` 的 `accessStore` 存 token） |
 | `nodeStore` | `store/modules/node.ts` | 当前选中 ZLM 节点 Key（`currentNodeKey`，set/get/clear） |
 
 页面级模式：
+
 - **状态切换**: 使用 `CellSwitch` 渲染器进行直接状态更改
 - **确认对话框**: 总是确认破坏性操作
 - **错误处理**: 一致的错误消息和用户反馈
@@ -408,6 +410,7 @@ apps/web-antd/src/views/[module]/[entity]/
 ```
 
 `data.ts` 三件套：
+
 - `useFormSchema(isEditMode)` → 编辑表单字段（`component`/`componentProps`/`fieldName`/`label`/`rules`/`dependencies`）
 - `useColumns(onActionClick, onStatusChange)` → 表格列（含操作列、`CellSwitch` 状态列）
 - `useGridFormSchema()` → 顶部搜索条件
