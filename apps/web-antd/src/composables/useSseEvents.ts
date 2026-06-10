@@ -75,7 +75,7 @@ export function useSseEvents(fullTopics: () => string[]) {
   }
 
   function pushEvent(topic: string, raw: string) {
-    let data: Record<string, any> = {};
+    let data: Record<string, any>;
     try {
       data = raw ? JSON.parse(raw) : {};
     } catch {

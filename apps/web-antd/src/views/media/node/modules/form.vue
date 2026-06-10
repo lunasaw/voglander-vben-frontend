@@ -3,7 +3,6 @@ import type { MediaNodeApi } from '#/api/media/medianode';
 
 import { computed, ref } from 'vue';
 
-import { useAccess } from '@vben/access';
 import { useVbenDrawer } from '@vben/common-ui';
 
 import { useVbenForm } from '#/adapter/form';
@@ -14,17 +13,11 @@ import { useEditFormSchema, useFormSchema } from '../data';
 
 const emits = defineEmits(['success']);
 
-const { hasAccessByCodes } = useAccess();
 const formData = ref<MediaNodeApi.MediaNodeVO>();
 const isEdit = ref(false);
 
-// 动态获取表单schema，编辑时节点ID不可修改
-const getFormSchema = computed(() => {
-  return isEdit.value ? useEditFormSchema() : useFormSchema();
-});
-
 const [Form, formApi] = useVbenForm({
-  schema: getFormSchema,
+  schema: useFormSchema(),
   showDefaultActions: false,
 });
 
@@ -39,8 +32,11 @@ const [Drawer, drawerApi] = useVbenDrawer({
     drawerApi.lock();
     try {
       await (id.value
-        ? updateMediaNode({ ...values, id: id.value })
-        : createMediaNode(values));
+        ? updateMediaNode({
+            ...values,
+            id: id.value,
+          } as MediaNodeApi.MediaNodeUpdateReq)
+        : createMediaNode(values as MediaNodeApi.MediaNodeCreateReq));
       emits('success');
       drawerApi.close();
     } catch {
@@ -55,11 +51,14 @@ const [Drawer, drawerApi] = useVbenDrawer({
         formData.value = data;
         id.value = data.id;
         isEdit.value = true;
+        // 编辑时节点 ID 不可修改
+        formApi.setState({ schema: useEditFormSchema() });
         formApi.setValues(data);
       } else {
         id.value = undefined;
         isEdit.value = false;
         formData.value = undefined;
+        formApi.setState({ schema: useFormSchema() });
       }
     }
   },

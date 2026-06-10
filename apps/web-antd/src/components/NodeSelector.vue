@@ -74,7 +74,7 @@ function isNodeOnline(keepalive?: number | string): boolean {
 
 // 计算属性：排序后的节点列表（在线节点优先）
 const sortedNodeList = computed(() => {
-  return [...nodeListData.value].sort((a, b) => {
+  return [...nodeListData.value].toSorted((a, b) => {
     const aOnline = isNodeOnline(a.keepalive);
     const bOnline = isNodeOnline(b.keepalive);
 
@@ -90,7 +90,7 @@ const sortedNodeList = computed(() => {
     // 如果在线状态相同，按名称排序
     const aName = a.name || a.serverId || a.id || '';
     const bName = b.name || b.serverId || b.id || '';
-    return aName.localeCompare(bName);
+    return String(aName).localeCompare(String(bName));
   });
 });
 
@@ -119,14 +119,16 @@ async function fetchNodeList() {
         isNodeOnline(node.keepalive),
       );
       const defaultNode = firstOnlineNode || nodeList[0];
-      const defaultValue = String(defaultNode.serverId || defaultNode.id);
+      if (defaultNode) {
+        const defaultValue = String(defaultNode.serverId || defaultNode.id);
 
-      // 更新全局状态
-      setCurrentNodeKey(defaultValue);
+        // 更新全局状态
+        setCurrentNodeKey(defaultValue);
 
-      emit('update:modelValue', defaultValue);
-      emit('change', defaultValue, defaultNode);
-      emit('nodeSwitch', defaultValue, defaultNode);
+        emit('update:modelValue', defaultValue);
+        emit('change', defaultValue, defaultNode);
+        emit('nodeSwitch', defaultValue, defaultNode);
+      }
     }
   } catch (error) {
     console.error('获取节点列表失败:', error);
@@ -137,9 +139,7 @@ async function fetchNodeList() {
 }
 
 // 节点切换处理
-function onNodeChange(
-  selectedNodeKey: (number | string)[] | number | string | undefined,
-) {
+function onNodeChange(selectedNodeKey: any, _option?: any) {
   if (selectedNodeKey === undefined || selectedNodeKey === null) {
     clearCurrentNodeKey(); // 清除全局状态
     emit('update:modelValue', null);
@@ -189,6 +189,7 @@ function selectDefaultNode() {
     isNodeOnline(node.keepalive),
   );
   const defaultNode = firstOnlineNode || nodeListData.value[0];
+  if (!defaultNode) return;
   const defaultValue = String(defaultNode.serverId || defaultNode.id);
 
   // 更新全局状态
@@ -266,7 +267,7 @@ onUnmounted(() => {
           {{ $t('media.node.query.selectNode') }}:
         </span>
         <Select
-          :value="modelValue"
+          :value="modelValue ?? undefined"
           :loading="combinedLoading"
           :placeholder="placeholder || $t('media.node.selector.placeholder')"
           :disabled="disabled"
@@ -317,7 +318,7 @@ onUnmounted(() => {
   <!-- 仅选择器组件 -->
   <Select
     v-else
-    :value="modelValue"
+    :value="modelValue ?? undefined"
     :loading="combinedLoading"
     :placeholder="placeholder || $t('media.node.selector.placeholder')"
     :disabled="disabled"

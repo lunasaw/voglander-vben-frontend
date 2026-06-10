@@ -359,7 +359,7 @@ async function handleServerScreenshot() {
   const timeoutSec = isRtspUrl ? 60 : 30; // RTSP流给更长超时时间
 
   // 获取使用的协议名称用于提示
-  const protocolName = screenshotUrl.split('://')[0].toUpperCase();
+  const protocolName = (screenshotUrl.split('://')[0] ?? '').toUpperCase();
 
   // 显示正在截图的提示信息
   message.loading({
@@ -370,7 +370,7 @@ async function handleServerScreenshot() {
 
   isServerScreenshotting.value = true;
   try {
-    const response = await getZlmMediaSnapshotUrl(
+    const response: any = await getZlmMediaSnapshotUrl(
       {
         url: screenshotUrl,
         timeout_sec: timeoutSec,

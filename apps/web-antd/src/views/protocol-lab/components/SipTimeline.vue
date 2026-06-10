@@ -25,7 +25,9 @@ const props = defineProps<{
 }>();
 
 /** 最新事件在顶部。 */
-const ordered = computed(() => [...props.events].sort((a, b) => b.seq - a.seq));
+const ordered = computed(() =>
+  [...props.events].toSorted((a, b) => b.seq - a.seq),
+);
 
 function timeOf(ts: number): string {
   const d = new Date(ts);

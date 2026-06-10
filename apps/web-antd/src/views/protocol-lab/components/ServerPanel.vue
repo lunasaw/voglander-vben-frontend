@@ -56,7 +56,7 @@ const speed = ref(128);
 const loading = ref(false);
 
 const deviceList = computed(() =>
-  [...devices.value.values()].sort((a, b) => b.lastTs - a.lastTs),
+  [...devices.value.values()].toSorted((a, b) => b.lastTs - a.lastTs),
 );
 
 const selectedChannelId = computed(() => {

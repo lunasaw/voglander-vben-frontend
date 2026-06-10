@@ -45,8 +45,8 @@ vi.mock('ant-design-vue', () => {
     name: 'Empty',
     props: ['description', 'image'],
     template: '<div class="empty">{{ description }}</div>',
+    PRESENTED_IMAGE_SIMPLE: 'simple',
   };
-  EmptyStub.PRESENTED_IMAGE_SIMPLE = 'simple';
   return {
     Badge: {
       name: 'Badge',

@@ -15,9 +15,6 @@ import { $t } from '#/locales';
 const forbiddenComponent = () => import('#/views/_core/fallback/forbidden.vue');
 
 async function generateAccess(options: GenerateMenuAndRoutesOptions) {
-  console.log('🚀 generateAccess 开始执行', options);
-  console.log('🔧 当前访问模式:', preferences.app.accessMode);
-
   const pageMap: ComponentRecordType = import.meta.glob('../views/**/*.vue');
 
   const layoutMap: ComponentRecordType = {
@@ -28,7 +25,6 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
   return await generateAccessible(preferences.app.accessMode, {
     ...options,
     fetchMenuListAsync: async () => {
-      console.log('📡 开始获取用户菜单');
       message.loading({
         content: `${$t('common.loadingMenu')}...`,
         duration: 1.5,
@@ -36,7 +32,6 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
 
       try {
         const result = await getUserPermissionMenusApi();
-        console.log('✅ 菜单获取成功', result);
         return result;
       } catch (error) {
         console.error('❌ 菜单获取失败', error);

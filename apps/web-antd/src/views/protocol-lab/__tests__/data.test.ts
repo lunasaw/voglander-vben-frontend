@@ -26,7 +26,7 @@ describe('protocol-lab/data', () => {
         PTZ_DIRECTIONS.map((b) => [b.command, b]),
       );
       // 后端支持：UP/DOWN/LEFT/RIGHT/UP_LEFT/UP_RIGHT/DOWN_LEFT/DOWN_RIGHT/STOP
-      expect(Object.keys(byKey).sort()).toEqual(
+      expect(Object.keys(byKey).toSorted()).toEqual(
         [
           'DOWN',
           'DOWN_LEFT',
@@ -37,7 +37,7 @@ describe('protocol-lab/data', () => {
           'UP',
           'UP_LEFT',
           'UP_RIGHT',
-        ].sort(),
+        ].toSorted(),
       );
       // STOP 居中（row2,col2），UP 居顶中（row1,col2），符合方向盘直觉
       expect(byKey.STOP).toMatchObject({ row: 2, col: 2 });
@@ -46,7 +46,7 @@ describe('protocol-lab/data', () => {
     });
 
     it('变倍按钮覆盖 ZOOM_IN / ZOOM_OUT', () => {
-      expect(PTZ_ZOOM.map((b) => b.command).sort()).toEqual([
+      expect(PTZ_ZOOM.map((b) => b.command).toSorted()).toEqual([
         'ZOOM_IN',
         'ZOOM_OUT',
       ]);

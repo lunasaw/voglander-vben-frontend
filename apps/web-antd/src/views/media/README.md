@@ -5,6 +5,7 @@
 媒体管理模块是独立的业务模块，主要负责流媒体相关功能的管理，包括节点管理、流媒体配置等功能。
 
 ## 技术栈
+
 - Vue 3 + TypeScript
 - Ant Design Vue
 - VxeTable 表格组件
@@ -43,14 +44,17 @@ apps/web-antd/src/api/media/
 ## 国际化配置
 
 ### 中文配置
+
 位置：`apps/web-antd/src/locales/langs/zh-CN/media.json`
 
 ### 英文配置
+
 位置：`apps/web-antd/src/locales/langs/en-US/media.json`
 
 ## 功能模块
 
 ### 1. 流媒体节点管理 (`/media/node`)
+
 - **功能描述**：管理流媒体服务节点，包括节点的创建、编辑、删除和状态监控
 - **权限控制**：
   - `Media:Node:List` - 节点列表查看
@@ -59,7 +63,9 @@ apps/web-antd/src/api/media/
   - `Media:Node:Delete` - 节点删除
 
 ### 2. 可扩展功能
+
 未来可以在此模块下扩展更多媒体相关功能：
+
 - 流媒体配置管理
 - 播放统计分析
 - 内容分发网络(CDN)管理
@@ -70,6 +76,7 @@ apps/web-antd/src/api/media/
 菜单SQL位置：`apps/web-antd/sql/media-menu-insert.sql`
 
 ### 菜单ID分配
+
 - **媒体管理模块**：300-399
 - **根目录菜单**：300
 - **节点管理页面**：301
@@ -97,5 +104,3 @@ apps/web-antd/src/api/media/
 2. **角色分配**：为相应角色分配媒体管理权限
 3. **功能测试**：确保所有CRUD操作正常工作
 4. **权限验证**：验证权限控制机制有效性
-
-

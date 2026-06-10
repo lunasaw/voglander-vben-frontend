@@ -274,7 +274,10 @@ export function useGridFormSchema(): VbenFormSchema[] {
 
 export function useColumns<T = MediaNodeApi.MediaNodeVO>(
   onActionClick: OnActionClickFn<T>,
-  onStatusChange?: (newStatus: any, row: T) => PromiseLike<boolean | undefined>,
+  _onStatusChange?: (
+    newStatus: any,
+    row: T,
+  ) => PromiseLike<boolean | undefined>,
   onEnabledChange?: (
     newEnabled: boolean,
     row: T,

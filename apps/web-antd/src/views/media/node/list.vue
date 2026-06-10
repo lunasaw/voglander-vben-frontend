@@ -131,7 +131,7 @@ function onDelete(row: MediaNodeApi.MediaNodeVO) {
     key: 'action_process_msg',
   });
 
-  deleteMediaNode(row.id!)
+  deleteMediaNode(row.id as number)
     .then(() => {
       message.success({
         content: $t('ui.actionMessage.deleteSuccess', [
@@ -206,7 +206,7 @@ async function onEnabledChange(
       `你要将流媒体节点【${row.name || row.serverId}】的启用状态切换为 【${statusText}】 吗？`,
       `切换启用状态`,
     );
-    await updateMediaNode({ id: row.id!, enabled: newEnabled });
+    await updateMediaNode({ id: row.id as number, enabled: newEnabled });
     return true;
   } catch {
     return false;
@@ -234,7 +234,10 @@ async function onHookEnabledChange(
       `你要将流媒体节点【${row.name || row.serverId}】的Hook状态切换为 【${statusText}】 吗？`,
       `切换Hook状态`,
     );
-    await updateMediaNode({ id: row.id!, hookEnabled: newHookEnabled });
+    await updateMediaNode({
+      id: row.id as number,
+      hookEnabled: newHookEnabled,
+    });
     return true;
   } catch {
     return false;

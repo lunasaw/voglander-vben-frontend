@@ -57,7 +57,7 @@ describe('protocolLab i18n —— 命名空间与 key 一致性', () => {
   });
 
   it('zh-CN 与 en-US 的 key 集合完全一致（无漂移）', () => {
-    expect(Object.keys(zh).sort()).toEqual(Object.keys(en).sort());
+    expect(Object.keys(zh).toSorted()).toEqual(Object.keys(en).toSorted());
   });
 
   it('两个语言包都含必备顶层段（title/menu/desc）', () => {

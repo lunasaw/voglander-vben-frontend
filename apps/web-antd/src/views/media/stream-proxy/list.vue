@@ -34,7 +34,6 @@ const nodeStore = useNodeStore();
 
 // 节点选择状态
 const currentNodeKey = ref<null | string>(null);
-const nodeSelectorRef = ref<InstanceType<typeof NodeSelector>>();
 
 // 节点列表加载完成处理
 function onNodeListLoaded(_nodes: MediaNodeApi.MediaNodeVO[]) {
@@ -55,7 +54,7 @@ async function onNodeSwitch(
     nodeStore.clearCurrentNodeKey();
     clearCurrentNodeKey(); // 清除全局状态
     // 清空表格数据
-    gridApi.getVxeInstance().clear();
+    gridApi.setGridOptions({ data: [] });
     return;
   }
 
@@ -244,7 +243,7 @@ function onDelete(row: StreamProxyApi.StreamProxyVO) {
     key: 'action_process_msg',
   });
 
-  deleteStreamProxyBusiness({ id: row.id! })
+  deleteStreamProxyBusiness({ id: row.id as number })
     .then(() => {
       message.success({
         content: $t('ui.actionMessage.deleteSuccess', [
@@ -336,7 +335,7 @@ async function onStatusChange(
       `你要将拉流代理【${row.app}/${row.stream}】的状态切换为 【${statusText}】 吗？`,
       `切换状态`,
     );
-    await updateStreamProxyStatus(row.id!, newStatus);
+    await updateStreamProxyStatus(row.id as number, newStatus);
     return true;
   } catch {
     return false;
@@ -356,7 +355,6 @@ async function onStatusChange(
 
     <!-- 节点选择区域 -->
     <NodeSelector
-      ref="nodeSelectorRef"
       v-model="currentNodeKey"
       :title="$t('media.node.selector.title')"
       :placeholder="$t('media.node.selector.placeholder')"
@@ -379,7 +377,7 @@ async function onStatusChange(
     <StreamDetailModal
       v-model:open="showStreamDetailModal"
       :stream-params="streamParams"
-      :node-key="currentNodeKey"
+      :node-key="currentNodeKey ?? undefined"
       :show-details="true"
     />
   </Page>

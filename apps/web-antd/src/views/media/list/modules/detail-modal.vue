@@ -13,7 +13,6 @@ interface Props {
 const props = defineProps<Props>();
 
 const visible = ref(false);
-const streamDetailModalRef = ref();
 
 // 计算流参数
 const streamParams = computed(() => {
@@ -44,7 +43,6 @@ defineExpose({
 <template>
   <!-- 使用StreamDetailModal替代整个Modal -->
   <StreamDetailModal
-    ref="streamDetailModalRef"
     :stream-params="streamParams"
     :node-key="nodeKey"
     :show-details="true"

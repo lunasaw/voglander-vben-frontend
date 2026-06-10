@@ -29,7 +29,7 @@ const [Form, formApi] = useVbenForm({
 
 function resetForm() {
   formApi.resetForm();
-  const resetData = formData.value || {};
+  const resetData: Partial<SystemDeptApi.SystemDept> = formData.value || {};
   // 过滤permissions数组中的null值
   if (resetData.permissions && Array.isArray(resetData.permissions)) {
     resetData.permissions = resetData.permissions.filter(
@@ -48,17 +48,9 @@ const [Modal, modalApi] = useVbenModal({
 
       // 过滤permissions数组中的null值
       if (data.permissions && Array.isArray(data.permissions)) {
-        const originalLength = data.permissions.length;
         data.permissions = data.permissions.filter(
           (item: any) => item !== null,
         );
-        console.log(
-          '过滤前permissions长度:',
-          originalLength,
-          '过滤后长度:',
-          data.permissions.length,
-        );
-        console.log('过滤后的permissions:', data.permissions);
       }
 
       try {

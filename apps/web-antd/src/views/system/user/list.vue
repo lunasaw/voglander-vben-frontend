@@ -165,9 +165,7 @@ function onCreate() {
         </Button>
       </template>
       <template #roles="{ row }">
-        <span v-if="!row.roles || row.roles.length === 0" class="text-gray-400"
-          >-</span
-        >
+        <span v-if="!row.roles?.length" class="text-gray-400">-</span>
         <div
           v-else
           class="flex max-w-full gap-1 overflow-x-auto"

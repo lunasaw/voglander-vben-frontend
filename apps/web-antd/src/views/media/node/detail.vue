@@ -638,7 +638,7 @@ const serverConfigTableData = computed(() => {
       key,
       value: value === null ? '-' : String(value),
     }))
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       const weightA = getConfigGroupWeight(a.key);
       const weightB = getConfigGroupWeight(b.key);
 

@@ -119,7 +119,7 @@ describe('useSseEvents —— 建连与 URL', () => {
     ]);
     const url = FakeEventSource.last().url;
     const param = decodeURIComponent(url.match(/topics=([^&]+)/)?.[1] ?? '');
-    expect(param.split(',').sort()).toEqual(['device', 'session']);
+    expect(param.split(',').toSorted()).toEqual(['device', 'session']);
   });
 });
 

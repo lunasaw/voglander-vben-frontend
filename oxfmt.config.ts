@@ -22,5 +22,6 @@ export default defineConfig({
     '.npmrc',
     '*-lock.yaml',
     'skills-lock.json',
+    '.playwright-mcp',
   ],
 });

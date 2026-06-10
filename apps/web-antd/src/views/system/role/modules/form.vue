@@ -7,7 +7,7 @@ import type { SystemRoleApi } from '#/api/system/role';
 
 import { computed, ref } from 'vue';
 
-import { useVbenDrawer, VbenTree } from '@vben/common-ui';
+import { Tree, useVbenDrawer } from '@vben/common-ui';
 import { IconifyIcon } from '@vben/icons';
 
 import { Spin } from 'ant-design-vue';
@@ -150,7 +150,7 @@ function handlePermissionsChange(value: any) {
     <Form>
       <template #permissions="slotProps">
         <Spin :spinning="loadingPermissions" wrapper-class-name="w-full">
-          <VbenTree
+          <Tree
             :tree-data="permissions"
             multiple
             bordered
@@ -166,7 +166,7 @@ function handlePermissionsChange(value: any) {
               <IconifyIcon v-if="value.meta.icon" :icon="value.meta.icon" />
               {{ $t(value.meta.title) }}
             </template>
-          </VbenTree>
+          </Tree>
         </Spin>
       </template>
     </Form>

@@ -39,7 +39,6 @@ const currentPlayUrls = ref<null | ZlmMediaApi.PlayUrls>(null);
 
 // 节点选择状态
 const currentNodeKey = ref<null | string>(null);
-const nodeSelectorRef = ref<InstanceType<typeof NodeSelector>>();
 
 // 节点列表加载完成处理
 function onNodeListLoaded(_nodes: MediaNodeApi.MediaNodeVO[]) {
@@ -60,7 +59,7 @@ async function onNodeSwitch(
     nodeStore.clearCurrentNodeKey();
     clearCurrentNodeKey(); // 清除全局状态
     // 清空表格数据
-    gridApi.clearData();
+    gridApi.setGridOptions({ data: [] });
     return;
   }
 
@@ -268,7 +267,11 @@ async function onViewDetails(row: ZlmMediaApi.MediaData) {
 
     // 设置数据并显示弹窗
     currentMediaInfo.value = mediaInfo;
-    currentPlayUrls.value = playUrls;
+    // play-urls 接口返回包装结构 {code,data,msg}，实际地址在 data
+    currentPlayUrls.value =
+      playUrls && 'data' in playUrls
+        ? playUrls.data
+        : (playUrls as unknown as ZlmMediaApi.PlayUrls);
     detailModalRef.value?.show();
   } catch (error) {
     message.destroy();
@@ -333,7 +336,6 @@ function handleExport() {
 
     <!-- 节点选择区域 -->
     <NodeSelector
-      ref="nodeSelectorRef"
       v-model="currentNodeKey"
       :title="$t('media.node.selector.title')"
       :placeholder="$t('media.node.selector.placeholder')"

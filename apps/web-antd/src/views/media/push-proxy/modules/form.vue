@@ -60,7 +60,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
         // 处理编辑模式的数据映射
         if (data.id) {
           // 从 extendObj 或 extend 字段中提取扩展配置
-          let extendData = {};
+          let extendData: Record<string, any> = {};
           let showAdvanced = false;
 
           if (data.extendObj && typeof data.extendObj === 'object') {
@@ -129,7 +129,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
         // 创建模式设置schema
         formApi.setState({ schema: useFormSchema(false) });
         formApi.resetForm();
-        localFormData.value = {};
+        localFormData.value = {} as PushProxyApi.PushProxyVO;
         isEditMode.value = false;
       }
     }
@@ -144,14 +144,12 @@ async function onSubmit() {
       const formValues = await formApi.getValues();
 
       // 构建提交数据
-      const data:
-        | PushProxyApi.PushProxyCreateReq
-        | PushProxyApi.PushProxyUpdateReq = {
+      const data: Record<string, any> = {
         ...formValues,
         // 如果是编辑模式且高级选项被展开，将扩展配置序列化到pushProxyExtendReq字段
         ...(localFormData.value?.id
           ? {
-              id: localFormData.value.id!,
+              id: localFormData.value.id as number,
               ...(formValues.showAdvanced
                 ? {
                     pushProxyExtendReq: {

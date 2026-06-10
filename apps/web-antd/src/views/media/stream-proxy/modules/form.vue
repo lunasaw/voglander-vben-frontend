@@ -151,7 +151,7 @@ async function onSubmit() {
       await (localFormData.value?.id
         ? updateStreamProxyBusiness(
             {
-              id: localFormData.value.id!,
+              id: localFormData.value.id as number,
               ...data,
             } as StreamProxyApi.StreamProxyUpdateReq,
             '更新拉流代理',
