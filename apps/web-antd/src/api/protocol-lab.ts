@@ -11,7 +11,13 @@ import { requestClient } from '#/api/request';
  * `responseReturn:'data'` + `successCode:0`，故下列函数直接拿到 `data` 本体。
  */
 export namespace ProtocolLabApi {
-  /** GET /lab/client/config 返回的身份与端口信息。 */
+  /**
+   * GET /lab/client/config 返回的身份与端口信息。
+   *
+   * 目标字段（serverId/serverIp/serverPort/serverDomain/transport）均为
+   * holder 覆盖后的「当前生效值」：未自定义时 = 本进程自环 sip.server.*，
+   * 自定义注册后 = holder 快照值。`targetCustomized` 标记当前是否非自环。
+   */
   export interface LabConfig {
     clientId: string;
     clientIp: string;
@@ -19,6 +25,12 @@ export namespace ProtocolLabApi {
     serverId: string;
     serverIp: string;
     serverPort: number;
+    /** 目标平台 SIP 域（realm 初始构造来源）。 */
+    serverDomain: string;
+    /** 当前生效的传输协议。 */
+    transport: 'TCP' | 'UDP';
+    /** true = 当前目标为自定义（非自环）。 */
+    targetCustomized: boolean;
     /** 后端已就绪的全部 SSE 主题（event: 名 = 完整 topic）。 */
     topics: string[];
   }
@@ -29,9 +41,29 @@ export namespace ProtocolLabApi {
     intervalSec: number;
   }
 
+  /**
+   * 设备注册请求。
+   *
+   * 目标 + 身份字段全空 = 注册到本进程自环（行为同现状）；任一非空 =
+   * 后端 `LabSessionHolder.apply(snapshot)`，把模拟设备注册到外部平台。
+   */
   export interface RegisterReq {
     /** 注册有效期（秒），注销时后端用 expires=0。 */
     expires?: number;
+    /** 目标平台编码（serverId）。 */
+    serverId?: string;
+    /** 目标平台 IP。 */
+    serverIp?: string;
+    /** 目标平台端口。 */
+    serverPort?: number;
+    /** 目标平台 SIP 域（realm 初始构造来源，选填）。 */
+    serverDomain?: string;
+    /** 传输协议（与外部平台一致，选填）。 */
+    transport?: 'TCP' | 'UDP';
+    /** 设备身份编码覆盖（空=用 sip.client）。 */
+    clientId?: string;
+    /** 设备身份密码覆盖（空=用后端配置）。 */
+    clientPassword?: string;
   }
 
   export interface KeepaliveAutoReq {

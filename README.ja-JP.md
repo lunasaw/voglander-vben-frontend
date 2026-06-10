@@ -2,10 +2,7 @@
   <h1>Voglander Admin · フロントエンド</h1>
   <p>映像監視 / ストリーミングメディア管理プラットフォームの Web 管理画面</p>
 
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Vue](https://img.shields.io/badge/Vue-3.x-42b883.svg)](https://vuejs.org/)
-[![Vite](https://img.shields.io/badge/Vite-6.x-646cff.svg)](https://vitejs.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)](https://www.typescriptlang.org/)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Vue](https://img.shields.io/badge/Vue-3.x-42b883.svg)](https://vuejs.org/) [![Vite](https://img.shields.io/badge/Vite-6.x-646cff.svg)](https://vitejs.dev/) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)](https://www.typescriptlang.org/)
 
 </div>
 
@@ -43,16 +40,16 @@ zlm-spring-boot-starter ──┘
 
 ## 技術スタック
 
-| カテゴリ | 採用技術 |
-|------|------|
-| フレームワーク | Vue 3 + TypeScript + Composition API |
-| ビルド | Vite + Turborepo + pnpm workspace（Monorepo） |
-| UI | Ant Design Vue（主）、Tailwind CSS |
-| 状態管理 | Pinia（永続化 + 暗号化） |
-| ルーティング | Vue Router 4（バックエンド駆動権限） |
-| テーブル / フォーム | VXE Table、Schema 駆動動的フォーム |
-| メディア | Video.js、FLV.js、HLS.js |
-| アイコン | `@vben/icons`（Lucide） |
+| カテゴリ            | 採用技術                                      |
+| ------------------- | --------------------------------------------- |
+| フレームワーク      | Vue 3 + TypeScript + Composition API          |
+| ビルド              | Vite + Turborepo + pnpm workspace（Monorepo） |
+| UI                  | Ant Design Vue（主）、Tailwind CSS            |
+| 状態管理            | Pinia（永続化 + 暗号化）                      |
+| ルーティング        | Vue Router 4（バックエンド駆動権限）          |
+| テーブル / フォーム | VXE Table、Schema 駆動動的フォーム            |
+| メディア            | Video.js、FLV.js、HLS.js                      |
+| アイコン            | `@vben/icons`（Lucide）                       |
 
 ## ディレクトリ構成
 
@@ -115,8 +112,8 @@ pnpm test:e2e       # Playwright E2E テスト
 
 モダンブラウザに対応、IE 非対応。ローカル開発では `Chrome 80+` を推奨します。
 
-| Edge | Firefox | Chrome | Safari |
-| :-: | :-: | :-: | :-: |
+|      Edge       |     Firefox     |     Chrome      |     Safari      |
+| :-------------: | :-------------: | :-------------: | :-------------: |
 | last 2 versions | last 2 versions | last 2 versions | last 2 versions |
 
 ## 謝辞とライセンス

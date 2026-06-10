@@ -1,7 +1,8 @@
 {
   "title": "GB28181 Protocol Lab",
-  "menu": "Protocol Lab",
-  "desc": "The left panel acts as the device (Client) registering and reporting to the platform; the right panel acts as the platform (Server) sensing the device and sending commands. Commands travel through real SIP exchanges and return to the left panel for display, used to visually verify the GB/T 28181 protocol chain.",
+  "category": "Protocol Verification",
+  "menu": "GB28181 Verification",
+  "desc": "Device side registers and reports on the left, platform side senses and sends commands on the right — visually verifying the GB/T 28181 chain over real SIP exchanges.",
   "sse": {
     "connected": "Live connected",
     "connecting": "Connecting…",
@@ -29,6 +30,30 @@
     "pushAlarm": "Push Alarm",
     "received": "Received Commands",
     "receivedEmpty": "No commands received yet. Send PTZ / Query Catalog / Reboot from the right panel to see them here in real time"
+  },
+  "register": {
+    "customized": "Custom",
+    "selfLoop": "Self-loop",
+    "toggle": "Custom Registration",
+    "toggleHint": "Registers to the local self-loop by default. Expand to fill in a target platform and device identity to register to any external GB28181 platform",
+    "targetGroup": "Target Platform",
+    "identityGroup": "Device Identity (optional)",
+    "serverId": "Platform ID",
+    "serverIdPh": "e.g. 34020000002000000001",
+    "serverIp": "Platform IP",
+    "serverPort": "Platform Port",
+    "serverDomain": "SIP Domain",
+    "transport": "Transport",
+    "clientId": "Device ID",
+    "clientPassword": "Device Password",
+    "optional": "Optional",
+    "serverIdRequired": "Platform ID is required for custom registration",
+    "serverIpRequired": "Platform IP is required for custom registration"
+  },
+  "section": {
+    "register": "Registration",
+    "heartbeat": "Keepalive",
+    "report": "Active Reporting"
   },
   "server": {
     "title": "Platform (Server)",

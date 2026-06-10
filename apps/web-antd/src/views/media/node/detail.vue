@@ -43,6 +43,7 @@ import {
 import NodeSelector from '#/components/NodeSelector.vue';
 import { $t } from '#/locales';
 import { useNodeStore } from '#/store';
+import { setCurrentNodeKey } from '#/utils/node-state';
 
 import { isNodeOnline } from './data';
 
@@ -396,7 +397,7 @@ async function onNodeSwitch(
 
     // 更新路由参数
     await router.push({
-      name: 'media.node.detail',
+      name: 'MediaNodeDetail',
       params: {
         nodeKey: nodeKeyStr,
       },
@@ -682,6 +683,10 @@ const configStats = computed(() => {
 watch(nodeKey, async (newNodeKey, oldNodeKey) => {
   if (newNodeKey && newNodeKey !== oldNodeKey) {
     try {
+      // 同步新 nodeKey 到全局模块镜像，保证后续 /zlm/api 请求头携带正确的 X-Node-Key
+      setCurrentNodeKey(newNodeKey);
+      nodeStore.setCurrentNodeKey(newNodeKey);
+
       // 清理旧数据
       versionData.value = null;
       apiListData.value = [];
@@ -704,6 +709,13 @@ watch(nodeKey, async (newNodeKey, oldNodeKey) => {
 
 // 组件挂载时加载数据
 onMounted(async () => {
+  // 同步路由参数中的 nodeKey 到全局模块镜像（请求拦截器据此注入 X-Node-Key）
+  // 必须在首次 refreshAllData() 之前执行，否则 /zlm/api 请求会因缺少 node key 而失败
+  if (nodeKey.value) {
+    setCurrentNodeKey(nodeKey.value);
+    nodeStore.setCurrentNodeKey(nodeKey.value);
+  }
+
   await refreshAllData();
 
   // 添加键盘快捷键监听

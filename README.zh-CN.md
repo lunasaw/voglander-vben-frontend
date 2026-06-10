@@ -2,10 +2,7 @@
   <h1>Voglander Admin · 前端</h1>
   <p>视频监控 / 流媒体管理平台的 Web 后台</p>
 
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Vue](https://img.shields.io/badge/Vue-3.x-42b883.svg)](https://vuejs.org/)
-[![Vite](https://img.shields.io/badge/Vite-6.x-646cff.svg)](https://vitejs.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)](https://www.typescriptlang.org/)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Vue](https://img.shields.io/badge/Vue-3.x-42b883.svg)](https://vuejs.org/) [![Vite](https://img.shields.io/badge/Vite-6.x-646cff.svg)](https://vitejs.dev/) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)](https://www.typescriptlang.org/)
 
 </div>
 
@@ -43,16 +40,16 @@ zlm-spring-boot-starter ──┘
 
 ## 技术栈
 
-| 类别 | 选型 |
-|------|------|
-| 框架 | Vue 3 + TypeScript + Composition API |
-| 构建 | Vite + Turborepo + pnpm workspace（Monorepo） |
-| UI | Ant Design Vue（主）、Tailwind CSS |
-| 状态 | Pinia（持久化 + 加密） |
-| 路由 | Vue Router 4（后端驱动权限） |
-| 表格 / 表单 | VXE Table、Schema 驱动动态表单 |
-| 媒体 | Video.js、FLV.js、HLS.js |
-| 图标 | `@vben/icons`（Lucide） |
+| 类别        | 选型                                          |
+| ----------- | --------------------------------------------- |
+| 框架        | Vue 3 + TypeScript + Composition API          |
+| 构建        | Vite + Turborepo + pnpm workspace（Monorepo） |
+| UI          | Ant Design Vue（主）、Tailwind CSS            |
+| 状态        | Pinia（持久化 + 加密）                        |
+| 路由        | Vue Router 4（后端驱动权限）                  |
+| 表格 / 表单 | VXE Table、Schema 驱动动态表单                |
+| 媒体        | Video.js、FLV.js、HLS.js                      |
+| 图标        | `@vben/icons`（Lucide）                       |
 
 ## 目录结构
 
@@ -115,8 +112,8 @@ pnpm test:e2e       # Playwright E2E 测试
 
 支持现代浏览器，不支持 IE。本地开发推荐 `Chrome 80+`。
 
-| Edge | Firefox | Chrome | Safari |
-| :-: | :-: | :-: | :-: |
+|      Edge       |     Firefox     |     Chrome      |     Safari      |
+| :-------------: | :-------------: | :-------------: | :-------------: |
 | last 2 versions | last 2 versions | last 2 versions | last 2 versions |
 
 ## 致谢与许可

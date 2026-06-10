@@ -1,7 +1,8 @@
 {
   "title": "GB28181 协议验证台",
-  "menu": "协议验证台",
-  "desc": "左侧作为设备端(Client)向平台注册并上报，右侧作为平台端(Server)感知设备并下发指令；指令经真实 SIP 交互后回到左侧展示，用于可视化验证 GB/T 28181 协议链路。",
+  "category": "协议验证",
+  "menu": "GB28181验证",
+  "desc": "左侧设备端注册上报，右侧平台端感知下发，经真实 SIP 交互可视化验证 GB/T 28181 协议链路。",
   "sse": {
     "connected": "实时连接已建立",
     "connecting": "连接中…",
@@ -29,6 +30,30 @@
     "pushAlarm": "上报告警",
     "received": "收到指令",
     "receivedEmpty": "暂无收到的指令，右侧下发 PTZ / 查目录 / 重启后这里会实时显示"
+  },
+  "register": {
+    "customized": "自定义",
+    "selfLoop": "自环",
+    "toggle": "自定义注册信息",
+    "toggleHint": "默认注册到本进程自环；展开后可填目标平台与设备身份，注册到任意外部 GB28181 平台",
+    "targetGroup": "目标平台",
+    "identityGroup": "设备身份（选填）",
+    "serverId": "平台编码",
+    "serverIdPh": "如 34020000002000000001",
+    "serverIp": "平台 IP",
+    "serverPort": "平台端口",
+    "serverDomain": "SIP 域",
+    "transport": "传输协议",
+    "clientId": "设备编码",
+    "clientPassword": "设备密码",
+    "optional": "选填",
+    "serverIdRequired": "自定义注册时平台编码必填",
+    "serverIpRequired": "自定义注册时平台 IP 必填"
+  },
+  "section": {
+    "register": "注册控制",
+    "heartbeat": "心跳保活",
+    "report": "主动上报"
   },
   "server": {
     "title": "平台端 (Server)",

@@ -16,6 +16,13 @@
 
 所有新增代码均严格对齐后端真实契约（逐文件核对 `LabClientController` + 5 个 `Lab*Listener` + `Gb28181ProtocolHandler` + `SseController`），**未发明任何字段或端点**。
 
+> ### 🔧 审核修订（2026-06-05，逐文件复核后端 + 前端源码）
+>
+> 后端契约对齐经独立复核**全部属实**（8 个 `/lab/client/*` 端点、5 个右侧复用端点、SSE `event:`=完整 topic、前缀域订阅 `matches()`、PTZ 词表、payload 字段逐条命中）。但发现并修复**一个构建/类型门禁抓不到的运行时缺陷**：
+>
+> - **i18n 命名空间不匹配（已修）**：`loadLocalesMapFromDir`（`packages/locales/src/i18n.ts`）用**原始文件名**做命名空间且不做大小写转换。原文件名 `protocol-lab.json` → 命名空间 `protocol-lab`，而全部 51 处代码引用为 `protocolLab.*`（camelCase）→ 运行时全部 miss，菜单/页头/按钮会渲染成原始 key 串。`typecheck` 与 `build` **不校验 i18n 运行时 key**，故"门禁全绿"为真、页面文案却是坏的。 **修复**：将 `zh-CN/protocol-lab.json`、`en-US/protocol-lab.json` 重命名为 **`protocolLab.json`**（命名空间随之变为 `protocolLab`，51 处引用零改动全部命中）。§3 文件清单已同步更新。
+> - **门禁未复跑**：上表为初次实现的记录；本次审核仅核源码正确性，未重跑 `typecheck`/`build`。i18n 重命名后建议本地 `pnpm dev:antd` 实看文案 + 复跑一次 `pnpm build:antd`。
+
 ---
 
 ## 0. TL;DR
@@ -114,8 +121,8 @@ apps/web-antd/src/
 ├── api/protocol-lab.ts                              # ✅ API 模块：8 个左侧 client + 5 个右侧复用 + 类型
 ├── composables/useSseEvents.ts                      # ✅ SSE 封装：token/前缀订阅/完整topic分流/去重/重连/背压
 ├── router/routes/modules/protocol-lab.ts            # ✅ 路由（order 9995，icon mdi:lan-connect，auto-glob 加载）
-├── locales/langs/zh-CN/protocol-lab.json            # ✅ 中文 i18n（auto-glob 加载，无需注册）
-├── locales/langs/en-US/protocol-lab.json            # ✅ 英文 i18n
+├── locales/langs/zh-CN/protocolLab.json             # ✅ 中文 i18n（文件名=命名空间，须 protocolLab 而非 protocol-lab）
+├── locales/langs/en-US/protocolLab.json             # ✅ 英文 i18n（同上）
 └── views/protocol-lab/
     ├── index.vue                                    # ✅ 容器：拉 config → 建 SSE → 按方向分发左右
     ├── data.ts                                      # ✅ PTZ 方向盘元数据 + topic→文案/颜色映射
@@ -126,6 +133,8 @@ apps/web-antd/src/
 ```
 
 > i18n 与路由均靠 `import.meta.glob` 自动加载（`locales/index.ts` glob `./langs/**/*.json`；`router/routes/index.ts` glob `./modules/**/*.ts`），新增文件**零注册**即生效。
+>
+> ⚠ **i18n 文件名即命名空间（踩坑点）**：`loadLocalesMapFromDir` 用**原始文件名**作为 i18n 命名空间，**不做 kebab→camel 转换**。代码统一用 `$t('protocolLab.*')`（camelCase，含 `data.ts` 的 `protocolLab.ptz.*` / `protocolLab.event.*`、路由 `protocolLab.title/menu`、两个 Panel 的全部标签），故文件名**必须**是 `protocolLab.json`。若误用 `protocol-lab.json`，typecheck/build 全过但运行时 51 处 key 全 miss、页面渲染原始 key 串（dev 下 `missingWarn` 会在控制台告警，prod 静默）。
 
 ---
 
@@ -205,6 +214,8 @@ cd vue-vben-admin && pnpm build:antd                  # ✅ 11/11 task；产出 
 ```
 
 > ⚠ **构建踩坑记录**：直接 `cd apps/web-antd && pnpm build` 会因 `@vben-core/design` 等 `@core` 工作区包**无 `dist/`**（dev 走 `development` 条件读 src，生产走 `default` 读 dist）而失败。必须用根目录 **`pnpm build:antd`**（turbo 先按依赖图构建工作区包）。typecheck 不受影响（走 src）。
+>
+> ⚠ **门禁盲区（审核补充）**：`typecheck` 与 `build` 均**不校验 i18n 运行时 key 是否存在**——i18n 命名空间错配（见 §0 审核修订 / §3 踩坑点）能让两道门禁全绿、页面文案却全坏。此类缺陷**只能靠 `pnpm dev:antd` 实跑肉眼核对**（dev 下控制台 `missingWarn` 会打印 `Not found 'protocolLab.xxx' key`）。i18n 文件重命名后请务必复跑 dev 实看 + 复跑一次 `build:antd`。
 
 ---
 

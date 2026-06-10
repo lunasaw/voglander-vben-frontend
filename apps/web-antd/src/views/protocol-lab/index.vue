@@ -67,7 +67,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Page :title="$t('protocolLab.title')" :description="$t('protocolLab.desc')">
+  <Page :title="$t('protocolLab.title')">
+    <template #description>
+      <p class="lab-desc text-muted-foreground">{{ $t('protocolLab.desc') }}</p>
+    </template>
     <template #extra>
       <div class="header-extra">
         <Badge
@@ -99,8 +102,14 @@ onMounted(async () => {
 <style scoped>
 .header-extra {
   display: flex;
+  flex-shrink: 0;
   gap: 12px;
   align-items: center;
+}
+
+.lab-desc {
+  max-width: 720px;
+  margin: 0;
 }
 
 .lab-grid {
@@ -108,9 +117,9 @@ onMounted(async () => {
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 
-  /* 视口高度减去顶栏/页头预留，保证两栏时间线可滚动 */
-  height: calc(100vh - 220px);
-  min-height: 560px;
+  /* 视口高度减去顶栏/页头预留；左栏控件多时内部滚动，时间线最低 260px 不被压扁 */
+  height: calc(100vh - 200px);
+  min-height: 640px;
 }
 
 @media (max-width: 1100px) {

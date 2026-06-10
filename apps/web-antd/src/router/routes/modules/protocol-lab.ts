@@ -7,7 +7,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       icon: 'mdi:lan-connect',
       order: 9995,
-      title: $t('protocolLab.title'),
+      title: $t('protocolLab.category'),
     },
     name: 'ProtocolLab',
     path: '/protocol-lab',

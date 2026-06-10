@@ -175,7 +175,7 @@ function onServerIdClick(row: MediaNodeApi.MediaNodeVO) {
   }
 
   router.push({
-    name: 'media.node.detail',
+    name: 'MediaNodeDetail',
     params: {
       nodeKey: row.serverId,
     },

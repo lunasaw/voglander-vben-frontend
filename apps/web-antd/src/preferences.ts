@@ -10,6 +10,6 @@ export const overridesPreferences = defineOverridesPreferences({
   app: {
     name: import.meta.env.VITE_APP_TITLE,
     accessMode: 'backend',
-    locale: 'en-US', // 设置默认语言为英文
+    locale: 'zh-CN', // 设置默认语言为中文
   },
 });
