@@ -118,9 +118,7 @@ describe('useSseEvents —— 建连与 URL', () => {
       'session.bye',
     ]);
     const url = FakeEventSource.last().url;
-    const param = decodeURIComponent(
-      url.match(/topics=([^&]+)/)?.[1] ?? '',
-    );
+    const param = decodeURIComponent(url.match(/topics=([^&]+)/)?.[1] ?? '');
     expect(param.split(',').sort()).toEqual(['device', 'session']);
   });
 });
