@@ -10,13 +10,18 @@ import {
   ref,
 } from 'vue';
 
-import { useStore } from '@vben-core/shared/store';
+import { usePreferences } from '@vben-core/preferences';
+import { useSelector } from '@vben-core/shared/store';
 
 import { ModalApi } from './modal-api';
 import VbenModal from './modal.vue';
 
 const USER_MODAL_INJECT_KEY = Symbol('VBEN_MODAL_INJECT');
 
+const { globalEscapeShortcutKey } = usePreferences();
+/**
+ * 默认配置
+ */
 const DEFAULT_MODAL_PROPS: Partial<ModalProps> = {};
 
 export function setDefaultModalProps(props: Partial<ModalProps>) {
@@ -29,6 +34,10 @@ export function useVbenModal<TParentModalProps extends ModalProps = ModalProps>(
   // Modal一般会抽离出来，所以如果有传入 connectedComponent，则表示为外部调用，与内部组件进行连接
   // 外部的Modal通过provide/inject传递api
 
+  const defaultOptions = {
+    closeOnPressEscape: globalEscapeShortcutKey.value, // 全局Esc快捷键配置
+    ...options,
+  };
   const { connectedComponent } = options;
   if (connectedComponent) {
     const extendedApi = reactive({});
@@ -41,7 +50,8 @@ export function useVbenModal<TParentModalProps extends ModalProps = ModalProps>(
             // 不能用 Object.assign,会丢失 api 的原型函数
             Object.setPrototypeOf(extendedApi, api);
           },
-          options,
+          consumed: false,
+          options: defaultOptions,
           async reCreateModal() {
             isModalReady.value = false;
             await nextTick();
@@ -73,12 +83,18 @@ export function useVbenModal<TParentModalProps extends ModalProps = ModalProps>(
     return [Modal, extendedApi as ExtendedModalApi] as const;
   }
 
-  const injectData = inject<any>(USER_MODAL_INJECT_KEY, {});
+  let injectData = inject<any>(USER_MODAL_INJECT_KEY, {});
+  // 这个数据已经被使用了，说明这个弹窗是嵌套的弹窗，不应该merge上层的配置
+  if (injectData.consumed) {
+    injectData = {};
+  } else {
+    injectData.consumed = true;
+  }
 
   const mergedOptions = {
     ...DEFAULT_MODAL_PROPS,
     ...injectData.options,
-    ...options,
+    ...defaultOptions,
   } as ModalApiOptions;
 
   mergedOptions.onOpenChange = (isOpen: boolean) => {
@@ -90,6 +106,7 @@ export function useVbenModal<TParentModalProps extends ModalProps = ModalProps>(
   mergedOptions.onClosed = () => {
     onClosed?.();
     if (mergedOptions.destroyOnClose) {
+      injectData.consumed = false;
       injectData.reCreateModal?.();
     }
   };
@@ -99,7 +116,7 @@ export function useVbenModal<TParentModalProps extends ModalProps = ModalProps>(
   const extendedApi: ExtendedModalApi = api as never;
 
   extendedApi.useStore = (selector) => {
-    return useStore(api.store, selector);
+    return useSelector(api.store, selector);
   };
 
   const Modal = defineComponent(

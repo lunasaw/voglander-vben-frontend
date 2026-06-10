@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { useAppConfig } from '@vben/hooks';
-import { MdiGithub, MdiGoogle, MdiQqchat, MdiWechat } from '@vben/icons';
+import {
+  SvgGithubIcon,
+  SvgGoogleIcon,
+  SvgQQChatIcon,
+  SvgWeChatIcon,
+} from '@vben/icons';
 import { $t } from '@vben/locales';
 
 import { VbenIconButton } from '@vben-core/shadcn-ui';
@@ -19,11 +24,11 @@ const {
 <template>
   <div class="w-full sm:mx-auto md:max-w-md">
     <div class="mt-4 flex items-center justify-between">
-      <span class="border-input w-[35%] border-b dark:border-gray-600"></span>
-      <span class="text-muted-foreground text-center text-xs uppercase">
+      <span class="w-[35%] border-b border-input dark:border-gray-600"></span>
+      <span class="text-center text-xs text-muted-foreground uppercase">
         {{ $t('authentication.thirdPartyLogin') }}
       </span>
-      <span class="border-input w-[35%] border-b dark:border-gray-600"></span>
+      <span class="w-[35%] border-b border-input dark:border-gray-600"></span>
     </div>
 
     <div class="mt-4 flex flex-wrap justify-center">
@@ -32,28 +37,28 @@ const {
         tooltip-side="top"
         class="mb-3"
       >
-        <MdiWechat />
+        <SvgWeChatIcon />
       </VbenIconButton>
       <VbenIconButton
         :tooltip="$t('authentication.qqLogin')"
         tooltip-side="top"
         class="mb-3"
       >
-        <MdiQqchat />
+        <SvgQQChatIcon />
       </VbenIconButton>
       <VbenIconButton
         :tooltip="$t('authentication.githubLogin')"
         tooltip-side="top"
         class="mb-3"
       >
-        <MdiGithub />
+        <SvgGithubIcon />
       </VbenIconButton>
       <VbenIconButton
         :tooltip="$t('authentication.googleLogin')"
         tooltip-side="top"
         class="mb-3"
       >
-        <MdiGoogle />
+        <SvgGoogleIcon />
       </VbenIconButton>
       <DingdingLogin
         v-if="dingdingAuthConfig"

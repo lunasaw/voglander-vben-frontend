@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 
-import { RiDingding } from '@vben/icons';
+import { SvgDingDingIcon } from '@vben/icons';
 import { $t } from '@vben/locales';
 
 import { alert, useVbenModal } from '@vben-core/popup-ui';
@@ -25,7 +25,7 @@ const [Modal, modalApi] = useVbenModal({
   header: false,
   footer: false,
   fullscreenButton: false,
-  class: 'w-[302px] h-[302px] dingding-qrcode-login-modal',
+  class: 'size-75.5 dingding-qrcode-login-modal',
   onOpened() {
     handleQrCodeLogin();
   },
@@ -96,7 +96,7 @@ const handleLogin = () => {
       :tooltip="$t('authentication.dingdingLogin')"
       tooltip-side="top"
     >
-      <RiDingding />
+      <SvgDingDingIcon />
     </VbenIconButton>
     <Modal>
       <div id="dingding_qrcode_login_element"></div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DialogContentEmits, DialogContentProps } from 'radix-vue';
+import type { DialogContentEmits, DialogContentProps } from 'reka-ui';
 
 import type { SheetVariants } from './sheet';
 
@@ -7,7 +7,7 @@ import { computed, ref } from 'vue';
 
 import { cn } from '@vben-core/shared/utils';
 
-import { DialogContent, DialogPortal, useForwardPropsEmits } from 'radix-vue';
+import { DialogContent, useForwardPropsEmits } from 'reka-ui';
 
 import { sheetVariants } from './sheet';
 import SheetOverlay from './SheetOverlay.vue';
@@ -73,7 +73,7 @@ function onAnimationEnd(event: AnimationEvent) {
 </script>
 
 <template>
-  <DialogPortal :to="appendTo">
+  <Teleport defer :to="appendTo">
     <Transition name="fade">
       <SheetOverlay
         v-if="open && modal"
@@ -98,10 +98,10 @@ function onAnimationEnd(event: AnimationEvent) {
       <slot></slot>
 
       <!-- <DialogClose
-        class="data-[state=open]:bg-secondary absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none"
+        class="data-[state=open]:bg-secondary absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-hidden disabled:pointer-events-none"
       >
         <Cross2Icon class="h-5 w-" />
       </DialogClose> -->
     </DialogContent>
-  </DialogPortal>
+  </Teleport>
 </template>

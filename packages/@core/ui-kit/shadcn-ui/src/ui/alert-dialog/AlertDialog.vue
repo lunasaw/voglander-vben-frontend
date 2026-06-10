@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { AlertDialogEmits, AlertDialogProps } from 'radix-vue';
+import type { AlertDialogEmits, AlertDialogProps } from 'reka-ui';
 
-import { AlertDialogRoot, useForwardPropsEmits } from 'radix-vue';
+import { AlertDialogRoot, useForwardPropsEmits } from 'reka-ui';
 
 const props = defineProps<AlertDialogProps>();
 const emits = defineEmits<AlertDialogEmits>();
@@ -10,7 +10,11 @@ const forwarded = useForwardPropsEmits(props, emits);
 </script>
 
 <template>
-  <AlertDialogRoot v-bind="forwarded">
-    <slot></slot>
+  <AlertDialogRoot
+    v-slot="slotProps"
+    data-slot="alert-dialog"
+    v-bind="forwarded"
+  >
+    <slot v-bind="slotProps"></slot>
   </AlertDialogRoot>
 </template>

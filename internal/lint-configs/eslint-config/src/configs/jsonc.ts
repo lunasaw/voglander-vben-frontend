@@ -3,17 +3,12 @@ import type { Linter } from 'eslint';
 import { interopDefault } from '../util';
 
 export async function jsonc(): Promise<Linter.Config[]> {
-  const [pluginJsonc, parserJsonc] = await Promise.all([
-    interopDefault(import('eslint-plugin-jsonc')),
-    interopDefault(import('jsonc-eslint-parser')),
-  ] as const);
+  const pluginJsonc = await interopDefault(import('eslint-plugin-jsonc'));
 
   return [
     {
       files: ['**/*.json', '**/*.json5', '**/*.jsonc', '*.code-workspace'],
-      languageOptions: {
-        parser: parserJsonc as any,
-      },
+      language: 'jsonc/x',
       plugins: {
         jsonc: pluginJsonc as any,
       },
@@ -48,6 +43,7 @@ export async function jsonc(): Promise<Linter.Config[]> {
     },
     sortTsconfig(),
     sortPackageJson(),
+    sortCspellJson(),
   ];
 }
 
@@ -124,6 +120,21 @@ function sortPackageJson(): Linter.Config {
         {
           order: ['types', 'import', 'require', 'default'],
           pathPattern: '^exports.*$',
+        },
+      ],
+    },
+  };
+}
+
+function sortCspellJson(): Linter.Config {
+  return {
+    files: ['**/cspell.json', '**/.cspell.json'],
+    rules: {
+      'jsonc/sort-array-values': [
+        'error',
+        {
+          order: { type: 'asc' },
+          pathPattern: '^words$|^ignorePaths$',
         },
       ],
     },

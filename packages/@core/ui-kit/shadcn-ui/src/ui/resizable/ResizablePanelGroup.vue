@@ -1,37 +1,32 @@
 <script setup lang="ts">
-import type { SplitterGroupEmits, SplitterGroupProps } from 'radix-vue';
+import type { SplitterGroupEmits, SplitterGroupProps } from 'reka-ui';
 
 import type { HTMLAttributes } from 'vue';
 
-import { computed } from 'vue';
-
 import { cn } from '@vben-core/shared/utils';
 
-import { SplitterGroup, useForwardPropsEmits } from 'radix-vue';
+import { reactiveOmit } from '@vueuse/core';
+import { SplitterGroup, useForwardPropsEmits } from 'reka-ui';
 
 const props = defineProps<
   SplitterGroupProps & { class?: HTMLAttributes['class'] }
 >();
 const emits = defineEmits<SplitterGroupEmits>();
 
-const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props;
-  return delegated;
-});
+const delegatedProps = reactiveOmit(props, 'class');
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits);
 </script>
 
 <template>
   <SplitterGroup
+    v-slot="slotProps"
+    data-slot="resizable-panel-group"
     v-bind="forwarded"
     :class="
-      cn(
-        'flex h-full w-full data-[panel-group-direction=vertical]:flex-col',
-        props.class,
-      )
+      cn('flex h-full w-full data-[orientation=vertical]:flex-col', props.class)
     "
   >
-    <slot></slot>
+    <slot v-bind="slotProps"></slot>
   </SplitterGroup>
 </template>

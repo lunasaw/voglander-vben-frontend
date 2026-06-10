@@ -7,7 +7,7 @@ import { useAccess } from '@vben/access';
 import { Page } from '@vben/common-ui';
 import { resetAllStores, useUserStore } from '@vben/stores';
 
-import { Button, Card } from 'ant-design-vue';
+import { Button, Card } from 'antdv-next';
 
 import { useAuthStore } from '#/store';
 
@@ -71,7 +71,7 @@ async function handleToggleAccessMode() {
   >
     <Card class="mb-5" title="权限模式">
       <span class="font-semibold">当前权限模式:</span>
-      <span class="text-primary mx-4">{{
+      <span class="mx-4 text-primary">{{
         accessMode === 'frontend' ? '前端权限控制' : '后端权限控制'
       }}</span>
       <Button type="primary" @click="handleToggleAccessMode">

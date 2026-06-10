@@ -3,7 +3,7 @@ import type { VxeGridProps } from '#/adapter/vxe-table';
 
 import { Page } from '@vben/common-ui';
 
-import { Button, Image, Switch, Tag } from 'ant-design-vue';
+import { Button, Image, Switch, Tag } from 'antdv-next';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getExampleTableApi } from '#/api';
@@ -95,7 +95,7 @@ const [Grid] = useVbenVxeGrid({ gridOptions });
         <Image :src="row.imageUrl" height="30" width="30" />
       </template>
       <template #open="{ row }">
-        <Switch v-model:checked="row.open" />
+        <Switch v-model="row.open" />
       </template>
       <template #status="{ row }">
         <Tag :color="row.color">{{ row.status }}</Tag>

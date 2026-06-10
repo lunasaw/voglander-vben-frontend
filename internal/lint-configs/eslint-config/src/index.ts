@@ -1,23 +1,16 @@
 import type { Linter } from 'eslint';
 
 import {
-  command,
-  comments,
-  disableds,
   ignores,
-  importPluginConfig,
   javascript,
-  jsdoc,
   jsonc,
   node,
   perfectionist,
-  prettier,
-  regexp,
-  test,
-  turbo,
+  pnpm,
   typescript,
   unicorn,
   vue,
+  yaml,
 } from './configs';
 import { customConfig } from './custom-config';
 
@@ -34,20 +27,13 @@ async function defineConfig(config: FlatConfig[] = []) {
     vue(),
     javascript(),
     ignores(),
-    prettier(),
     typescript(),
     jsonc(),
-    disableds(),
-    importPluginConfig(),
     node(),
     perfectionist(),
-    comments(),
-    jsdoc(),
     unicorn(),
-    test(),
-    regexp(),
-    command(),
-    turbo(),
+    yaml(),
+    pnpm(),
     ...customConfig,
     ...config,
   ];

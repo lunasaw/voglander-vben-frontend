@@ -9,23 +9,30 @@ import type {
 import { mapTree } from '@vben-core/shared/utils';
 
 /**
+ * 判断路由是否在菜单中显示但访问时展示 403（让用户知悉功能并申请权限）
+ */
+function menuHasVisibleWithForbidden(route: RouteRecordRaw): boolean {
+  return !!route.meta?.menuVisibleWithForbidden;
+}
+
+/**
  * 动态生成路由 - 后端方式
+ * 对 meta.menuVisibleWithForbidden 为 true 的项直接替换为 403 组件，让用户知悉功能并申请权限。
  */
 async function generateRoutesByBackend(
   options: GenerateMenuAndRoutesOptions,
 ): Promise<RouteRecordRaw[]> {
-  console.log('🌐 generateRoutesByBackend 开始执行', options);
-
-  const { fetchMenuListAsync, layoutMap = {}, pageMap = {} } = options;
-
-  console.log('🔍 fetchMenuListAsync 是否存在:', !!fetchMenuListAsync);
+  const {
+    fetchMenuListAsync,
+    layoutMap = {},
+    pageMap = {},
+    forbiddenComponent,
+  } = options;
 
   try {
     const menuRoutes = await fetchMenuListAsync?.();
-    console.log('📋 后端菜单数据:', menuRoutes);
 
     if (!menuRoutes) {
-      console.log('⚠️ 没有获取到菜单数据，返回空数组');
       return [];
     }
 
@@ -35,8 +42,16 @@ async function generateRoutesByBackend(
       normalizePageMap[normalizeViewPath(key)] = value;
     }
 
-    const routes = convertRoutes(menuRoutes, layoutMap, normalizePageMap);
-    console.log('🎯 生成的后端路由:', routes);
+    let routes = convertRoutes(menuRoutes, layoutMap, normalizePageMap);
+
+    if (forbiddenComponent) {
+      routes = mapTree(routes, (route) => {
+        if (menuHasVisibleWithForbidden(route)) {
+          route.component = forbiddenComponent;
+        }
+        return route;
+      });
+    }
 
     return routes;
   } catch (error) {

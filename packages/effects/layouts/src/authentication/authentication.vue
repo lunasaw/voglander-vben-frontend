@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { ToolbarType } from './types';
 
+import { computed } from 'vue';
+
 import { preferences, usePreferences } from '@vben/preferences';
 
 import { Copyright } from '../basic/copyright';
@@ -11,6 +13,7 @@ import Toolbar from './toolbar.vue';
 interface Props {
   appName?: string;
   logo?: string;
+  logoDark?: string;
   pageTitle?: string;
   pageDescription?: string;
   sloganImage?: string;
@@ -20,10 +23,11 @@ interface Props {
   clickLogo?: () => void;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   appName: '',
   copyright: true,
   logo: '',
+  logoDark: '',
   pageDescription: '',
   pageTitle: '',
   sloganImage: '',
@@ -34,12 +38,24 @@ withDefaults(defineProps<Props>(), {
 
 const { authPanelCenter, authPanelLeft, authPanelRight, isDark } =
   usePreferences();
+
+/**
+ * @zh_CN 根据主题选择合适的 logo 图标
+ */
+const logoSrc = computed(() => {
+  // 如果是暗色主题且提供了 logoDark，则使用暗色主题的 logo
+  if (isDark.value && props.logoDark) {
+    return props.logoDark;
+  }
+  // 否则使用默认的 logo
+  return props.logo;
+});
 </script>
 
 <template>
   <div
     :class="[isDark ? 'dark' : '']"
-    class="flex min-h-full flex-1 select-none overflow-x-hidden"
+    class="flex min-h-full flex-1 overflow-x-hidden select-none"
   >
     <template v-if="toolbar">
       <slot name="toolbar">
@@ -50,7 +66,7 @@ const { authPanelCenter, authPanelLeft, authPanelRight, isDark } =
     <AuthenticationFormView
       v-if="authPanelLeft"
       class="min-h-full w-2/5 flex-1"
-      transition-name="slide-left"
+      data-side="left"
     >
       <template v-if="copyright" #copyright>
         <slot name="copyright">
@@ -65,14 +81,21 @@ const { authPanelCenter, authPanelLeft, authPanelRight, isDark } =
     <slot name="logo">
       <!-- 头部 Logo 和应用名称 -->
       <div
-        v-if="logo || appName"
-        class="absolute left-0 top-0 z-10 flex flex-1"
+        v-if="logoSrc || appName"
+        class="absolute top-0 left-0 z-10 flex flex-1"
         @click="clickLogo"
       >
         <div
-          class="text-foreground lg:text-foreground ml-4 mt-4 flex flex-1 items-center sm:left-6 sm:top-6"
+          class="mt-4 ml-4 flex flex-1 items-center text-foreground sm:top-6 sm:left-6 lg:text-foreground"
         >
-          <img v-if="logo" :alt="appName" :src="logo" class="mr-2" width="42" />
+          <img
+            v-if="logoSrc"
+            :key="logoSrc"
+            :alt="appName"
+            :src="logoSrc"
+            class="mr-2"
+            width="42"
+          />
           <p v-if="appName" class="m-0 text-xl font-medium">
             {{ appName }}
           </p>
@@ -83,22 +106,29 @@ const { authPanelCenter, authPanelLeft, authPanelRight, isDark } =
     <!-- 系统介绍 -->
     <div v-if="!authPanelCenter" class="relative hidden w-0 flex-1 lg:block">
       <div
-        class="bg-background-deep absolute inset-0 h-full w-full dark:bg-[#070709]"
+        class="absolute inset-0 size-full bg-background-deep dark:bg-[#070709]"
       >
-        <div class="login-background absolute left-0 top-0 size-full"></div>
-        <div class="flex-col-center -enter-x mr-20 h-full">
+        <div class="login-background absolute top-0 left-0 size-full"></div>
+        <div
+          :key="authPanelLeft ? 'left' : authPanelRight ? 'right' : 'center'"
+          class="mr-20 flex-col-center h-full"
+          :class="{
+            'enter-x': authPanelLeft,
+            '-enter-x': authPanelRight,
+          }"
+        >
           <template v-if="sloganImage">
             <img
               :alt="appName"
               :src="sloganImage"
-              class="animate-float h-64 w-2/5"
+              class="h-64 w-2/5 animate-float"
             />
           </template>
-          <SloganIcon v-else :alt="appName" class="animate-float h-64 w-2/5" />
-          <div class="text-1xl text-foreground mt-6 font-sans lg:text-2xl">
+          <SloganIcon v-else :alt="appName" class="h-64 w-2/5 animate-float" />
+          <div class="text-1xl mt-6 font-sans text-foreground lg:text-2xl">
             {{ pageTitle }}
           </div>
-          <div class="dark:text-muted-foreground mt-2">
+          <div class="mt-2 dark:text-muted-foreground">
             {{ pageDescription }}
           </div>
         </div>
@@ -106,10 +136,11 @@ const { authPanelCenter, authPanelLeft, authPanelRight, isDark } =
     </div>
 
     <!-- 中心认证面板 -->
-    <div v-if="authPanelCenter" class="flex-center relative w-full">
-      <div class="login-background absolute left-0 top-0 size-full"></div>
+    <div v-if="authPanelCenter" class="relative flex-center w-full">
+      <div class="login-background absolute top-0 left-0 size-full"></div>
       <AuthenticationFormView
-        class="md:bg-background shadow-primary/5 shadow-float w-full rounded-3xl pb-20 md:w-2/3 lg:w-1/2 xl:w-[36%]"
+        class="w-full rounded-3xl pb-20 shadow-float shadow-primary/5 md:w-2/3 md:bg-background lg:w-1/2 xl:w-[36%]"
+        data-side="bottom"
       >
         <template v-if="copyright" #copyright>
           <slot name="copyright">
@@ -125,7 +156,8 @@ const { authPanelCenter, authPanelLeft, authPanelRight, isDark } =
     <!-- 右侧认证面板 -->
     <AuthenticationFormView
       v-if="authPanelRight"
-      class="min-h-full w-[34%] flex-1"
+      class="min-h-full w-2/5 flex-1"
+      data-side="right"
     >
       <template v-if="copyright" #copyright>
         <slot name="copyright">

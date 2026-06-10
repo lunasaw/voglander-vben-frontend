@@ -1,46 +1,32 @@
 <script setup lang="ts">
-import type { ScrollAreaRootProps } from 'radix-vue';
+import type { ScrollAreaRootProps } from 'reka-ui';
 
-import { computed } from 'vue';
+import type { HTMLAttributes } from 'vue';
 
 import { cn } from '@vben-core/shared/utils';
 
-import {
-  ScrollAreaCorner,
-  ScrollAreaRoot,
-  ScrollAreaViewport,
-} from 'radix-vue';
+import { reactiveOmit } from '@vueuse/core';
+import { ScrollAreaCorner, ScrollAreaRoot, ScrollAreaViewport } from 'reka-ui';
 
 import ScrollBar from './ScrollBar.vue';
 
-const props = withDefaults(
-  defineProps<
-    ScrollAreaRootProps & {
-      class?: any;
-      onScroll?: (event: Event) => void;
-      viewportProps?: { onScroll: (event: Event) => void };
-    }
-  >(),
-  {
-    onScroll: () => {},
-  },
-);
+const props = defineProps<
+  ScrollAreaRootProps & { class?: HTMLAttributes['class'] }
+>();
 
-const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props;
-  return delegated;
-});
+const delegatedProps = reactiveOmit(props, 'class');
 </script>
 
 <template>
   <ScrollAreaRoot
+    data-slot="scroll-area"
     v-bind="delegatedProps"
     :class="cn('relative overflow-hidden', props.class)"
   >
     <ScrollAreaViewport
       as-child
-      class="h-full w-full rounded-[inherit] focus:outline-none"
-      @scroll="onScroll"
+      data-slot="scroll-area-viewport"
+      class="h-full w-full rounded-[inherit] focus:outline-hidden"
     >
       <slot></slot>
     </ScrollAreaViewport>

@@ -1,16 +1,16 @@
 <script lang="ts" setup>
-import type { DataNode } from 'ant-design-vue/es/tree';
+import type { DataNode } from 'antdv-next/dist/tree';
 
 import type { Recordable } from '@vben/types';
 
 import type { SystemRoleApi } from '#/api/system/role';
 
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 
-import { useVbenDrawer, VbenTree } from '@vben/common-ui';
+import { Tree, useVbenDrawer } from '@vben/common-ui';
 import { IconifyIcon } from '@vben/icons';
 
-import { Spin } from 'ant-design-vue';
+import { Spin } from 'antdv-next';
 
 import { useVbenForm } from '#/adapter/form';
 import { getMenuList } from '#/api/system/menu';
@@ -63,20 +63,26 @@ const [Drawer, drawerApi] = useVbenDrawer({
         drawerApi.unlock();
       });
   },
-  onOpenChange(isOpen) {
+
+  async onOpenChange(isOpen) {
     if (isOpen) {
       const data = drawerApi.getData<SystemRoleApi.SystemRole>();
       formApi.resetForm();
+
       if (data) {
         formData.value = data;
         id.value = data.id;
-        formApi.setValues(data);
       } else {
         id.value = undefined;
       }
 
       if (permissions.value.length === 0) {
-        loadPermissions();
+        await loadPermissions();
+      }
+      // Wait for Vue to flush DOM updates (form fields mounted)
+      await nextTick();
+      if (data) {
+        formApi.setValues(data);
       }
     }
   },
@@ -102,9 +108,6 @@ function getNodeClass(node: Recordable<any>) {
   const classes: string[] = [];
   if (node.value?.type === 'button') {
     classes.push('inline-flex');
-    if (node.index % 3 >= 1) {
-      classes.push('!pl-0');
-    }
   }
 
   return classes.join(' ');
@@ -114,8 +117,8 @@ function getNodeClass(node: Recordable<any>) {
   <Drawer :title="getDrawerTitle">
     <Form>
       <template #permissions="slotProps">
-        <Spin :spinning="loadingPermissions" wrapper-class-name="w-full">
-          <VbenTree
+        <Spin :spinning="loadingPermissions" :classes="{ root: 'w-full' }">
+          <Tree
             :tree-data="permissions"
             multiple
             bordered
@@ -130,7 +133,7 @@ function getNodeClass(node: Recordable<any>) {
               <IconifyIcon v-if="value.meta.icon" :icon="value.meta.icon" />
               {{ $t(value.meta.title) }}
             </template>
-          </VbenTree>
+          </Tree>
         </Spin>
       </template>
     </Form>
@@ -139,17 +142,13 @@ function getNodeClass(node: Recordable<any>) {
 <style lang="css" scoped>
 :deep(.ant-tree-title) {
   .tree-actions {
-    display: none;
-    margin-left: 20px;
+    @apply ml-5 hidden;
   }
 }
 
 :deep(.ant-tree-title:hover) {
   .tree-actions {
-    display: flex;
-    flex: auto;
-    justify-content: flex-end;
-    margin-left: 20px;
+    @apply ml-5 flex flex-auto justify-end;
   }
 }
 </style>

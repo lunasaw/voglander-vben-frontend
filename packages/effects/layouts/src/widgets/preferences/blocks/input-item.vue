@@ -3,7 +3,7 @@ import type { SelectOption } from '@vben/types';
 
 import { useSlots } from 'vue';
 
-import { CircleHelp } from '@vben/icons';
+import { CircleHelp, CircleX } from '@vben/icons';
 
 import { Input, VbenTooltip } from '@vben-core/shadcn-ui';
 
@@ -16,10 +16,12 @@ withDefaults(
     disabled?: boolean;
     items?: SelectOption[];
     placeholder?: string;
+    tip?: string;
   }>(),
   {
     disabled: false,
     placeholder: '',
+    tip: '',
     items: () => [],
   },
 );
@@ -32,7 +34,7 @@ const slots = useSlots();
 <template>
   <div
     :class="{
-      'hover:bg-accent': !slots.tip,
+      'hover:bg-accent': !(slots.tip || tip),
       'pointer-events-none opacity-50': disabled,
     }"
     class="my-1 flex w-full items-center justify-between rounded-md px-2 py-1"
@@ -40,13 +42,30 @@ const slots = useSlots();
     <span class="flex items-center text-sm">
       <slot></slot>
 
-      <VbenTooltip v-if="slots.tip" side="bottom">
+      <VbenTooltip v-if="slots.tip || tip" side="bottom">
         <template #trigger>
           <CircleHelp class="ml-1 size-3 cursor-help" />
         </template>
-        <slot name="tip"></slot>
+        <slot name="tip">
+          <template v-if="tip">
+            <p v-for="(line, index) in tip.split('\n')" :key="index">
+              {{ line }}
+            </p>
+          </template>
+        </slot>
       </VbenTooltip>
     </span>
-    <Input v-model="inputValue" class="h-8 w-[165px]" />
+    <div class="relative">
+      <Input
+        v-model="inputValue"
+        class="h-8 w-41.25"
+        :placeholder="placeholder"
+      />
+      <CircleX
+        v-if="inputValue"
+        class="absolute top-1/2 right-2 size-3 -translate-y-1/2 transform cursor-pointer text-foreground/60 hover:text-foreground"
+        @click="() => (inputValue = '')"
+      />
+    </div>
   </div>
 </template>

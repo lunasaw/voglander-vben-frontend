@@ -1,7 +1,7 @@
 import type { VxeTableGridOptions } from '@vben/plugins/vxe-table';
 import type { Recordable } from '@vben/types';
 
-import type { ComponentType } from './component';
+import type { ComponentPropsMap, ComponentType } from './component';
 
 import { h } from 'vue';
 
@@ -62,9 +62,10 @@ setupVbenVxeTable({
 
     // 表格配置项可以用 cellRender: { name: 'CellImage' },
     vxeUI.renderer.add('CellImage', {
-      renderTableDefault(_renderOpts, params) {
+      renderTableDefault(renderOpts, params) {
+        const { props } = renderOpts;
         const { column, row } = params;
-        return h(Image, { src: row[column.field] });
+        return h(Image, { src: row[column.field], ...props });
       },
     });
 
@@ -284,8 +285,8 @@ setupVbenVxeTable({
 });
 
 export const useVbenVxeGrid = <T extends Record<string, any>>(
-  ...rest: Parameters<typeof useGrid<T, ComponentType>>
-) => useGrid<T, ComponentType>(...rest);
+  ...rest: Parameters<typeof useGrid<T, ComponentType, ComponentPropsMap>>
+) => useGrid<T, ComponentType, ComponentPropsMap>(...rest);
 
 export type OnActionClickParams<T = Recordable<any>> = {
   code: string;

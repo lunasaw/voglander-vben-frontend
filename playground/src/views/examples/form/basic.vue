@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import type { UploadFile } from 'ant-design-vue';
+import type { UploadFile } from 'antdv-next';
 
 import { h, ref, toRaw } from 'vue';
 
 import { Page } from '@vben/common-ui';
 
 import { useDebounceFn } from '@vueuse/core';
-import { Button, Card, message, Spin, Tag } from 'ant-design-vue';
+import { Button, Card, message, Spin, Tag } from 'antdv-next';
 import dayjs from 'dayjs';
 
 import { useVbenForm, z } from '#/adapter/form';
@@ -68,6 +68,13 @@ const [BaseForm, baseFormApi] = useVbenForm({
       rules: 'required',
     },
     {
+      component: 'Input',
+      fieldName: 'desc',
+      // 界面显示的description
+      description: '这是表单描述',
+      label: '字符串(带描述)',
+    },
+    {
       // 组件需要在 #/adapter.ts内注册，并加上类型
       component: 'ApiSelect',
       // 对应组件的参数
@@ -106,6 +113,10 @@ const [BaseForm, baseFormApi] = useVbenForm({
           params: {
             keyword: keyword.value || undefined,
           },
+          // 远程搜索判断。当为true时，才允许调用api
+          shouldFetch: (params: any) => {
+            return !!params?.keyword;
+          },
           showSearch: true,
         };
       },
@@ -113,6 +124,7 @@ const [BaseForm, baseFormApi] = useVbenForm({
       fieldName: 'remoteSearch',
       // 界面显示的label
       label: '远程搜索',
+      help: '远程查询，仅有输入时方进行查询',
       renderComponentContent: () => {
         return {
           notFoundContent: fetching.value ? h(Spin) : undefined,
@@ -274,6 +286,10 @@ const [BaseForm, baseFormApi] = useVbenForm({
     {
       component: 'DatePicker',
       fieldName: 'datePicker',
+      help: (values) =>
+        [`这是一个可输出其他字段值的帮助信息${values?.rate}`].map((v) =>
+          h('p', v),
+        ),
       label: '日期选择框',
     },
     {
@@ -341,11 +357,26 @@ const [BaseForm, baseFormApi] = useVbenForm({
         // 自动携带认证信息
         customRequest: upload_file,
         disabled: false,
-        maxCount: 1,
+        maxCount: 3,
+        // 单位：MB
+        maxSize: 2,
         multiple: false,
         showUploadList: true,
         // 上传列表的内建样式，支持四种基本样式 text, picture, picture-card 和 picture-circle
         listType: 'picture-card',
+        draggable: true, // 启用拖拽排序
+        // onChange事件已被重写，如需自定义请在此基础上扩展
+        handleChange: ({ file }: { file: UploadFile }) => {
+          const { name, status } = file;
+          if (status === 'done') {
+            message.success(`${name} ${$t('examples.form.upload-success')}`);
+          } else if (status === 'error') {
+            message.error(`${name} ${$t('examples.form.upload-fail')}`);
+          }
+        },
+        onDragSort: (oldIndex: number, newIndex: number) => {
+          console.warn(`图片从 ${oldIndex} 移动到 ${newIndex}`);
+        },
       },
       fieldName: 'files',
       label: $t('examples.form.file'),
@@ -354,7 +385,35 @@ const [BaseForm, baseFormApi] = useVbenForm({
           default: () => $t('examples.form.upload-image'),
         };
       },
-      rules: 'required',
+      rules: 'selectRequired',
+    },
+    {
+      component: 'Upload',
+      componentProps: {
+        accept: '.png,.jpg,.jpeg',
+        customRequest: upload_file,
+        maxCount: 1,
+        maxSize: 2,
+        listType: 'picture-card',
+        // 是否启用图片裁剪(多选或者非图片不唤起裁剪框)
+        crop: true,
+        // 裁剪比例
+        aspectRatio: '1:1',
+      },
+      fieldName: 'cropImage',
+      label: $t('examples.form.crop-image'),
+      renderComponentContent: () => {
+        return {
+          default: () => $t('examples.form.upload-image'),
+        };
+      },
+      rules: 'selectRequired',
+    },
+    {
+      component: 'RichEditor',
+      fieldName: 'richEditor',
+      label: '富文本',
+      formItemClass: 'col-span-3 items-baseline',
     },
   ],
   // 大屏一行显示3个，中屏一行显示2个，小屏一行显示1个
@@ -363,12 +422,19 @@ const [BaseForm, baseFormApi] = useVbenForm({
 
 function onSubmit(values: Record<string, any>) {
   const files = toRaw(values.files) as UploadFile[];
+  const cropImage = (toRaw(values.cropImage) ?? []) as UploadFile[];
   const doneFiles = files.filter((file) => file.status === 'done');
   const failedFiles = files.filter((file) => file.status !== 'done');
+  const doneCrop = cropImage.filter((file) => file.status === 'done');
+  const failedCrop = cropImage.filter((file) => file.status !== 'done');
 
   const msg = [
     ...doneFiles.map((file) => file.response?.url || file.url),
     ...failedFiles.map((file) => file.name),
+  ].join(', ');
+  const msgCrop = [
+    ...doneCrop.map((file) => file.response?.url || file.url),
+    ...failedCrop.map((file) => file.name),
   ].join(', ');
 
   if (failedFiles.length === 0) {
@@ -381,8 +447,19 @@ function onSubmit(values: Record<string, any>) {
     });
     return;
   }
+  if (doneCrop.length > 0 && failedCrop.length === 0) {
+    message.success({
+      content: `${$t('examples.form.upload-urls')}: ${msgCrop}`,
+    });
+  } else if (failedCrop.length > 0) {
+    message.error({
+      content: `${$t('examples.form.upload-error')}: ${msgCrop}`,
+    });
+    return;
+  }
   // 如果需要可提交前替换为需要的urls
   values.files = doneFiles.map((file) => file.response?.url || file.url);
+  values.cropImage = doneCrop.map((file) => file.response?.url || file.url);
   message.success({
     content: `form values: ${JSON.stringify(values)}`,
   });
@@ -414,6 +491,12 @@ function handleSetFormValue() {
     timePicker: dayjs('2022-01-01 12:00:00'),
     treeSelect: 'leaf1',
     username: '1',
+    richEditor: `
+      <h1>Vben Tiptap</h1>
+      <p>这个编辑器已经被封装在 <code>packages/effects/plugins/src/tiptap</code> 中。</p>
+      <p>你可以直接在各个 app 里通过 <code>@vben/plugins/tiptap</code> 引入。</p>
+      <blockquote>默认内置 StarterKit、Underline、TextAlign、Placeholder。</blockquote>
+    `,
   });
 
   // 设置单个表单值

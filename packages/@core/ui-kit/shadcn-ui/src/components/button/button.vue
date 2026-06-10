@@ -6,7 +6,7 @@ import { computed } from 'vue';
 import { LoaderCircle } from '@vben-core/icons';
 import { cn } from '@vben-core/shared/utils';
 
-import { Primitive } from 'radix-vue';
+import { Primitive } from 'reka-ui';
 
 import { buttonVariants } from '../../ui';
 
@@ -35,7 +35,7 @@ const isDisabled = computed(() => {
   >
     <LoaderCircle
       v-if="loading"
-      class="text-md mr-2 size-4 flex-shrink-0 animate-spin"
+      class="text-md mr-2 size-4 shrink-0 animate-spin"
     />
     <slot></slot>
   </Primitive>

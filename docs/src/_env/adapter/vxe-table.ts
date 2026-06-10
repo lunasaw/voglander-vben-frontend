@@ -2,7 +2,7 @@ import { h } from 'vue';
 
 import { setupVbenVxeTable, useVbenVxeGrid } from '@vben/plugins/vxe-table';
 
-import { Button, Image } from 'ant-design-vue';
+import { Button, Image } from 'antdv-next';
 
 import { useVbenForm } from './form';
 
@@ -40,9 +40,10 @@ if (!import.meta.env.SSR) {
 
       // 表格配置项可以用 cellRender: { name: 'CellImage' },
       vxeUI.renderer.add('CellImage', {
-        renderTableDefault(_renderOpts, params) {
+        renderTableDefault(renderOpts, params) {
+          const { props } = renderOpts;
           const { column, row } = params;
-          return h(Image, { src: row[column.field] });
+          return h(Image, { src: row[column.field], ...props });
         },
       });
 

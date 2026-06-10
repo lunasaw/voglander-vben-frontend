@@ -7,7 +7,7 @@ import { LOGIN_PATH } from '@vben/constants';
 import { preferences } from '@vben/preferences';
 import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
 
-import { notification } from 'ant-design-vue';
+import { notification } from 'antdv-next';
 import { defineStore } from 'pinia';
 
 import { getAccessCodesApi, getUserInfoApi, loginApi, logoutApi } from '#/api';
@@ -65,7 +65,7 @@ export const useAuthStore = defineStore('auth', () => {
           notification.success({
             description: `${$t('authentication.loginSuccessDesc')}:${userInfo?.realName}`,
             duration: 3,
-            message: $t('authentication.loginSuccess'),
+            title: $t('authentication.loginSuccess'),
           });
         }
       }
@@ -78,15 +78,22 @@ export const useAuthStore = defineStore('auth', () => {
     };
   }
 
+  const isLoggingOut = ref(false); // 正在 logout 标识, 防止 /logout 死循环.
+
   async function logout(redirect: boolean = true) {
+    if (isLoggingOut.value) return; // 正在登出中, 说明已进入循环, 直接返回.
+    isLoggingOut.value = true; // 设置 标识
+
     try {
       await logoutApi();
     } catch {
       // 不做任何处理
-    }
+    } finally {
+      isLoggingOut.value = false; // 重置 标识
 
-    resetAllStores();
-    accessStore.setLoginExpired(false);
+      resetAllStores();
+      accessStore.setLoginExpired(false);
+    }
 
     // 回登录页带上当前路由地址
     await router.replace({
@@ -100,8 +107,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function fetchUserInfo() {
-    let userInfo: null | UserInfo = null;
-    userInfo = await getUserInfoApi();
+    const userInfo = await getUserInfoApi();
     userStore.setUserInfo(userInfo);
     return userInfo;
   }

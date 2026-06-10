@@ -12,11 +12,7 @@ import {
   watch,
 } from 'vue';
 
-import {
-  useIsMobile,
-  usePriorityValues,
-  useSimpleLocale,
-} from '@vben-core/composables';
+import { usePriorityValues, useSimpleLocale } from '@vben-core/composables';
 import { Expand, Shrink } from '@vben-core/icons';
 import {
   Dialog,
@@ -50,18 +46,19 @@ const props = withDefaults(defineProps<Props>(), {
 const components = globalShareState.getComponents();
 
 const contentRef = ref();
+// @ts-expect-error unused
 const wrapperRef = ref<HTMLElement>();
 const dialogRef = ref();
 const headerRef = ref();
+// @ts-expect-error unused
 const footerRef = ref();
 
-const id = useId();
-
-provide('DISMISSABLE_MODAL_ID', id);
-
 const { $t } = useSimpleLocale();
-const { isMobile } = useIsMobile();
 const state = props.modalApi?.useStore?.();
+
+const id = useId();
+// 遮罩层通过该 id 标记，仅当点击发生在当前 Modal 的遮罩上时才允许关闭
+provide('DISMISSABLE_MODAL_ID', id);
 
 const {
   appendToMain,
@@ -79,6 +76,7 @@ const {
   description,
   destroyOnClose,
   draggable,
+  overflow,
   footer: showFooter,
   footerClass,
   fullscreen,
@@ -98,10 +96,14 @@ const {
   zIndex,
 } = usePriorityValues(props, state);
 
-const shouldFullscreen = computed(() => fullscreen.value || isMobile.value);
+const shouldFullscreen = computed(() => fullscreen.value);
 
 const shouldDraggable = computed(
   () => draggable.value && !shouldFullscreen.value && header.value,
+);
+
+const shouldCentered = computed(
+  () => centered.value && !shouldFullscreen.value,
 );
 
 const getAppendTo = computed(() => {
@@ -115,6 +117,8 @@ const { dragging, transform } = useModalDraggable(
   headerRef,
   shouldDraggable,
   getAppendTo,
+  shouldCentered,
+  overflow,
 );
 
 const firstOpened = ref(false);
@@ -132,7 +136,9 @@ watch(
       dialogRef.value = innerContentRef.$el;
       // reopen modal reassign value
       const { offsetX, offsetY } = transform;
-      dialogRef.value.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+      dialogRef.value.style.transform = shouldCentered.value
+        ? `translate(${offsetX}px, calc(-50% + ${offsetY}px))`
+        : `translate(${offsetX}px, ${offsetY}px)`;
     }
   },
   { immediate: true },
@@ -180,7 +186,7 @@ function escapeKeyDown(e: KeyboardEvent) {
   }
 }
 
-function handerOpenAutoFocus(e: Event) {
+function handleOpenAutoFocus(e: Event) {
   if (!openAutoFocus.value) {
     e?.preventDefault();
   }
@@ -205,9 +211,19 @@ function handleFocusOutside(e: Event) {
   e.stopPropagation();
 }
 
+function handleCloseAutoFocus(_e: Event) {
+  // allow reka-ui to return focus to the trigger element on close
+}
+
 const getForceMount = computed(() => {
   return !unref(destroyOnClose) && unref(firstOpened);
 });
+
+const handleOpened = () => {
+  requestAnimationFrame(() => {
+    props.modalApi?.onOpened();
+  });
+};
 
 function handleClosed() {
   isClosed.value = true;
@@ -225,15 +241,17 @@ function handleClosed() {
       :append-to="getAppendTo"
       :class="
         cn(
-          'left-0 right-0 top-[10vh] mx-auto flex max-h-[80%] w-[520px] flex-col p-0',
-          shouldFullscreen ? 'sm:rounded-none' : 'sm:rounded-[var(--radius)]',
+          'inset-x-0 top-[10vh] mx-auto flex w-130 flex-col p-0',
+          shouldFullscreen ? 'rounded-none' : 'rounded-(--radius)',
           modalClass,
           {
-            'border-border border': bordered,
+            'border border-border': bordered,
             'shadow-3xl': !bordered,
-            'left-0 top-0 size-full max-h-full !translate-x-0 !translate-y-0':
+            'max-h-[min(80%,calc(100dvh-20px))] max-w-[calc(100vw-20px)]':
+              !shouldFullscreen,
+            'top-0 left-0 size-full max-h-full max-w-full transform-[translate(0,0)]!':
               shouldFullscreen,
-            'top-1/2 !-translate-y-1/2': centered && !shouldFullscreen,
+            'top-1/2': centered && !shouldFullscreen,
             'duration-300': !dragging,
             hidden: isClosed,
           },
@@ -242,19 +260,19 @@ function handleClosed() {
       :force-mount="getForceMount"
       :modal="modal"
       :open="state?.isOpen"
-      :show-close="closable"
+      :show-close-button="closable"
       :animation-type="animationType"
       :z-index="zIndex"
       :overlay-blur="overlayBlur"
       close-class="top-3"
-      @close-auto-focus="handleFocusOutside"
+      @close-auto-focus="handleCloseAutoFocus"
       @closed="handleClosed"
       :close-disabled="submitting"
       @escape-key-down="escapeKeyDown"
       @focus-outside="handleFocusOutside"
       @interact-outside="interactOutside"
-      @open-auto-focus="handerOpenAutoFocus"
-      @opened="() => modalApi?.onOpened()"
+      @open-auto-focus="handleOpenAutoFocus"
+      @opened="handleOpened"
       @pointer-down-outside="pointerDownOutside"
     >
       <DialogHeader
@@ -305,7 +323,7 @@ function handleClosed() {
       <VbenLoading v-if="showLoading || submitting" spinning />
       <VbenIconButton
         v-if="fullscreenButton"
-        class="hover:bg-accent hover:text-accent-foreground text-foreground/80 flex-center absolute right-10 top-3 hidden size-6 rounded-full px-1 text-lg opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none sm:block"
+        class="absolute top-3 right-10 flex-center size-6 rounded-full px-1 text-lg text-foreground/80 opacity-70 transition-opacity hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus:outline-hidden disabled:pointer-events-none"
         @click="handleFullscreen"
       >
         <Shrink v-if="fullscreen" class="size-3.5" />
@@ -313,8 +331,8 @@ function handleClosed() {
       </VbenIconButton>
 
       <DialogFooter
-        v-if="showFooter"
         ref="footerRef"
+        v-if="showFooter"
         :class="
           cn(
             'flex-row items-center justify-end p-2',
@@ -330,7 +348,7 @@ function handleClosed() {
           <component
             :is="components.DefaultButton || VbenButton"
             v-if="showCancelButton"
-            variant="ghost"
+            variant="outline"
             :disabled="submitting"
             @click="() => modalApi?.onCancel()"
           >

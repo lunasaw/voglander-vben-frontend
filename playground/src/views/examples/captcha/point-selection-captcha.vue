@@ -5,7 +5,7 @@ import { reactive, ref } from 'vue';
 
 import { Page, PointSelectionCaptcha } from '@vben/common-ui';
 
-import { Card, Input, InputNumber, message, Switch } from 'ant-design-vue';
+import { Card, Input, InputNumber, message, Switch } from 'antdv-next';
 
 import { $t } from '#/locales';
 
@@ -64,7 +64,7 @@ const handleClick = (point: CaptchaPoint) => {
         />
         <div class="ml-8 flex w-96 items-center">
           <Switch
-            v-model:checked="params.showHintImage"
+            v-model="params.showHintImage"
             :checked-children="$t('examples.captcha.hintImage')"
             :un-checked-children="$t('examples.captcha.hintText')"
             class="mr-4 w-40"
@@ -82,7 +82,7 @@ const handleClick = (point: CaptchaPoint) => {
         </div>
 
         <Switch
-          v-model:checked="params.showConfirm"
+          v-model="params.showConfirm"
           :checked-children="$t('examples.captcha.showConfirm')"
           :un-checked-children="$t('examples.captcha.hideConfirm')"
           class="ml-8 w-28"

@@ -3,7 +3,7 @@ import type { PinInputProps } from './types';
 
 import { computed, onBeforeUnmount, ref, useId, watch } from 'vue';
 
-import { PinInput, PinInputGroup, PinInputInput } from '../../ui';
+import { PinInput, PinInputGroup, PinInputSlot } from '../../ui';
 import { VbenButton } from '../button';
 
 defineOptions({
@@ -84,6 +84,8 @@ onBeforeUnmount(() => {
 });
 
 const id = useId();
+
+const pinType = 'text' as const;
 </script>
 
 <template>
@@ -94,12 +96,12 @@ const id = useId();
     class="flex w-full justify-between"
     otp
     placeholder="○"
-    type="number"
+    :type="pinType"
     @complete="handleComplete"
   >
     <div class="relative flex w-full">
       <PinInputGroup class="mr-2">
-        <PinInputInput
+        <PinInputSlot
           v-for="(item, index) in codeLength"
           :key="item"
           :index="index"
@@ -108,7 +110,7 @@ const id = useId();
       <VbenButton
         :disabled="disabled"
         :loading="btnLoading"
-        class="flex-grow"
+        class="grow"
         size="lg"
         variant="outline"
         @click="handleSend"

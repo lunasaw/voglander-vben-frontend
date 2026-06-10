@@ -22,7 +22,8 @@ yarn.lock
 package-lock.json
 .VSCodeCounter
 **/backend-mock/data
-
+.omx
+.pnpm-store
 # local env files
 .env.local
 .env.*.local
@@ -49,3 +50,13 @@ vite.config.ts.*
 *.sln
 *.sw?
 .history
+.cursor
+
+# AI
+.agent
+.agents
+.claude
+.codex
+skills-lock.json
+.atomcode
+datalog

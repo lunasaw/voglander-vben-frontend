@@ -5,7 +5,7 @@ import { reactive } from 'vue';
 
 import { Page, Tippy } from '@vben/common-ui';
 
-import { Button, Card, Flex } from 'ant-design-vue';
+import { Button, Card, Flex } from 'antdv-next';
 
 import { useVbenForm } from '#/adapter/form';
 
@@ -291,7 +291,7 @@ function goDoc() {
       <Form class="mt-4" />
       <template #actions>
         <p
-          class="text-secondary-foreground hover:text-secondary-foreground cursor-default"
+          class="cursor-default text-secondary-foreground hover:text-secondary-foreground"
         >
           更多配置请
           <Button type="link" size="small" @click="goDoc">查看文档</Button>

@@ -12,7 +12,7 @@ import {
   Slider,
   Tag,
   Tooltip,
-} from 'ant-design-vue';
+} from 'antdv-next';
 
 const props = reactive({
   leftCollapsedWidth: 5,
@@ -22,8 +22,8 @@ const props = reactive({
   leftWidth: 30,
   resizable: true,
   rightWidth: 70,
-  splitHandle: false,
-  splitLine: false,
+  splitHandle: true,
+  splitLine: true,
 });
 const leftMinWidth = ref(props.leftMinWidth || 1);
 const leftMaxWidth = ref(props.leftMaxWidth || 100);
@@ -42,7 +42,7 @@ const leftMaxWidth = ref(props.leftMaxWidth || 100);
     <template #left="{ isCollapsed, expand }">
       <div v-if="isCollapsed" @click="expand">
         <Tooltip title="点击展开左侧">
-          <Button shape="circle" type="primary">
+          <Button shape="circle" type="primary" class="flex-center">
             <template #icon>
               <IconifyIcon class="text-2xl" icon="bi:arrow-right" />
             </template>
@@ -52,7 +52,7 @@ const leftMaxWidth = ref(props.leftMaxWidth || 100);
       <div
         v-else
         :style="{ minWidth: '200px' }"
-        class="border-border bg-card mr-2 rounded-[var(--radius)] border p-2"
+        class="mr-2 rounded-(--radius) border border-border bg-card p-2"
       >
         <p>这里是左侧内容</p>
         <p>这里是左侧内容</p>
@@ -77,7 +77,7 @@ const leftMaxWidth = ref(props.leftMaxWidth || 100);
             v-model:value="leftMinWidth"
             :max="props.leftMaxWidth - 1"
             :min="1"
-            style="width: 100px"
+            class="w-25"
             @after-change="(value) => (props.leftMinWidth = value as number)"
           />
           <span>左侧最大宽度百分比：</span>
@@ -85,11 +85,11 @@ const leftMaxWidth = ref(props.leftMaxWidth || 100);
             v-model:value="props.leftMaxWidth"
             :max="100"
             :min="leftMaxWidth + 1"
-            style="width: 100px"
+            class="w-25"
             @after-change="(value) => (props.leftMaxWidth = value as number)"
           />
         </div>
-        <Alert message="实验性的组件" show-icon type="warning">
+        <Alert title="实验性的组件" show-icon type="warning">
           <template #description>
             <p>
               双列布局组件是一个在Page组件上扩展的相对基础的布局组件，支持左侧折叠（当拖拽导致左侧宽度比最小宽度还要小时，还可以进入折叠状态）、拖拽调整宽度等功能。

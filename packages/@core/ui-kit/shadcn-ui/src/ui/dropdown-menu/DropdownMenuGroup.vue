@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type { DropdownMenuGroupProps } from 'radix-vue';
+import type { DropdownMenuGroupProps } from 'reka-ui';
 
-import { DropdownMenuGroup } from 'radix-vue';
+import { DropdownMenuGroup } from 'reka-ui';
 
 const props = defineProps<DropdownMenuGroupProps>();
 </script>
 
 <template>
-  <DropdownMenuGroup v-bind="props">
+  <DropdownMenuGroup data-slot="dropdown-menu-group" v-bind="props">
     <slot></slot>
   </DropdownMenuGroup>
 </template>

@@ -1,6 +1,8 @@
 {
   "title": "Preferences",
   "subtitle": "Customize Preferences & Preview in Real Time",
+  "enableStickyPreferencesNavigationBar": "Enable sticky preferences navigation bar",
+  "disableStickyPreferencesNavigationBar": "Disable sticky preferences navigation bar",
   "resetTip": "Data has changed, click to reset",
   "resetTitle": "Reset Preferences",
   "resetSuccess": "Preferences reset successfully",
@@ -29,20 +31,24 @@
   "plain": "Plain",
   "rounded": "Rounded",
   "copyPreferences": "Copy Preferences",
+  "enableCopyPreferences": "Show copy preferences button",
   "copyPreferencesSuccessTitle": "Copy successful",
   "copyPreferencesSuccess": "Copy successful, please override in `src/preferences.ts` under app",
   "clearAndLogout": "Clear Cache & Logout",
   "mode": "Mode",
   "general": "General",
   "language": "Language",
+  "timezone": "Timezone",
   "dynamicTitle": "Dynamic Title",
   "watermark": "Watermark",
+  "watermarkContent": "Please input Watermark content",
   "checkUpdates": "Periodic update check",
   "position": {
     "title": "Preferences Postion",
     "header": "Header",
     "auto": "Auto",
-    "fixed": "Fixed"
+    "fixed": "Fixed",
+    "userDropdown": "User Dropdown"
   },
   "sidebar": {
     "buttons": "Show Buttons",
@@ -51,6 +57,7 @@
     "title": "Sidebar",
     "width": "Width",
     "visible": "Show Sidebar",
+    "draggable": "Drag Sidebar Menu",
     "collapsed": "Collpase Menu",
     "collapsedShowTitle": "Show Menu Title",
     "autoActivateChild": "Auto Activate SubMenu",
@@ -65,6 +72,8 @@
     "showMore": "Show More Button",
     "showMaximize": "Show Maximize Button",
     "persist": "Persist Tabs",
+    "visitHistory": "Visit History",
+    "visitHistoryTip": "When enabled, the tab bar records tab visit history. \nClosing the current tab will automatically select the last opened tab.",
     "maxCount": "Max Count of Tabs",
     "maxCountTip": "When the number of tabs exceeds the maximum,\nthe oldest tab will be closed.\n Set to 0 to disable count checking.",
     "draggable": "Enable Draggable Sort",
@@ -117,9 +126,14 @@
   "theme": {
     "title": "Theme",
     "radius": "Radius",
+    "fontSize": "Font Size",
+    "fontSizeTip": "Adjust global font size with real-time preview",
     "light": "Light",
     "dark": "Dark",
     "darkSidebar": "Semi Dark Sidebar",
+    "darkSidebarTip": "It can be enabled when the theme is light, and the layout is neither 'Horizontal' nor 'Full Content'.",
+    "darkSidebarSub": "Semi Dark Sidebar Sub",
+    "darkSidebarSubTip": "It can be enabled when the theme is light, the semi dark sidebar is enabled, and the layout uses 'Two-Column' menu mode.",
     "darkHeader": "Semi Dark Header",
     "weakMode": "Weak Mode",
     "grayMode": "Gray Mode",
@@ -173,6 +187,7 @@
     "global": "Global",
     "search": "Global Search",
     "logout": "Logout",
+    "escape": "Close Current Window",
     "preferences": "Preferences"
   },
   "widget": {
@@ -184,6 +199,35 @@
     "notification": "Enable Notification",
     "sidebarToggle": "Enable Sidebar Toggle",
     "lockScreen": "Enable Lock Screen",
-    "refresh": "Enable Refresh"
+    "refresh": "Enable Refresh",
+    "timezone": "Enable Timezone"
+  },
+  "antd": {
+    "tabLabel": "Antd Extension",
+    "title": "Business Preferences",
+    "fields": {
+      "enableFormFullscreen": {
+        "label": "Enable Form Fullscreen Mode",
+        "tip": "Subprojects can read this extension configuration in their own business scenarios."
+      },
+      "tenantMode": {
+        "label": "Tenant Mode",
+        "options": {
+          "single": {
+            "label": "Single Tenant"
+          },
+          "multi": {
+            "label": "Multi Tenant"
+          }
+        }
+      },
+      "defaultTableSize": {
+        "label": "Default Page Size"
+      },
+      "reportTitle": {
+        "label": "Default Report Title",
+        "placeholder": "Please enter the default report title"
+      }
+    }
   }
 }

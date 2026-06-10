@@ -5,7 +5,6 @@ import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 export const rawPathRegexp =
-  // eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/strict
   /^(.+?(?:\.([\da-z]+))?)(#[\w-]+)?(?: ?{(\d+(?:[,-]\d+)*)? ?(\S+)?})? ?(?:\[(.+)])?$/;
 
 function rawPathToToken(rawPath: string) {
@@ -84,7 +83,7 @@ export const demoPreviewPlugin = (md: MarkdownRenderer) => {
         return '';
       }
       const firstString = 'index.vue';
-      childFiles = childFiles.sort((a, b) => {
+      childFiles = childFiles.toSorted((a, b) => {
         if (a === firstString) return -1;
         if (b === firstString) return 1;
         return a.localeCompare(b, 'en', { sensitivity: 'base' });
