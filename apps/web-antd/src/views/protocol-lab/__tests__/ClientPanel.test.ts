@@ -25,6 +25,9 @@ const m = vi.hoisted(() => ({
   labPushAlarm: vi.fn().mockResolvedValue(undefined),
   labPushCatalog: vi.fn().mockResolvedValue(undefined),
   labPushDeviceInfo: vi.fn().mockResolvedValue(undefined),
+  labPushStart: vi.fn().mockResolvedValue({ state: 'RUNNING' }),
+  labPushStatus: vi.fn().mockResolvedValue({ state: 'IDLE' }),
+  labPushStop: vi.fn().mockResolvedValue({ state: 'IDLE' }),
   labRegister: vi.fn().mockResolvedValue(undefined),
   labUnregister: vi.fn().mockResolvedValue(undefined),
   messageError: vi.fn(),
@@ -37,6 +40,9 @@ vi.mock('#/api/protocol-lab', () => ({
   labPushAlarm: m.labPushAlarm,
   labPushCatalog: m.labPushCatalog,
   labPushDeviceInfo: m.labPushDeviceInfo,
+  labPushStart: m.labPushStart,
+  labPushStatus: m.labPushStatus,
+  labPushStop: m.labPushStop,
   labRegister: m.labRegister,
   labUnregister: m.labUnregister,
 }));
@@ -44,9 +50,10 @@ vi.mock('#/api/protocol-lab', () => ({
 vi.mock('ant-design-vue', () => ({
   Button: {
     name: 'Button',
-    props: ['loading', 'type', 'danger'],
+    props: ['loading', 'type', 'danger', 'disabled'],
     emits: ['click'],
-    template: '<button @click="$emit(\'click\', $event)"><slot/></button>',
+    template:
+      '<button :disabled="disabled" @click="$emit(\'click\', $event)"><slot/></button>',
   },
   Card: { name: 'Card', template: '<div class="card"><slot/></div>' },
   Checkbox: {
@@ -115,9 +122,12 @@ const config: ProtocolLabApi.LabConfig = {
   topics: ['clientcmd.ptz'],
 };
 
-function mountPanel(cfg: null | ProtocolLabApi.LabConfig = config) {
+function mountPanel(
+  cfg: null | ProtocolLabApi.LabConfig = config,
+  received: any[] = [],
+) {
   return mount(ClientPanel, {
-    props: { config: cfg, received: [] },
+    props: { config: cfg, received },
     global: {
       stubs: { SipTimeline: { template: '<div class="sip-timeline-stub" />' } },
     },
@@ -140,6 +150,9 @@ beforeEach(() => {
   m.labPushCatalog.mockClear().mockResolvedValue(undefined);
   m.labPushDeviceInfo.mockClear().mockResolvedValue(undefined);
   m.labPushAlarm.mockClear().mockResolvedValue(undefined);
+  m.labPushStart.mockClear().mockResolvedValue({ state: 'RUNNING' });
+  m.labPushStatus.mockClear().mockResolvedValue({ state: 'IDLE' });
+  m.labPushStop.mockClear().mockResolvedValue({ state: 'IDLE' });
   m.messageSuccess.mockClear();
   m.messageError.mockClear();
 });
@@ -311,5 +324,119 @@ describe('clientPanel —— 自定义注册表单（§6 F1）', () => {
     expect(wrapper.find('.tag').text()).toContain(
       'protocolLab.register.selfLoop',
     );
+  });
+});
+
+describe('clientPanel —— 模拟推流（1.0.7 §2/§4）', () => {
+  /** 带 push 字段的 config（自动推流关闭，便于验手动窗口）。 */
+  const pushConfig: ProtocolLabApi.LabConfig = {
+    ...config,
+    pushAuto: false,
+    ffmpegPath: '/usr/local/bin/ffmpeg',
+    mediaFile: '/Movies/demo.mp4',
+    topics: ['clientcmd.invite', 'clientcmd.push.started'],
+  };
+
+  /** 构造一条 SSE 事件（仅 topic 触发 watcher 即可）。 */
+  function ev(topic: string) {
+    return { topic, data: {}, ts: Date.now(), seq: 0, dir: 'in' as const };
+  }
+
+  it('config 就绪后预填 ffmpeg / 文件路径输入框', async () => {
+    const wrapper = mountPanel(pushConfig);
+    await nextTick();
+    // 折叠的注册表单不渲染，剩下的 input.text 即推流两输入框
+    const texts = wrapper.findAll('input.text');
+    const values = texts.map((t: any) => (t.element as HTMLInputElement).value);
+    expect(values).toContain('/usr/local/bin/ffmpeg');
+    expect(values).toContain('/Movies/demo.mp4');
+  });
+
+  it('挂载即拉一次 push 状态（labPushStatus 被调用）', async () => {
+    mountPanel(pushConfig);
+    await nextTick();
+    expect(m.labPushStatus).toHaveBeenCalled();
+  });
+
+  it('无 INVITE 且 auto=false 时「模拟推流」按钮 disabled', async () => {
+    const wrapper = mountPanel(pushConfig);
+    await nextTick();
+    const btn = buttonByText(wrapper, 'protocolLab.push.start');
+    expect((btn.element as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('auto=true 时「模拟推流」按钮可点（随时补推）', async () => {
+    const wrapper = mountPanel({ ...pushConfig, pushAuto: true });
+    await nextTick();
+    const btn = buttonByText(wrapper, 'protocolLab.push.start');
+    expect((btn.element as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('收到 clientcmd.invite（手动模式）启动 8s 倒计时并放开按钮', async () => {
+    vi.useFakeTimers();
+    try {
+      const wrapper = mountPanel(pushConfig);
+      await nextTick();
+      await wrapper.setProps({ received: [ev('clientcmd.invite')] });
+      await nextTick();
+      // ���计时条出现，按钮可点
+      expect(wrapper.find('.push-countdown').exists()).toBe(true);
+      const btn = buttonByText(wrapper, 'protocolLab.push.start');
+      expect((btn.element as HTMLButtonElement).disabled).toBe(false);
+      // 走完 8s 倒计时归零
+      vi.advanceTimersByTime(8000);
+      await nextTick();
+      expect(wrapper.find('.push-countdown').exists()).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('点「模拟推流」调 labPushStart 携带 trim 后路径', async () => {
+    const wrapper = mountPanel({ ...pushConfig, pushAuto: true });
+    await nextTick();
+    await buttonByText(wrapper, 'protocolLab.push.start').trigger('click');
+    expect(m.labPushStart).toHaveBeenCalledWith({
+      ffmpegPath: '/usr/local/bin/ffmpeg',
+      mediaFile: '/Movies/demo.mp4',
+    });
+  });
+
+  it('state=RUNNING 时「停止推流」可点并调 labPushStop', async () => {
+    m.labPushStatus.mockResolvedValue({
+      state: 'RUNNING',
+      mediaIp: '127.0.0.1',
+    });
+    const wrapper = mountPanel(pushConfig);
+    await nextTick();
+    await nextTick(); // 等 refreshPushStatus 的 await 落地
+    const stop = buttonByText(wrapper, 'protocolLab.push.stop');
+    expect((stop.element as HTMLButtonElement).disabled).toBe(false);
+    await stop.trigger('click');
+    expect(m.labPushStop).toHaveBeenCalled();
+  });
+
+  it('收到 clientcmd.push.started 触发状态校准（再拉 status）', async () => {
+    const wrapper = mountPanel(pushConfig);
+    await nextTick();
+    m.labPushStatus.mockClear();
+    await wrapper.setProps({ received: [ev('clientcmd.push.started')] });
+    await nextTick();
+    expect(m.labPushStatus).toHaveBeenCalled();
+  });
+
+  it('卸载时清理轮询 / 倒计时定时器（不抛错）', async () => {
+    vi.useFakeTimers();
+    try {
+      const wrapper = mountPanel(pushConfig);
+      await nextTick();
+      await wrapper.setProps({ received: [ev('clientcmd.invite')] });
+      await nextTick();
+      wrapper.unmount();
+      // 卸载后推进时间不应再触发任何定时回调报错
+      expect(() => vi.advanceTimersByTime(10_000)).not.toThrow();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

@@ -55,6 +55,20 @@
     "heartbeat": "心跳保活",
     "report": "主动上报"
   },
+  "push": {
+    "title": "模拟推流",
+    "auto": "自动推流",
+    "autoOn": "开（收到点播自动推流）",
+    "autoOff": "关（需手动点击）",
+    "ffmpeg": "ffmpeg 路径",
+    "ffmpegPh": "ffmpeg 可执行文件绝对路径（后端机器视角）",
+    "media": "视频文件",
+    "mediaPh": "待推视频文件绝对路径（后端机器视角）",
+    "start": "模拟推流",
+    "stop": "停止推流",
+    "target": "推流目标",
+    "countdown": "请在 {sec}s 内点击推流（平台点播超时窗）"
+  },
   "server": {
     "title": "平台端 (Server)",
     "devices": "在线设备",
@@ -109,7 +123,10 @@
     "queryDeviceStatus": "设备状态查询",
     "configBasicParam": "基础参数配置",
     "broadcast": "语音广播",
-    "invite": "点播请求"
+    "invite": "点播请求",
+    "pushStarted": "推流启动",
+    "pushStopped": "推流停止",
+    "pushFailed": "推流失败"
   },
   "timeline": {
     "empty": "暂无事件"
@@ -128,6 +145,9 @@
     "queryDeviceInfoSent": "设备信息查询已下发",
     "rebootSent": "重启指令已下发",
     "liveSent": "点播请求已下发",
-    "selectOnlineDevice": "请先在设备列表选择一个在线设备"
+    "selectOnlineDevice": "请先在设备列表选择一个在线设备",
+    "pushStarted": "推流已启动",
+    "pushStopped": "推流已停止",
+    "pushFailed": "推流启动失败"
   }
 }

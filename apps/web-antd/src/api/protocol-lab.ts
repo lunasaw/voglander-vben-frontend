@@ -33,6 +33,12 @@ export namespace ProtocolLabApi {
     targetCustomized: boolean;
     /** 后端已就绪的全部 SSE 主题（event: 名 = 完整 topic）。 */
     topics: string[];
+    /** push.auto：收到 INVITE 是否自动起 ffmpeg（只读展示）。 */
+    pushAuto?: boolean;
+    /** push.ffmpeg-path：ffmpeg 路径输入框初值。 */
+    ffmpegPath?: string;
+    /** push.media-file：视频文件路径输入框初值（可能为空，联调前填）。 */
+    mediaFile?: string;
   }
 
   /** POST /lab/client/keepalive/auto 返回的当前调度状态。 */
@@ -87,6 +93,43 @@ export namespace ProtocolLabApi {
     alarmType?: number;
     priority?: number;
     channelId?: string;
+  }
+
+  /**
+   * POST /lab/client/push/start 入参（均选填，空=用后端配置默认值）。
+   *
+   * 路径是**后端运行机器**视角的绝对路径（非浏览器本地路径）；前端仅透传字符串，
+   * 文件是否存在 / 是否越界由后端 `LabMediaPushService.validateFile` 校验并报错。
+   */
+  export interface PushStartReq {
+    /** ffmpeg 可执行文件绝对路径，覆盖配置。 */
+    ffmpegPath?: string;
+    /** 待推视频文件绝对路径，覆盖配置。 */
+    mediaFile?: string;
+  }
+
+  /**
+   * push/start|stop|status 返回的推流状态（后端 `LabMediaPushService.PushStatus`）。
+   *
+   * 单流模型：一次只维护一路推流。IDLE=无推流，RUNNING=ffmpeg 在推，
+   * STOPPED=已停，FAILED=启动/运行失败（看 lastLog）。
+   */
+  export interface PushStatus {
+    state: 'FAILED' | 'IDLE' | 'RUNNING' | 'STOPPED';
+    /** 关联的 INVITE callId。 */
+    callId?: string;
+    /** 平台收流 IP（SDP c=）。 */
+    mediaIp?: string;
+    /** 平台收流端口（SDP m=），IDLE 时为 0。 */
+    mediaPort?: number;
+    /** SDP y= ssrc。 */
+    ssrc?: string;
+    /** 完整 ffmpeg 命令行（空格拼接，仅展示）。 */
+    cmd?: string;
+    /** 启动时刻（毫秒）。 */
+    startMs?: number;
+    /** ffmpeg 最近 ≤30 行日志（换行拼接）。 */
+    lastLog?: string;
   }
 
   /** 右侧 PTZ 控制请求（既有 /ptz/control 端点）。 */
@@ -171,6 +214,34 @@ export async function labPushDeviceInfo(
 /** 主动上报告警（右侧 alarm.new 验证）。 */
 export async function labPushAlarm(data?: ProtocolLabApi.AlarmPushReq) {
   return requestClient.post<null>(`${LAB_CLIENT}/alarm/push`, data ?? {});
+}
+
+/**
+ * 模拟推流：用 ffmpeg 把视频推到最近一次 INVITE 的收流目标。
+ *
+ * 不传参=用后端配置默认 ffmpeg/file；传 ffmpegPath/mediaFile 覆盖。
+ * 后端无 INVITE 目标 / 非 UDP / 文件非法时返回错误码，requestClient 统一弹错。
+ */
+export async function labPushStart(data?: ProtocolLabApi.PushStartReq) {
+  return requestClient.post<ProtocolLabApi.PushStatus>(
+    `${LAB_CLIENT}/push/start`,
+    data ?? {},
+  );
+}
+
+/** 停止模拟推流（幂等，返回 state=IDLE）。 */
+export async function labPushStop() {
+  return requestClient.post<ProtocolLabApi.PushStatus>(
+    `${LAB_CLIENT}/push/stop`,
+    {},
+  );
+}
+
+/** 查询当前模拟推流状态（空闲为 state=IDLE）。 */
+export async function labPushStatus() {
+  return requestClient.get<ProtocolLabApi.PushStatus>(
+    `${LAB_CLIENT}/push/status`,
+  );
 }
 
 /* -------------------------------------------------------------------------- */

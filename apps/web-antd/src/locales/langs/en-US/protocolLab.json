@@ -55,6 +55,20 @@
     "heartbeat": "Keepalive",
     "report": "Active Reporting"
   },
+  "push": {
+    "title": "Simulated Push",
+    "auto": "Auto Push",
+    "autoOn": "On (auto-push on invite)",
+    "autoOff": "Off (manual click)",
+    "ffmpeg": "FFmpeg Path",
+    "ffmpegPh": "Absolute path to ffmpeg (on the backend host)",
+    "media": "Media File",
+    "mediaPh": "Absolute path to the video file (on the backend host)",
+    "start": "Push",
+    "stop": "Stop Push",
+    "target": "Push Target",
+    "countdown": "Click push within {sec}s (platform invite timeout window)"
+  },
   "server": {
     "title": "Platform (Server)",
     "devices": "Online Devices",
@@ -109,7 +123,10 @@
     "queryDeviceStatus": "Device Status Query",
     "configBasicParam": "Basic Param Config",
     "broadcast": "Voice Broadcast",
-    "invite": "Invite Request"
+    "invite": "Invite Request",
+    "pushStarted": "Push Started",
+    "pushStopped": "Push Stopped",
+    "pushFailed": "Push Failed"
   },
   "timeline": {
     "empty": "No events"
@@ -128,6 +145,9 @@
     "queryDeviceInfoSent": "Device info query sent",
     "rebootSent": "Reboot command sent",
     "liveSent": "Live play request sent",
-    "selectOnlineDevice": "Please select an online device from the list first"
+    "selectOnlineDevice": "Please select an online device from the list first",
+    "pushStarted": "Push started",
+    "pushStopped": "Push stopped",
+    "pushFailed": "Push start failed"
   }
 }

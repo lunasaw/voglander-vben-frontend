@@ -7,6 +7,9 @@ import {
   labPushAlarm,
   labPushCatalog,
   labPushDeviceInfo,
+  labPushStart,
+  labPushStatus,
+  labPushStop,
   labRegister,
   labUnregister,
   liveStart,
@@ -125,6 +128,47 @@ describe('protocol-lab API —— 左侧设备 UA（/api/v1/lab/client/*）', ()
     expect(postMock).toHaveBeenCalledWith('/api/v1/lab/client/alarm/push', {
       alarmType: 1,
       priority: 1,
+    });
+  });
+});
+
+describe('protocol-lab API —— 模拟推流（/lab/client/push/* §1.1）', () => {
+  it('labPushStart 默认空体 / 透传 ffmpegPath+mediaFile', async () => {
+    await labPushStart();
+    expect(postMock).toHaveBeenCalledWith('/api/v1/lab/client/push/start', {});
+
+    postMock.mockClear();
+    await labPushStart({
+      ffmpegPath: '/usr/local/bin/ffmpeg',
+      mediaFile: '/Movies/demo.mp4',
+    });
+    expect(postMock).toHaveBeenCalledWith('/api/v1/lab/client/push/start', {
+      ffmpegPath: '/usr/local/bin/ffmpeg',
+      mediaFile: '/Movies/demo.mp4',
+    });
+  });
+
+  it('labPushStop → POST .../push/stop 空体', async () => {
+    await labPushStop();
+    expect(postMock).toHaveBeenCalledWith('/api/v1/lab/client/push/stop', {});
+  });
+
+  it('labPushStatus → GET .../push/status', async () => {
+    await labPushStatus();
+    expect(getMock).toHaveBeenCalledWith('/api/v1/lab/client/push/status');
+  });
+
+  it('labPushStart 透传 requestClient 返回的 PushStatus 本体', async () => {
+    postMock.mockResolvedValueOnce({
+      state: 'RUNNING',
+      mediaIp: '127.0.0.1',
+      mediaPort: 30_000,
+    });
+    const status = await labPushStart();
+    expect(status).toEqual({
+      state: 'RUNNING',
+      mediaIp: '127.0.0.1',
+      mediaPort: 30_000,
     });
   });
 });

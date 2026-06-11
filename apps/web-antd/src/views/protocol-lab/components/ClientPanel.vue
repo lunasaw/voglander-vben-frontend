@@ -2,9 +2,10 @@
 import type { ProtocolLabApi } from '#/api/protocol-lab';
 import type { LabEvent } from '#/composables/useSseEvents';
 
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, onUnmounted, reactive, ref, watch } from 'vue';
 
 import {
+  ArrowUpToLine,
   Bell,
   ChevronDown,
   ChevronRight,
@@ -13,6 +14,7 @@ import {
   LogOut,
   Plus,
   RotateCw,
+  Square,
 } from '@vben/icons';
 
 import {
@@ -37,6 +39,9 @@ import {
   labPushAlarm,
   labPushCatalog,
   labPushDeviceInfo,
+  labPushStart,
+  labPushStatus,
+  labPushStop,
   labRegister,
   labUnregister,
 } from '#/api/protocol-lab';
@@ -102,6 +107,135 @@ const identity = computed(() => {
     serverEndpoint: c ? `${c.serverIp}:${c.serverPort}` : '-',
     targetCustomized: c?.targetCustomized ?? false,
   };
+});
+
+/* -------------------------------------------------------------------------- */
+/*                     模拟推流（ffmpeg）—— 1.0.7 §2/§4                        */
+/* -------------------------------------------------------------------------- */
+
+/** ffmpeg / 文件路径输入框（初值来自 config 回显，提交时覆盖后端配置默认）。 */
+const pushForm = reactive({ ffmpegPath: '', mediaFile: '' });
+/** 当前推流状态（push/status 回包）。 */
+const pushStatus = ref<ProtocolLabApi.PushStatus>({ state: 'IDLE' });
+/** 手动模式 8s 倒计时（秒），0 = 非倒计时态。 */
+const inviteCountdown = ref(0);
+let statusTimer: null | ReturnType<typeof setInterval> = null;
+let countdownTimer: null | ReturnType<typeof setInterval> = null;
+
+// config 就绪后预填路径输入框 + 拉一次推流状态。
+watch(
+  () => props.config,
+  (c) => {
+    if (!c) {
+      return;
+    }
+    pushForm.ffmpegPath = c.ffmpegPath ?? '';
+    pushForm.mediaFile = c.mediaFile ?? '';
+    refreshPushStatus();
+  },
+  { immediate: true },
+);
+
+// 监听最新一条 clientcmd.* 事件：invite（手动模式）开倒计时；push.* 校准状态。
+watch(
+  () => props.received,
+  (list) => {
+    const latest = list.at(-1);
+    if (!latest) {
+      return;
+    }
+    if (latest.topic === 'clientcmd.invite') {
+      if (!props.config?.pushAuto) {
+        startCountdown(); // 手动模式：开 8s 速点窗口提示
+      }
+    } else if (latest.topic.startsWith('clientcmd.push.')) {
+      refreshPushStatus(); // 推流事件即时校准状态
+    }
+  },
+  { deep: true },
+);
+
+function startCountdown() {
+  stopCountdown();
+  inviteCountdown.value = 8;
+  countdownTimer = setInterval(() => {
+    inviteCountdown.value -= 1;
+    if (inviteCountdown.value <= 0) {
+      stopCountdown();
+    }
+  }, 1000);
+}
+function stopCountdown() {
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+  }
+  countdownTimer = null;
+  inviteCountdown.value = 0;
+}
+
+async function refreshPushStatus() {
+  try {
+    pushStatus.value = await labPushStatus();
+    syncPolling();
+  } catch {
+    // lab 未开启 / status 端点缺失等，忽略（页面已有 lab 兜底）
+  }
+}
+
+// RUNNING 时每 2s 轮询刷新 lastLog；状态非 RUNNING 即停轮询，避免空转。
+function syncPolling() {
+  const running = pushStatus.value.state === 'RUNNING';
+  if (running && !statusTimer) {
+    statusTimer = setInterval(refreshPushStatus, 2000);
+  } else if (!running && statusTimer) {
+    clearInterval(statusTimer);
+    statusTimer = null;
+  }
+}
+
+/**
+ * 「模拟推流」可点：RUNNING（可重推切文件）/ 倒计时中（手动窗口）/ 自动模式（随时补推）。
+ * 否则（从无 INVITE 到来）置灰，前端先拦一道，与后端「无目标抛异常」对齐。
+ */
+const canPushStart = computed(
+  () =>
+    pushStatus.value.state === 'RUNNING' ||
+    inviteCountdown.value > 0 ||
+    !!props.config?.pushAuto,
+);
+const canPushStop = computed(() => pushStatus.value.state === 'RUNNING');
+
+async function onPushStart() {
+  loading.value = true;
+  try {
+    pushStatus.value = await labPushStart({
+      ffmpegPath: pushForm.ffmpegPath.trim() || undefined,
+      mediaFile: pushForm.mediaFile.trim() || undefined,
+    });
+    stopCountdown();
+    message.success($t('protocolLab.msg.pushStarted'));
+    syncPolling();
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function onPushStop() {
+  loading.value = true;
+  try {
+    pushStatus.value = await labPushStop();
+    message.success($t('protocolLab.msg.pushStopped'));
+    syncPolling();
+  } finally {
+    loading.value = false;
+  }
+}
+
+onUnmounted(() => {
+  if (statusTimer) {
+    clearInterval(statusTimer);
+  }
+  stopCountdown();
 });
 
 async function run(fn: () => Promise<unknown>, okKey: string) {
@@ -388,6 +522,73 @@ async function onToggleAutoKeepalive(checked: boolean) {
 
     <Divider class="my-3" />
 
+    <!-- 模拟推流：ffmpeg 路径 + 文件路径 + 启停 + 8s 倒计时 + 目标/日志 -->
+    <div class="section-title push-title">
+      <span>{{ $t('protocolLab.push.title') }}</span>
+      <Tag v-if="pushStatus.state === 'RUNNING'" color="green">RUNNING</Tag>
+      <Tag v-else-if="pushStatus.state === 'FAILED'" color="red">FAILED</Tag>
+      <Tag v-else color="default">{{ pushStatus.state }}</Tag>
+    </div>
+
+    <div class="push-form">
+      <div class="push-row">
+        <span class="push-label">{{ $t('protocolLab.push.auto') }}</span>
+        <Tag :color="config?.pushAuto ? 'green' : 'default'">
+          {{
+            config?.pushAuto
+              ? $t('protocolLab.push.autoOn')
+              : $t('protocolLab.push.autoOff')
+          }}
+        </Tag>
+      </div>
+
+      <Input
+        v-model:value="pushForm.ffmpegPath"
+        allow-clear
+        :addon-before="$t('protocolLab.push.ffmpeg')"
+        :placeholder="$t('protocolLab.push.ffmpegPh')"
+        class="push-input"
+      />
+      <Input
+        v-model:value="pushForm.mediaFile"
+        allow-clear
+        :addon-before="$t('protocolLab.push.media')"
+        :placeholder="$t('protocolLab.push.mediaPh')"
+        class="push-input"
+      />
+
+      <div v-if="inviteCountdown > 0" class="push-countdown">
+        {{ $t('protocolLab.push.countdown', { sec: inviteCountdown }) }}
+      </div>
+
+      <Space>
+        <Button
+          type="primary"
+          :disabled="!canPushStart || loading"
+          @click="onPushStart"
+        >
+          <template #icon><ArrowUpToLine class="btn-icon" /></template>
+          {{ $t('protocolLab.push.start') }}
+        </Button>
+        <Button danger :disabled="!canPushStop || loading" @click="onPushStop">
+          <template #icon><Square class="btn-icon" /></template>
+          {{ $t('protocolLab.push.stop') }}
+        </Button>
+      </Space>
+
+      <div v-if="pushStatus.mediaIp" class="push-target mono">
+        {{ $t('protocolLab.push.target') }}: {{ pushStatus.mediaIp }}:{{
+          pushStatus.mediaPort
+        }}
+        <span v-if="pushStatus.ssrc"> · ssrc {{ pushStatus.ssrc }}</span>
+      </div>
+      <pre v-if="pushStatus.lastLog" class="push-log">{{
+        pushStatus.lastLog
+      }}</pre>
+    </div>
+
+    <Divider class="my-3" />
+
     <!-- 收到指令时间线 -->
     <div class="section-title">{{ $t('protocolLab.client.received') }}</div>
     <div class="timeline-wrap">
@@ -571,6 +772,63 @@ async function onToggleAutoKeepalive(checked: boolean) {
 
 .auto-keepalive-label {
   font-size: 13px;
+}
+
+/* 模拟推流区 */
+.push-title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.push-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.push-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.push-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.push-input {
+  width: 100%;
+}
+
+.push-countdown {
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: hsl(var(--destructive, 0 84% 60%));
+  background: hsl(var(--destructive, 0 84% 60%) / 10%);
+  border-radius: 6px;
+}
+
+.push-target {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+
+.push-log {
+  max-height: 140px;
+  padding: 8px 10px;
+  margin: 0;
+  overflow: auto;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  background: hsl(var(--muted) / 40%);
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
 }
 
 /* 时间线标题（独占一行） */

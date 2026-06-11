@@ -80,6 +80,9 @@ export const TOPIC_META: Record<string, TopicMeta> = {
   },
   'clientcmd.broadcast': { labelKey: 'broadcast', color: 'magenta' },
   'clientcmd.invite': { labelKey: 'invite', color: 'purple' },
+  'clientcmd.push.started': { labelKey: 'pushStarted', color: 'green' },
+  'clientcmd.push.stopped': { labelKey: 'pushStopped', color: 'orange' },
+  'clientcmd.push.failed': { labelKey: 'pushFailed', color: 'red' },
 };
 
 /** 取 topic 的展示标题（找不到映射时回退原始 topic）。 */
