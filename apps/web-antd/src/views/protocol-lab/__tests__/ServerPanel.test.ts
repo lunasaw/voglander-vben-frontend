@@ -87,6 +87,13 @@ function mountPanel() {
     global: {
       stubs: {
         SipTimeline: { template: '<div class="sip-timeline-stub" />' },
+        MediaPlayer: {
+          name: 'MediaPlayer',
+          props: ['open', 'playUrls', 'title', 'loading'],
+          emits: ['close'],
+          template:
+            '<div class="media-player-stub" :data-open="String(open)" @click="$emit(\'close\')" />',
+        },
       },
     },
   });
@@ -265,5 +272,66 @@ describe('serverPanel —— 命令下发', () => {
     );
     await nextTick();
     expect(m.messageSuccess).toHaveBeenCalled();
+  });
+});
+
+describe('serverPanel —— 点播后自动开播放器弹窗', () => {
+  const playUrls = {
+    httpFlv: 'http://127.0.0.1:8082/rtp/s.live.flv',
+    hls: 'http://127.0.0.1:8082/rtp/s/hls.m3u8',
+    rtmp: 'rtmp://127.0.0.1:1935/rtp/s',
+  };
+
+  async function onlineWrapper() {
+    const wrapper = mountPanel();
+    await wrapper.setProps({
+      events: [devEvent('device.register', { deviceId: 'd1' })],
+    });
+    await nextTick();
+    return wrapper;
+  }
+
+  it('点播默认不开弹窗（初始 open=false）', async () => {
+    const wrapper = await onlineWrapper();
+    expect(wrapper.find('.media-player-stub').attributes('data-open')).toBe(
+      'false',
+    );
+  });
+
+  it('liveStart 返回 playUrls 后打开弹窗并透传地址', async () => {
+    m.liveStart.mockResolvedValueOnce({ status: 1, playUrls });
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'protocolLab.server.play')?.trigger('click');
+    await nextTick();
+    await nextTick();
+
+    const player = wrapper.findComponent({ name: 'MediaPlayer' });
+    expect(player.props('open')).toBe(true);
+    expect(player.props('playUrls')).toEqual(playUrls);
+  });
+
+  it('liveStart 无 playUrls（点播失败）时不开弹窗', async () => {
+    m.liveStart.mockResolvedValueOnce({ status: 0, playUrls: null });
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'protocolLab.server.play')?.trigger('click');
+    await nextTick();
+    await nextTick();
+
+    expect(wrapper.find('.media-player-stub').attributes('data-open')).toBe(
+      'false',
+    );
+  });
+
+  it('弹窗 close 事件后 open 回落 false', async () => {
+    m.liveStart.mockResolvedValueOnce({ status: 1, playUrls });
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'protocolLab.server.play')?.trigger('click');
+    await nextTick();
+    await nextTick();
+
+    await wrapper.find('.media-player-stub').trigger('click'); // 触发 close
+    await nextTick();
+    const player = wrapper.findComponent({ name: 'MediaPlayer' });
+    expect(player.props('open')).toBe(false);
   });
 });

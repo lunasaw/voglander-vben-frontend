@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { ProtocolLabApi } from '#/api/protocol-lab';
 import type { LabEvent } from '#/composables/useSseEvents';
 
 import { computed, ref, watch } from 'vue';
@@ -22,6 +23,7 @@ import {
   queryDeviceInfo,
   rebootDevice,
 } from '#/api/protocol-lab';
+import MediaPlayer from '#/components/MediaPlayer.vue';
 import { $t } from '#/locales';
 
 import { PTZ_DIRECTIONS, PTZ_ZOOM } from '../data';
@@ -54,6 +56,11 @@ const devices = ref<Map<string, DeviceRow>>(new Map());
 const selectedId = ref<string>('');
 const speed = ref(128);
 const loading = ref(false);
+
+/** 点播播放器弹窗：onLiveStart 拿到 playUrls 后打开。 */
+const playerOpen = ref(false);
+const playerUrls = ref<ProtocolLabApi.LivePlayVO['playUrls']>(undefined);
+const playerTitle = ref('');
 
 const deviceList = computed(() =>
   [...devices.value.values()].toSorted((a, b) => b.lastTs - a.lastTs),
@@ -164,14 +171,31 @@ function onReboot() {
   run(() => rebootDevice(selectedId.value), 'protocolLab.msg.rebootSent');
 }
 function onLiveStart() {
-  run(
-    () =>
-      liveStart({
-        deviceId: selectedId.value,
-        channelId: selectedChannelId.value,
-      }),
-    'protocolLab.msg.liveSent',
-  );
+  if (!canCommand.value) {
+    message.warning($t('protocolLab.msg.selectOnlineDevice'));
+    return;
+  }
+  loading.value = true;
+  liveStart({
+    deviceId: selectedId.value,
+    channelId: selectedChannelId.value,
+  })
+    .then((vo) => {
+      message.success($t('protocolLab.msg.liveSent'));
+      // 点播成功且有可播地址 → 打开播放器弹窗自动起播；失败/无地址不打扰
+      if (vo?.playUrls && Object.keys(vo.playUrls).length > 0) {
+        playerUrls.value = vo.playUrls;
+        playerTitle.value = `${selectedId.value} · ${selectedChannelId.value}`;
+        playerOpen.value = true;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function onPlayerClose() {
+  playerOpen.value = false;
 }
 </script>
 
@@ -272,6 +296,17 @@ function onLiveStart() {
         :empty-text="$t('protocolLab.server.eventsEmpty')"
       />
     </div>
+
+    <!-- 点播播放器弹窗：liveStart 返回 playUrls 后自动起播。
+         显式钉死 HLS：GB 直播流走 HLS 起播更稳，避免漂到原生管线触发 demuxer 解析失败。
+         无 hls 地址时 MediaPlayerManager 自动回退最佳格式。 -->
+    <MediaPlayer
+      :open="playerOpen"
+      :play-urls="playerUrls"
+      :title="playerTitle"
+      format="hls"
+      @close="onPlayerClose"
+    />
   </Card>
 </template>
 

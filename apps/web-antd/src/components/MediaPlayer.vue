@@ -34,6 +34,8 @@ interface Props {
   controls?: boolean;
   fluid?: boolean;
   loading?: boolean;
+  /** 指定播放格式（如 'hls'）；为空时由 MediaPlayerManager 自动选最佳格式。 */
+  format?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -47,6 +49,7 @@ const props = withDefaults(defineProps<Props>(), {
   controls: true,
   fluid: true,
   loading: false,
+  format: '',
 });
 
 const emit = defineEmits<{
@@ -155,6 +158,7 @@ function handleFormatNotSupported(data: { format: string; message: string }) {
         <MediaPlayerManager
           v-else-if="computedPlayUrls"
           :play-urls="computedPlayUrls"
+          :current-format="format"
           width="100%"
           :height="height"
           :autoplay="autoplay"
