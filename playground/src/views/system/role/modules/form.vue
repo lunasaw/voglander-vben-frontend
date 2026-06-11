@@ -37,6 +37,14 @@ const [Drawer, drawerApi] = useVbenDrawer({
     const { valid } = await formApi.validate();
     if (!valid) return;
     const values = await formApi.getValues();
+
+    // 过滤permissions数组中的null值
+    if (values.permissions && Array.isArray(values.permissions)) {
+      values.permissions = values.permissions.filter(
+        (item: any) => item !== null,
+      );
+    }
+
     drawerApi.lock();
     (id.value ? updateRole(id.value, values) : createRole(values))
       .then(() => {

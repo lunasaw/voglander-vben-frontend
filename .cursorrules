@@ -1,0 +1,253 @@
+# Vue-Vben-Admin 管理后台基础框架开发规则
+
+## 项目概述
+这是一个基于Vue-Vben-Admin的管理后台基础框架。所有开发工作都在`apps/web-antd`目录下进行。主要任务是对接`apps/web-antd/api/`目录下的OpenAPI接口定义，创建和适配对应的管理页面。所有页面的样式设计、组件使用和交互模式都必须参考`playground/`目录下的示例进行复用和改造，确保整个系统的一致性和统一性。
+
+## 工作目录结构
+- **主要开发目录**: `apps/web-antd/`
+- **API定义文件**: `apps/web-antd/api/Voglander.openapi.json`
+- **样式参考目录**: `playground/src/views/`
+- **组件示例目录**: `playground/src/views/examples/`
+
+## 开发规范
+
+### 1. 页面开发规范
+- 所有新页面必须放在`apps/web-antd/src/views/`目录下
+- 页面结构、布局、组件使用必须严格参考`playground/`目录下的对应示例
+- 保持与playground示例一致的设计语言和交互模式
+- 使用相同的组件库和样式规范
+
+### 2. API对接规范
+- 基于`apps/web-antd/api/Voglander.openapi.json`文件中的接口定义进行开发
+- API调用代码应放在`apps/web-antd/src/api/`目录下
+- 遵循现有的API调用模式和错误处理机制
+- 确保接口参数、响应格式与OpenAPI文档一致
+- **时间格式规范**：所有接口响应中的时间字段必须是时间戳格式（毫秒），前端根据用户时区和国际化设置自行处理时间显示格式
+
+### 3. 组件使用规范
+- 优先使用`playground/src/views/examples/`中已有的组件模式
+- 表格操作参考`playground/src/views/examples/vxe-table/`
+- 表单设计参考`playground/src/views/examples/form/`
+- 弹窗和抽屉参考`playground/src/views/examples/modal/`和`drawer/`
+- 按钮组合参考`playground/src/views/examples/button-group/`
+
+### 3.1. VxeTable表格规范
+- **横向滚动同步问题**：当表格列宽度总和超过容器宽度时，必须配置滚动选项确保表头和表内容同步滚动
+- **滚动配置**：在gridOptions中添加scrollX和scrollY配置
+  ```typescript
+  const [Grid, gridApi] = useVbenVxeGrid({
+    gridOptions: {
+      columns: useColumns(...),
+      // 其他配置...
+      scrollX: {
+        enabled: true,
+      },
+      scrollY: {
+        enabled: true,
+      },
+    },
+  });
+  ```
+- **列宽设置**：确保所有列都设置了合适的width值，避免布局异常
+- **固定列配置**：操作列通常设置为`fixed: 'right'`，重要标识列可设置为`fixed: 'left'`
+
+### 4. 样式规范
+- 使用playground中的现有样式和主题
+- 保持统一的间距、字体、颜色规范
+- 响应式设计要与playground保持一致
+- 使用相同的图标库和图标风格
+
+### 5. 图标使用规范
+- **统一图标系统**：项目使用 `@vben/icons` 作为统一的图标系统，严禁使用其他图标库
+- **禁止的导入**：不要使用 `@ant-design/icons-vue`、`@iconify/vue` 等第三方图标库
+- **正确的导入方式**：
+  ```typescript
+  // ✅ 正确：使用项目统一的图标系统
+  import { Search, SearchX, X, Plus, Settings } from '@vben/icons';
+
+  // ❌ 错误：使用第三方图标库
+  import { SearchOutlined, ClearOutlined } from '@ant-design/icons-vue';
+  ```
+- **可用图标查找**：所有可用图标都在 `packages/@core/base/icons/src/lucide.ts` 文件中定义
+- **图标命名规范**：使用 PascalCase 命名，如 `Search`、`SearchX`、`ArrowLeft`、`RotateCw`
+- **图标替换对照**：
+  - `SearchOutlined` → `Search`
+  - `ClearOutlined` → `X`
+  - `CloseOutlined` → `X`
+  - `PlusOutlined` → `Plus`
+  - `SettingOutlined` → `Settings`
+- **图标大小控制**：使用 Tailwind CSS 类控制图标大小，如 `class="size-4"`、`class="size-6"`
+
+### 6. 路由和菜单
+- 新增路由配置在`apps/web-antd/src/router/`
+- 菜单配置要与路由结构保持一致
+- 参考playground的路由结构和命名规范
+
+### 7. 数据管理
+- 使用统一的状态管理模式
+- API数据缓存和更新策略要保持一致
+- 错误处理和用户反馈机制统一
+- **时间数据处理**：统一使用项目内置的时间格式化工具(`@vben/utils`中的`formatDate`、`formatDateTime`)和VxeTable全局格式化器(`formatDate`、`formatDateTime`)进行时间显示
+
+### 8. 国际化规范
+- 新增页面时必须同时创建完整的国际化描述文件
+- 国际化键值命名遵循模块化结构，如：`system.menu.create`、`system.user.edit`、`dashboard.overview.title`
+- 所有页面标题、按钮文字、表单标签、提示信息都必须使用国际化键值
+- 国际化文件位置：`apps/web-antd/src/locales/`
+- 参考playground中的国际化键值命名规范和层级结构
+- 确保中英文翻译的准确性和一致性
+- 错误提示和成功消息也需要国际化处理
+
+### 9. 权限控制规范
+- **双重权限防护机制**：必须同时实现按钮显示控制和点击时权限校验
+- **按钮显示控制**：在表格列定义或组件配置中使用 `show` 属性控制按钮是否显示
+  ```typescript
+  {
+    code: 'edit',
+    text: $t('common.edit'),
+    show: () => hasAccessByCodes(['Module:Action:Permission']),
+  }
+  ```
+- **点击时权限校验**：在事件处理函数中进行权限检查并给出用户提示
+  ```typescript
+  function onEdit(row: any) {
+    if (!hasAccessByCodes(['Module:Action:Permission'])) {
+      message.error('您没有编辑权限');
+      return;
+    }
+    // 执行编辑逻辑
+  }
+  ```
+- **权限编码规范**：使用 `Module:Entity:Action` 格式，如 `System:User:Edit`、`System:Role:Delete`
+- **避免重复校验**：不要在表单提交等后续步骤中重复进行相同的权限检查
+- **权限导入**：使用 `import { useAccess } from '@vben/access'` 和 `const { hasAccessByCodes } = useAccess()`
+- **用户反馈**：权限校验失败时必须使用 `message.error()` 给出明确的提示信息
+- **权限优先级**：按钮显示控制 > 点击时校验 > 避免重复校验
+
+### 10. 状态切换组件规范
+- **统一使用CellSwitch**：所有状态字段（如启用/禁用、在线/离线等）都应使用CellSwitch渲染器实现直接切换
+- **列定义规范**：在data.ts的useColumns函数中配置状态切换列
+  ```typescript
+  {
+    cellRender: {
+      attrs: {
+        beforeChange: onStatusChange,
+        disabled: () => !hasAccessByCodes(['Module:Entity:Edit']),
+      },
+      name: onStatusChange ? 'CellSwitch' : 'CellTag',
+      options: onStatusChange ? undefined : [
+        { label: $t('common.enabled'), value: true, type: 'success' },
+        { label: $t('common.disabled'), value: false, type: 'error' },
+      ],
+    },
+    field: 'status',
+    title: $t('module.entity.status'),
+    width: 100,
+    align: 'center',
+  }
+  ```
+- **回调函数参数**：useColumns函数必须接收状态切换的回调函数参数
+  ```typescript
+  export function useColumns<T = EntityVO>(
+    onActionClick: OnActionClickFn<T>,
+    onStatusChange?: (newStatus: any, row: T) => PromiseLike<boolean | undefined>,
+  ): VxeTableGridOptions['columns']
+  ```
+- **状态切换处理函数**：在list.vue中实现状态切换逻辑，必须包含以下步骤：
+  1. **权限检查**：首先检查用户是否有编辑权限
+  2. **确认对话框**：显示状态切换确认提示
+  3. **API调用**：调用更新接口
+  4. **错误处理**：处理切换失败的情况
+  ```typescript
+  async function onStatusChange(newStatus: any, row: EntityVO) {
+    if (!hasAccessByCodes(['Module:Entity:Edit'])) {
+      message.error('您没有编辑权限');
+      return false;
+    }
+
+    const statusText = { true: '启用', false: '禁用' };
+    try {
+      await confirm(
+        `你要将【${row.name}】的状态切换为 【${statusText[newStatus.toString()]}】 吗？`,
+        `切换状态`,
+      );
+      await updateEntity({ id: row.id!, status: newStatus });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  ```
+- **Grid配置传递**：在Grid组件配置中传递状态切换回调函数
+  ```typescript
+  const [Grid, gridApi] = useVbenVxeGrid({
+    gridOptions: {
+      columns: useColumns(onActionClick, onStatusChange),
+      // ... 其他配置
+    },
+  });
+  ```
+- **多状态字段支持**：对于有多个状态字段的实体，为每个状态字段创建独立的回调函数
+  ```typescript
+  // 启用状态切换
+  async function onEnabledChange(newEnabled: boolean, row: EntityVO) { ... }
+  // Hook状态切换
+  async function onHookEnabledChange(newHookEnabled: boolean, row: EntityVO) { ... }
+
+  // 传递多个回调函数
+  columns: useColumns(onActionClick, undefined, onEnabledChange, onHookEnabledChange)
+  ```
+
+### 11. 数据库菜单SQL生成规范
+- **后端路由控制**：所有接口路由由后端通过数据库菜单表控制，前端页面需要对应的数据库菜单记录
+- **SQL模板基础**：参考 `apps/web-antd/sql/menu-data-insert.sql` 模板结构生成对应的SQL插入语句
+- **菜单层级结构**：
+  - 根级菜单：`menu_type = 1`，`parent_id = 0`
+  - 页面菜单：`menu_type = 2`，`parent_id` 为父级菜单ID
+  - 按钮权限：`menu_type = 3`，`parent_id` 为页面菜单ID
+- **必填字段规范**：
+  - `id`：唯一标识，建议按模块预留ID段
+  - `menu_code`：菜单编码，采用驼峰命名，如 `SystemUser`
+  - `menu_name`：菜单名称，使用国际化键值，如 `system.user.title`
+  - `path`：路由路径，如 `/system/user`
+  - `component`：组件路径，如 `/system/user/list`
+  - `permission`：权限编码，格式为 `Module:Entity:Action`
+  - `meta`：JSON格式的元数据，包含 `title`、`icon` 等信息
+- **ID分配规则**：
+  - 系统管理模块：200-299
+  - 项目管理模块：900-999
+  - 按钮权限ID：在页面ID基础上加两位序号，如页面ID为201，按钮权限ID为20101、20102
+- **权限分配**：新增菜单后需要在 `tb_role_menu` 表中为管理员角色（通常role_id=1）分配相应权限
+- **SQL生成流程**：
+  1. 根据新增页面的功能模块确定ID范围
+  2. 按照层级结构生成菜单记录（目录->页面->按钮）
+  3. 生成对应的角色权限分配记录
+  4. 确保国际化键值与前端保持一致
+
+## 代码质量要求
+- 使用TypeScript进行类型安全开发
+- 遵循Vue 3 Composition API规范
+- 组件要具有良好的可复用性和可维护性
+- 添加必要的注释和文档说明
+
+## 开发流程
+1. 查看OpenAPI文档，了解需要对接的接口
+2. 在playground中寻找相似的页面示例作为参考
+3. 复制并改造playground中的组件和样式
+4. 适配具体的业务逻辑和数据结构
+5. 确保页面功能完整且样式一致
+
+## 注意事项
+- 严禁偏离playground的设计风格和组件使用方式
+- 所有UI交互都要保持与示例的一致性
+- 代码提交前必须确保样式和功能都符合规范
+- 新增功能要考虑在其他类似页面的复用性
+
+## 技术栈
+- Vue 3 + TypeScript
+- Ant Design Vue (根据web-antd目录推断)
+- Vite构建工具
+- Pinia状态管理
+- Vue Router路由管理
+
+遵循以上规则，确保整个管理后台系统的一致性、可维护性和用户体验的统一性。

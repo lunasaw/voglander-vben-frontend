@@ -1,157 +1,123 @@
 <div align="center">
-  <a href="https://github.com/anncwb/vue-vben-admin">
-    <img alt="VbenAdmin Logo" width="215" src="https://unpkg.com/@vbenjs/static-source@0.1.7/source/logo-v1.webp">
-  </a>
-  <br>
-  <br>
+  <h1>Voglander Admin · フロントエンド</h1>
+  <p>映像監視 / ストリーミングメディア管理プラットフォームの Web 管理画面</p>
 
-[![license](https://img.shields.io/github/license/anncwb/vue-vben-admin.svg)](LICENSE)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Vue](https://img.shields.io/badge/Vue-3.x-42b883.svg)](https://vuejs.org/) [![Vite](https://img.shields.io/badge/Vite-6.x-646cff.svg)](https://vitejs.dev/) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)](https://www.typescriptlang.org/)
 
-  <h1>Vue Vben Admin</h1>
 </div>
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=vbenjs_vue-vben-admin&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=vbenjs_vue-vben-admin) ![codeql](https://github.com/vbenjs/vue-vben-admin/actions/workflows/codeql.yml/badge.svg) ![build](https://github.com/vbenjs/vue-vben-admin/actions/workflows/build.yml/badge.svg) ![ci](https://github.com/vbenjs/vue-vben-admin/actions/workflows/ci.yml/badge.svg) ![deploy](https://github.com/vbenjs/vue-vben-admin/actions/workflows/deploy.yml/badge.svg)
+[简体中文](./README.md) | **日本語**
 
-**日本語** | [English](./README.md) | [中文](./README.zh-CN.md)
+## はじめに
 
-## 紹介
+本リポジトリは **Voglander** 映像監視 / ストリーミングメディアプラットフォームの管理フロントエンドであり、[Vue Vben Admin](https://github.com/vbenjs/vue-vben-admin) 5.x をベースに二次開発したものです。統一された `requestClient` を通じて voglander バックエンドの REST API（`/api/*`、`/zlm/api/*`）を呼び出し、デバイス接続、ストリーミング制御、GB28181 プロトコル検証、システム権限管理を実現します。
 
-Vue Vben Adminは、最新の`vue3`、`vite`、`TypeScript`などの主流技術を使用して開発された、無料でオープンソースの中・後端テンプレートです。すぐに使える中・後端のフロントエンドソリューションとして、学習の参考にもなります。
+> これは **プライベートなカスタム fork** であり、主要な開発対象は `apps/web-antd`（Ant Design Vue 版）です。その他の `web-ele` / `web-naive` / `playground` は上流テンプレート由来で、スタイルやコンポーネントの参考用途に限られます。
 
-## アップグレード通知
+## プロダクト内での位置づけ
 
-これは最新バージョン `5.0` であり、以前のバージョンとは互換性がありません。新しいプロジェクトを開始する場合は、最新バージョンを使用することをお勧めします。古いバージョンを表示したい場合は、[v2ブランチ](https://github.com/vbenjs/vue-vben-admin/tree/v2)を使用してください。
+Voglander は 4 つの独立したリポジトリで構成され、本リポジトリはそのフロントエンドです。バックエンドは GB28181（`sip-proxy`）と ZLMediaKit（`zlm-spring-boot-starter`）を `voglander` に統合し、フロントエンドは REST と SSE を通じて連携します。
 
-## 特徴
-
-- **最新技術スタック**：Vue 3やViteなどの最先端フロントエンド技術で開発
-- **TypeScript**：アプリケーション規模のJavaScriptのための言語
-- **テーマ**：複数のテーマカラーが利用可能で、カスタマイズオプションも豊富
-- **国際化**：完全な内蔵国際化サポート
-- **権限管理**：動的ルートベースの権限生成ソリューションを内蔵
-
-## プレビュー
-
-- [Vben Admin](https://vben.pro/) - フルバージョンの中国語サイト
-
-テストアカウント：vben/123456
-
-<div align="center">
-  <img alt="VbenAdmin Logo" width="100%" src="https://anncwb.github.io/anncwb/images/preview1.png">
-  <img alt="VbenAdmin Logo" width="100%" src="https://anncwb.github.io/anncwb/images/preview2.png">
-  <img alt="VbenAdmin Logo" width="100%" src="https://anncwb.github.io/anncwb/images/preview3.png">
-</div>
-
-### Gitpodを使用
-
-Gitpod（GitHub用の無料オンライン開発環境）でプロジェクトを開き、すぐにコーディングを開始します。
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/vbenjs/vue-vben-admin)
-
-## ドキュメント
-
-[ドキュメント](https://doc.vben.pro/)
-
-## インストールと使用
-
-1. プロジェクトコードを取得
-
-```bash
-git clone https://github.com/vbenjs/vue-vben-admin.git
+```
+sip-proxy ───────────────┐
+                         ├──► voglander (バックエンド) ◄──── REST /api/*、/zlm/api/* + SSE ──── vue-vben-admin (本リポジトリ)
+zlm-spring-boot-starter ──┘
 ```
 
-2. 依存関係のインストール
+フロントとバックの契約は一致させる必要があります。フィールドの追加・変更は双方で整合させ、API やフィールドを独自に捏造してはいけません（詳細は [`apps/web-antd/CLAUDE.md`](apps/web-antd/CLAUDE.md) および `.cursorrules` を参照）。
+
+## 主な機能
+
+- **メディア管理**
+  - サービスノード管理：ZLMediaKit ノードの登録、オンライン状態、マルチノードルーティング（`X-Node-Key`）
+  - 映像ストリーム一覧：リアルタイムストリーム一覧、ストリーム詳細、スクリーンショット
+  - プル / プッシュプロキシ：プル・プッシュプロキシの CRUD とオンライン状態監視
+- **マルチプロトコルメディアプレーヤー**：HLS / FLV / Video.js の自動フォーマット検出とプレーヤー切替（`MediaPlayerManager`）、リアルタイム視聴者数と URL コピーに対応
+- **GB28181 プロトコル検証台**：左側でデバイス側（Client）の登録・通知をシミュレート、右側でプラットフォーム側（Server）が指令を送信し、実際の SIP 交換を経てプロトコルリンクを可視化検証
+- **システム管理**：ユーザー、ロール、メニュー、部門の管理。バックエンド駆動の動的ルーティングと RBAC による二重権限チェック
+- **リアルタイムイベント（SSE）**：デバイス登録、セッション、指令、アラームなどのイベントをリアルタイム配信。自動再接続と重複排除に対応
+- **基盤機能**：マルチテーマ切替、充実した国際化（中 / 英）、Schema 駆動の動的フォームと VXE Table データグリッド
+
+## 技術スタック
+
+| カテゴリ            | 採用技術                                      |
+| ------------------- | --------------------------------------------- |
+| フレームワーク      | Vue 3 + TypeScript + Composition API          |
+| ビルド              | Vite + Turborepo + pnpm workspace（Monorepo） |
+| UI                  | Ant Design Vue（主）、Tailwind CSS            |
+| 状態管理            | Pinia（永続化 + 暗号化）                      |
+| ルーティング        | Vue Router 4（バックエンド駆動権限）          |
+| テーブル / フォーム | VXE Table、Schema 駆動動的フォーム            |
+| メディア            | Video.js、FLV.js、HLS.js                      |
+| アイコン            | `@vben/icons`（Lucide）                       |
+
+## ディレクトリ構成
+
+```
+vue-vben-admin/
+├── apps/
+│   ├── web-antd/          # 主要開発対象（Ant Design Vue）
+│   │   ├── src/
+│   │   │   ├── api/        # API 層：core / media / system / protocol-lab
+│   │   │   ├── views/      # ページ：media / protocol-lab / system / dashboard
+│   │   │   ├── components/ # 共有ビジネスコンポーネント（MediaPlayer、NodeSelector…）
+│   │   │   ├── composables/# Composable 関数（useSseEvents…）
+│   │   │   ├── router/     # ルーティングモジュール定義
+│   │   │   └── locales/    # 国際化（zh-CN / en-US）
+│   │   ├── api/            # バックエンド OpenAPI 参考（voglander-api.md）
+│   │   └── doc/            # アーキテクチャ・設計ドキュメント
+│   ├── web-ele / web-naive # 上流テンプレート参考版
+│   └── backend-mock/      # Nitro Mock サービス
+├── packages/              # 共有ライブラリ（@core / effects / ビジネスパッケージ）
+├── internal/              # ビルド・規約設定
+└── playground/            # スタイル・コンポーネント参考
+```
+
+## クイックスタート
+
+動作要件：**Node.js >= 20.10.0**、**pnpm >= 9.12.0**。
 
 ```bash
-cd vue-vben-admin
+# 1. 依存関係のインストール
 npm i -g corepack
 pnpm install
+
+# 2. 開発サーバーの起動（主対象 web-antd、デフォルトポート 5666）
+pnpm dev:antd
+
+# 3. 本番ビルド
+pnpm build:antd
 ```
 
-3. 実行
+開発時の API は `/api` プレフィックスを使用し、Vite プロキシ経由で voglander バックエンド（デフォルト `http://0.0.0.0:8081`）へ転送されます。ローカルバックエンドと連携する場合は、各リポジトリのビルド順序（ルートの `CLAUDE.md` を参照）を確認してください。
+
+## コード品質
 
 ```bash
-pnpm dev
+pnpm check          # すべての品質ゲート（型 / 依存 / 循環依存 / スペル）
+pnpm lint           # コードチェック
+pnpm format         # フォーマット
+pnpm test:unit      # Vitest ユニットテスト
+pnpm test:e2e       # Playwright E2E テスト
 ```
 
-4. ビルド
+## 開発ガイドとドキュメント
 
-```bash
-pnpm build
-```
-
-## 変更ログ
-
-[CHANGELOG](https://github.com/vbenjs/vue-vben-admin/releases)
-
-## 貢献方法
-
-ご参加をお待ちしております！[Issueを提出](https://github.com/anncwb/vue-vben-admin/issues/new/choose)するか、Pull Requestを送信してください。
-
-**Pull Request プロセス：**
-
-1. コードをフォーク
-2. 自分のブランチを作成：`git checkout -b feat/xxxx`
-3. 変更をコミット：`git commit -am 'feat(function): add xxxxx'`
-4. ブランチをプッシュ：`git push origin feat/xxxx`
-5. `pull request`を送信
-
-## Git貢献提出規則
-
-参考 [vue](https://github.com/vuejs/vue/blob/dev/.github/COMMIT_CONVENTION.md) 規則 ([Angular](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-angular))
-
-- `feat` 新機能の追加
-- `fix` 問題/バグの修正
-- `style` コードスタイルに関連し、実行結果に影響しない
-- `perf` 最適化/パフォーマンス向上
-- `refactor` リファクタリング
-- `revert` 変更の取り消し
-- `test` テスト関連
-- `docs` ドキュメント/注釈
-- `chore` 依存関係の更新/スキャフォールディング設定の変更など
-- `ci` 継続的インテグレーション
-- `types` 型定義ファイルの変更
+- プロジェクトの開発規約、コンポーネント化パターン、権限と i18n の取り決め：[`CLAUDE.md`](CLAUDE.md)、[`apps/web-antd/CLAUDE.md`](apps/web-antd/CLAUDE.md)
+- システムアーキテクチャドキュメント：[`apps/web-antd/doc/1.0.6/README.md`](apps/web-antd/doc/1.0.6/README.md)（システム概要 / フロント・バックアーキテクチャ / API 契約）
+- GB28181 プロトコル検証台の設計：[`apps/web-antd/doc/1.0.7/`](apps/web-antd/doc/1.0.7/)
+- バックエンド API 参考：[`apps/web-antd/api/voglander-api.md`](apps/web-antd/api/voglander-api.md)
 
 ## ブラウザサポート
 
-Tailwind CSS v4.0 is designed for Safari 16.4+, Chrome 111+, and Firefox 128+
+モダンブラウザに対応、IE 非対応。ローカル開発では `Chrome 80+` を推奨します。
 
-モダンブラウザをサポートし、IEはサポートしません
+|      Edge       |     Firefox     |     Chrome      |     Safari      |
+| :-------------: | :-------------: | :-------------: | :-------------: |
+| last 2 versions | last 2 versions | last 2 versions | last 2 versions |
 
-| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Safari |
-| :-: | :-: | :-: | :-: |
-| 最新2バージョン | 最新2バージョン | 最新2バージョン | 最新2バージョン |
+## 謝辞とライセンス
 
-## メンテナー
+本プロジェクトはオープンソースの管理画面テンプレート [Vue Vben Admin](https://github.com/vbenjs/vue-vben-admin)（[ドキュメント](https://doc.vben.pro/)）をベースに二次開発しています。原作者 [@Vben](https://github.com/anncwb) とそのコントリビューターに感謝します。
 
-[@Vben](https://github.com/anncwb)
-
-## スター歴史
-
-[![Star History Chart](https://api.star-history.com/svg?repos=vbenjs/vue-vben-admin&type=Date)](https://star-history.com/#vbenjs/vue-vben-admin&Date)
-
-## 寄付
-
-このプロジェクトが役に立つと思われた場合、作者にコーヒーを一杯おごってサポートを示すことができます！
-
-![donate](https://unpkg.com/@vbenjs/static-source@0.1.7/source/sponsor.png)
-
-<a style="display: block;width: 100px;height: 50px;line-height: 50px; color: #fff;text-align: center; background: #408aed;border-radius: 4px;" href="https://www.paypal.com/paypalme/cvvben">Paypal Me</a>
-
-## 貢献者
-
-<a href="https://openomy.app/github/vbenjs/vue-vben-admin" target="_blank" style="display: block; width: 100%;" align="center">
-  <img src="https://openomy.app/svg?repo=vbenjs/vue-vben-admin&chart=bubble&latestMonth=3" target="_blank" alt="Contribution Leaderboard" style="display: block; width: 100%;" />
- </a>
-
-<a href="https://github.com/vbenjs/vue-vben-admin/graphs/contributors">
-  <img alt="Contributors" src="https://contrib.rocks/image?repo=vbenjs/vue-vben-admin" />
-</a>
-
-## Discord
-
-- [Github Discussions](https://github.com/anncwb/vue-vben-admin/discussions)
-
-## ライセンス
-
-[MIT © Vben-2020](./LICENSE)
+[MIT](./LICENSE) License.

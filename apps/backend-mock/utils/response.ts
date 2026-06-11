@@ -1,7 +1,5 @@
 import type { EventHandlerRequest, H3Event } from 'h3';
 
-import { setResponseStatus } from 'h3';
-
 export function useResponseSuccess<T = any>(data: T) {
   return {
     code: 0,

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm check:type:*)",
+      "Bash(pnpm run:*)",
+      "Bash(npx vue-tsc:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm format:*)",
+      "Bash(npx eslint:*)",
+      "Bash(pnpm add:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm install:*)",
+      "Bash(rm:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(mkdir:*)"
+    ],
+    "deny": []
+  }
+}

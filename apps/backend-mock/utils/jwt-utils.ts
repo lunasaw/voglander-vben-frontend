@@ -1,11 +1,8 @@
 import type { EventHandlerRequest, H3Event } from 'h3';
 
-import type { UserInfo } from './mock-data';
-
-import { getHeader } from 'h3';
 import jwt from 'jsonwebtoken';
 
-import { MOCK_USERS } from './mock-data';
+import { UserInfo } from './mock-data';
 
 // TODO: Replace with your own secret key
 const ACCESS_TOKEN_SECRET = 'access_token_secret';
@@ -34,22 +31,12 @@ export function verifyAccessToken(
     return null;
   }
 
-  const tokenParts = authHeader.split(' ');
-  if (tokenParts.length !== 2) {
-    return null;
-  }
-  const token = tokenParts[1] as string;
+  const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(
-      token,
-      ACCESS_TOKEN_SECRET,
-    ) as unknown as UserPayload;
+    const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET) as UserPayload;
 
     const username = decoded.username;
     const user = MOCK_USERS.find((item) => item.username === username);
-    if (!user) {
-      return null;
-    }
     const { password: _pwd, ...userinfo } = user;
     return userinfo;
   } catch {
@@ -63,12 +50,7 @@ export function verifyRefreshToken(
   try {
     const decoded = jwt.verify(token, REFRESH_TOKEN_SECRET) as UserPayload;
     const username = decoded.username;
-    const user = MOCK_USERS.find(
-      (item) => item.username === username,
-    ) as UserInfo;
-    if (!user) {
-      return null;
-    }
+    const user = MOCK_USERS.find((item) => item.username === username);
     const { password: _pwd, ...userinfo } = user;
     return userinfo;
   } catch {

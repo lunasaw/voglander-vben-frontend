@@ -131,8 +131,13 @@ const PreviewGroup = defineAsyncComponent(() =>
   import('ant-design-vue/es/image').then((res) => res.ImagePreviewGroup),
 );
 
-const withDefaultPlaceholder = (
-  component: Component,
+// 导入自定义组件
+const NodeSelector = defineAsyncComponent(
+  () => import('#/components/NodeSelector.vue'),
+);
+
+const withDefaultPlaceholder = <T extends Component>(
+  component: T,
   type: 'input' | 'select',
   componentProps: Recordable<any> = {},
 ) => {
@@ -612,6 +617,7 @@ export type ComponentType =
   | 'InputNumber'
   | 'InputPassword'
   | 'Mentions'
+  | 'NodeSelector'
   | 'PrimaryButton'
   | 'Radio'
   | 'RadioGroup'
@@ -707,6 +713,7 @@ async function initComponentAdapter() {
     }),
     InputPassword: withDefaultPlaceholder(InputPassword, 'input'),
     Mentions: withDefaultPlaceholder(Mentions, 'input'),
+    NodeSelector,
     // 自定义主要按钮
     PrimaryButton: (props, { attrs, slots }) => {
       return h(Button, { ...props, attrs, type: 'primary' }, slots);

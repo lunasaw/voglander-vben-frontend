@@ -134,10 +134,12 @@ catalog:
   eslint-plugin-yml: ^3.4.0
   execa: ^9.6.1
   find-up: ^8.0.0
+  flv.js: ^1.6.2
   get-port: ^7.2.0
   globals: ^17.6.0
   h3: ^1.15.11
   happy-dom: ^20.10.2
+  hls.js: ^1.6.7
   html-minifier-terser: ^7.2.0
   is-ci: ^4.1.0
   json-bigint: ^1.0.0
@@ -192,6 +194,7 @@ catalog:
   unplugin-element-plus: ^0.11.2
   unplugin-vue: ^7.2.0
   vee-validate: ^4.15.1
+  video.js: ^8.21.1
   vite: 8.0.10
   vite-plugin-compression: ^0.5.1
   vite-plugin-lazy-import: ^1.0.7

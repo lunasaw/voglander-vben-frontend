@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-import { eventHandler } from 'h3';
 import { verifyAccessToken } from '~/utils/jwt-utils';
 import { unAuthorizedResponse, useResponseSuccess } from '~/utils/response';
 

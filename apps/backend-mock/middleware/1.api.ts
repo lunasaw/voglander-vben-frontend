@@ -1,4 +1,3 @@
-import { defineEventHandler } from 'h3';
 import { forbiddenResponse, sleep } from '~/utils/response';
 
 export default defineEventHandler(async (event) => {

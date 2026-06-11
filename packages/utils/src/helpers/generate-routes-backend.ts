@@ -31,6 +31,7 @@ async function generateRoutesByBackend(
 
   try {
     const menuRoutes = await fetchMenuListAsync?.();
+
     if (!menuRoutes) {
       return [];
     }
@@ -54,7 +55,7 @@ async function generateRoutesByBackend(
 
     return routes;
   } catch (error) {
-    console.error(error);
+    console.error('❌ generateRoutesByBackend 执行出错:', error);
     throw error;
   }
 }

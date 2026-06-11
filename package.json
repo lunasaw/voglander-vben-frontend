@@ -82,6 +82,7 @@
     "@vben/vsh": "workspace:*",
     "@vitejs/plugin-vue": "catalog:",
     "@vitejs/plugin-vue-jsx": "catalog:",
+    "@vue/test-utils": "catalog:",
     "cross-env": "catalog:",
     "cspell": "catalog:",
     "eslint": "catalog:",
