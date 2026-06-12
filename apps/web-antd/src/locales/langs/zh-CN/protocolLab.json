@@ -124,6 +124,7 @@
     "configBasicParam": "基础参数配置",
     "broadcast": "语音广播",
     "invite": "点播请求",
+    "byeRecv": "收到挂断",
     "pushStarted": "推流启动",
     "pushStopped": "推流停止",
     "pushFailed": "推流失败"

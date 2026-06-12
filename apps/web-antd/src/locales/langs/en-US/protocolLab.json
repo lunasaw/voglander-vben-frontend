@@ -124,6 +124,7 @@
     "configBasicParam": "Basic Param Config",
     "broadcast": "Voice Broadcast",
     "invite": "Invite Request",
+    "byeRecv": "BYE Received",
     "pushStarted": "Push Started",
     "pushStopped": "Push Stopped",
     "pushFailed": "Push Failed"

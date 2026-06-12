@@ -65,6 +65,9 @@ function summaryOf(ev: LabEvent): string {
   if (ev.topic === 'clientcmd.invite' || ev.topic === 'session.invite_ok') {
     return `callId=${d.callId ?? ''}`;
   }
+  if (ev.topic === 'clientcmd.bye') {
+    return `callId=${d.callId ?? ''}  statusCode=${d.statusCode ?? ''}`;
+  }
   // 兜底：deviceId / clientId / platformId
   return d.deviceId ?? d.clientId ?? d.platformId ?? '';
 }
