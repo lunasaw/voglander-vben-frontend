@@ -22,6 +22,9 @@ export const overridesPreferences = defineOverridesPreferences({
     accessMode: 'backend',
     locale: 'zh-CN', // 设置默认语言为中文
   },
+  theme: {
+    mode: 'light', // 设置默认主题为浅色（白色）模式
+  },
 });
 
 export const preferencesExtension =
