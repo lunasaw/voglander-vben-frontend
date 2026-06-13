@@ -7,6 +7,8 @@
     "status": "状态",
     "type": "协议类型",
     "ip": "IP",
+    "port": "端口",
+    "serverIp": "注册节点",
     "channelCount": "通道数",
     "keepaliveTime": "心跳时间",
     "registerTime": "注册时间",
@@ -54,7 +56,10 @@
     "alarmQuery": "查询报警",
     "alarmControl": "报警复位",
     "broadcast": "语音广播",
-    "reboot": "远程重启"
+    "reboot": "远程重启",
+    "edit": "编辑",
+    "delete": "删除",
+    "batchDelete": "批量删除"
   },
   "msg": {
     "cmdSent": "指令已下发",
@@ -63,6 +68,11 @@
     "liveSent": "点播请求已下发",
     "recordQuerySent": "录像查询已下发，结果将通过实时事件通知",
     "noPermission": "您没有执行该操作的权限",
-    "eventsEmpty": "暂无设备事件，设备上报 / 应答会实时显示"
+    "eventsEmpty": "暂无设备事件，设备上报 / 应答会实时显示",
+    "deleting": "正在删除 {0} …",
+    "deleteSuccess": "删除成功",
+    "updateSuccess": "更新成功",
+    "batchDeleteEmpty": "请先勾选要删除的设备",
+    "batchDeleteConfirm": "确定删除选中的 {0} 个设备？"
   }
 }

@@ -100,6 +100,77 @@ export function mergeDeviceEvents<T extends DeviceApi.DeviceVO>(
   return rows.map((r) => byId.get(r.deviceId) ?? r);
 }
 
+/** 协议类型选项（DeviceAgreementEnum：1=GB28181 IPC / 2=NVR / 3=ONVIF）。 */
+const DEVICE_TYPE_OPTIONS = [
+  { label: 'GB28181 IPC', value: 1 },
+  { label: 'GB28181 NVR', value: 2 },
+  { label: 'ONVIF IPC', value: 3 },
+];
+
+/**
+ * 设备编辑表单字段（§4.2 编辑支链）。
+ *
+ * deviceId 为唯一索引，编辑时只读（仅展示，不可改）；id 走隐藏字段透传。
+ * 其余字段（name/ip/port/type/serverIp/status）对应 PUT /device/update 可更新项。
+ */
+export function useFormSchema(): VbenFormSchema[] {
+  return [
+    {
+      component: 'Input',
+      dependencies: {
+        show: () => false,
+        triggerFields: ['id'],
+      },
+      fieldName: 'id',
+      label: 'id',
+    },
+    {
+      component: 'Input',
+      componentProps: { disabled: true },
+      fieldName: 'deviceId',
+      label: $t('device.field.deviceId'),
+    },
+    {
+      component: 'Input',
+      fieldName: 'name',
+      label: $t('device.field.name'),
+    },
+    {
+      component: 'Select',
+      componentProps: { options: DEVICE_TYPE_OPTIONS },
+      fieldName: 'type',
+      label: $t('device.field.type'),
+    },
+    {
+      component: 'Input',
+      fieldName: 'ip',
+      label: $t('device.field.ip'),
+    },
+    {
+      component: 'InputNumber',
+      componentProps: { max: 65_535, min: 0, precision: 0 },
+      fieldName: 'port',
+      label: $t('device.field.port'),
+    },
+    {
+      component: 'Input',
+      fieldName: 'serverIp',
+      label: $t('device.field.serverIp'),
+    },
+    {
+      component: 'Select',
+      componentProps: {
+        options: [
+          { label: $t('device.status.online'), value: 1 },
+          { label: $t('device.status.offline'), value: 0 },
+        ],
+      },
+      fieldName: 'status',
+      label: $t('device.field.status'),
+    },
+  ];
+}
+
 /** 顶部筛选条件（§1.1：仅 type 维度，禁用派生字段 subType/protocol）。 */
 export function useGridFormSchema(): VbenFormSchema[] {
   return [
@@ -148,6 +219,12 @@ export function useColumns<T = DeviceApi.DeviceVO>(
   const { hasAccessByCodes } = useAccess();
 
   return [
+    {
+      type: 'checkbox',
+      width: 48,
+      align: 'center',
+      fixed: 'left',
+    },
     {
       field: 'deviceId',
       title: $t('device.field.deviceId'),
@@ -210,7 +287,11 @@ export function useColumns<T = DeviceApi.DeviceVO>(
     {
       align: 'center',
       cellRender: {
-        attrs: { onClick: onActionClick },
+        attrs: {
+          nameField: 'name',
+          nameTitle: $t('device.field.name'),
+          onClick: onActionClick,
+        },
         name: 'CellOperation',
         options: [
           {
@@ -223,12 +304,23 @@ export function useColumns<T = DeviceApi.DeviceVO>(
             text: $t('device.action.live'),
             show: () => hasAccessByCodes(['Device:Cmd:Live']),
           },
+          {
+            code: 'edit',
+            text: $t('device.action.edit'),
+            show: () => hasAccessByCodes(['Device:Device:Edit']),
+          },
+          {
+            code: 'delete',
+            danger: true,
+            text: $t('device.action.delete'),
+            show: () => hasAccessByCodes(['Device:Device:Delete']),
+          },
         ],
       },
       field: 'operation',
       fixed: 'right',
       title: $t('device.field.operation'),
-      width: 180,
+      width: 260,
     },
   ];
 }

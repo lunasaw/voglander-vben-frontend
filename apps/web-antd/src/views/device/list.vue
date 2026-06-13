@@ -10,10 +10,10 @@ import { computed, ref, watch } from 'vue';
 import { useAccess } from '@vben/access';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 
-import { message } from 'ant-design-vue';
+import { Button, message, Modal } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getDevicePage } from '#/api/device';
+import { deleteDevice, deleteDeviceBatch, getDevicePage } from '#/api/device';
 import { useSseEvents } from '#/composables/useSseEvents';
 import { $t } from '#/locales';
 
@@ -24,6 +24,7 @@ import {
   useGridFormSchema,
 } from './data';
 import DeviceDetail from './modules/device-detail.vue';
+import DeviceForm from './modules/device-form.vue';
 
 /**
  * 设备管理列表页（§4.2）——「Fleet Console 机群指挥台」皮肤。
@@ -56,6 +57,11 @@ const [DetailDrawer, detailDrawerApi] = useVbenDrawer({
   destroyOnClose: true,
 });
 
+const [FormDrawer, formDrawerApi] = useVbenDrawer({
+  connectedComponent: DeviceForm,
+  destroyOnClose: true,
+});
+
 const [Grid, gridApi] = useVbenVxeGrid({
   formOptions: {
     schema: useGridFormSchema(),
@@ -83,6 +89,10 @@ const [Grid, gridApi] = useVbenVxeGrid({
     rowConfig: {
       keyField: 'id',
     },
+    checkboxConfig: {
+      highlight: true,
+      range: true,
+    },
     scrollX: {
       enabled: true,
     },
@@ -95,6 +105,9 @@ const [Grid, gridApi] = useVbenVxeGrid({
       refresh: { code: 'query' },
       search: true,
       zoom: true,
+      slots: {
+        buttons: 'toolbar-buttons',
+      },
     },
   } as VxeTableGridOptions<DeviceApi.DeviceVO>,
 });
@@ -120,8 +133,16 @@ watch(events, (list) => {
 
 function onActionClick(e: OnActionClickParams<DeviceApi.DeviceVO>) {
   switch (e.code) {
+    case 'delete': {
+      onDelete(e.row);
+      break;
+    }
     case 'detail': {
       onDetail(e.row);
+      break;
+    }
+    case 'edit': {
+      onEdit(e.row);
       break;
     }
     case 'liveStart': {
@@ -137,6 +158,61 @@ function onDetail(row: DeviceApi.DeviceVO) {
     return;
   }
   detailDrawerApi.setData(row).open();
+}
+
+function onEdit(row: DeviceApi.DeviceVO) {
+  if (!hasAccessByCodes(['Device:Device:Edit'])) {
+    message.error($t('device.msg.noPermission'));
+    return;
+  }
+  formDrawerApi.setData(row).open();
+}
+
+function onDelete(row: DeviceApi.DeviceVO) {
+  if (!hasAccessByCodes(['Device:Device:Delete'])) {
+    message.error($t('device.msg.noPermission'));
+    return;
+  }
+  // 二次确认由 CellOperation 内置 Popconfirm 承载，此处直接执行删除。
+  const hideLoading = message.loading({
+    content: $t('device.msg.deleting', [row.name || row.deviceId]),
+    duration: 0,
+    key: 'device_delete_msg',
+  });
+  deleteDevice(row.id)
+    .then(() => {
+      message.success({
+        content: $t('device.msg.deleteSuccess'),
+        key: 'device_delete_msg',
+      });
+      onRefresh();
+    })
+    .catch(() => {
+      hideLoading();
+    });
+}
+
+function onBatchDelete() {
+  if (!hasAccessByCodes(['Device:Device:Delete'])) {
+    message.error($t('device.msg.noPermission'));
+    return;
+  }
+  const records =
+    (gridApi.grid?.getCheckboxRecords?.() as DeviceApi.DeviceVO[]) ?? [];
+  if (records.length === 0) {
+    message.warning($t('device.msg.batchDeleteEmpty'));
+    return;
+  }
+  const ids = records.map((r) => r.id);
+  Modal.confirm({
+    content: $t('device.msg.batchDeleteConfirm', [ids.length]),
+    title: $t('device.action.batchDelete'),
+    onOk: async () => {
+      await deleteDeviceBatch(ids);
+      message.success($t('device.msg.deleteSuccess'));
+      onRefresh();
+    },
+  });
 }
 
 function onLiveStart(row: DeviceApi.DeviceVO) {
@@ -156,6 +232,7 @@ function onRefresh() {
 <template>
   <Page auto-content-height>
     <DetailDrawer @success="onRefresh" />
+    <FormDrawer @success="onRefresh" />
 
     <div class="fleet" :class="{ 'is-active': hasOnline }">
       <!-- 机群态势带（记忆点）：脉冲雷达 + 网格纹理 + 等宽统计读数 -->
@@ -201,7 +278,18 @@ function onRefresh() {
 
       <!-- 控制台化表格 -->
       <div class="fleet-grid">
-        <Grid :table-title="$t('device.fleet.scope')" />
+        <Grid :table-title="$t('device.fleet.scope')">
+          <template #toolbar-buttons>
+            <Button
+              v-if="hasAccessByCodes(['Device:Device:Delete'])"
+              danger
+              type="primary"
+              @click="onBatchDelete"
+            >
+              {{ $t('device.action.batchDelete') }}
+            </Button>
+          </template>
+        </Grid>
       </div>
     </div>
   </Page>
@@ -539,6 +627,111 @@ function onRefresh() {
 
 .fleet-grid :deep(.vxe-body--row:hover) {
   background: hsl(var(--accent, var(--muted)) / 55%);
+}
+
+/* ============================ Filter Console（检索台） ============================
+   重塑 vxe 内置搜索表单（schema 驱动，与 proxyConfig 联动）为指挥台检索面板：
+   发丝边框卡片 + 左侧标记条 + 浮签序号标签 + 等宽大写字段名 + 终端式输入框/按键。
+   仅作用于本视图（scoped + .fleet-grid 下），不影响其它列表页。 */
+.fleet-grid :deep(.vxe-grid--form-wrapper) {
+  position: relative;
+  padding: 16px 18px 14px;
+  margin-bottom: 12px;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--card)) 0%,
+    hsl(var(--background-deep, var(--background))) 130%
+  );
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) + 2px);
+  box-shadow: inset 0 1px 0 hsl(var(--foreground) / 5%);
+}
+
+/* 左侧竖向标记条，呼应态��带 stat 的 ::before */
+.fleet-grid :deep(.vxe-grid--form-wrapper)::before {
+  position: absolute;
+  top: 16px;
+  bottom: 14px;
+  left: 0;
+  width: 2px;
+  content: '';
+  background: linear-gradient(
+    hsl(var(--success) / 70%),
+    hsl(var(--success) / 0%)
+  );
+  border-radius: 2px;
+}
+
+/* 顶部浮签序号标签（绝对定位不占位） */
+.fleet-grid :deep(.vxe-grid--form-wrapper)::after {
+  position: absolute;
+  top: -9px;
+  left: 14px;
+  padding: 1px 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  content: 'FILTER · 检索';
+  background: hsl(var(--background-deep, var(--background)));
+  border: 1px solid hsl(var(--border));
+  border-radius: 999px;
+}
+
+/* 字段标签：等宽大写小字距，弱化为次级读数 */
+.fleet-grid :deep(.vxe-grid--form-wrapper label),
+.fleet-grid :deep(.vxe-grid--form-wrapper [class*='form-label']) {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* 输入 / 选择器 / 日期框：终端式发丝边框 + 聚焦柔光环 */
+.fleet-grid :deep(.vxe-grid--form-wrapper .ant-input),
+.fleet-grid :deep(.vxe-grid--form-wrapper .ant-input-affix-wrapper),
+.fleet-grid :deep(.vxe-grid--form-wrapper .ant-select-selector),
+.fleet-grid :deep(.vxe-grid--form-wrapper .ant-picker) {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s;
+}
+
+.fleet-grid :deep(.vxe-grid--form-wrapper .ant-input:hover),
+.fleet-grid :deep(.vxe-grid--form-wrapper .ant-input-affix-wrapper:hover),
+.fleet-grid
+  :deep(.vxe-grid--form-wrapper .ant-select:hover .ant-select-selector),
+.fleet-grid :deep(.vxe-grid--form-wrapper .ant-picker:hover) {
+  border-color: hsl(var(--foreground) / 35%);
+}
+
+.fleet-grid :deep(.vxe-grid--form-wrapper .ant-input:focus),
+.fleet-grid :deep(.vxe-grid--form-wrapper .ant-input-affix-wrapper-focused),
+.fleet-grid
+  :deep(.vxe-grid--form-wrapper .ant-select-focused .ant-select-selector),
+.fleet-grid :deep(.vxe-grid--form-wrapper .ant-picker-focused) {
+  border-color: hsl(var(--success) / 60%);
+  box-shadow: 0 0 0 3px hsl(var(--success) / 12%);
+}
+
+/* 检索 / 重置按钮：终端按键观感 */
+.fleet-grid :deep(.vxe-grid--form-wrapper .ant-btn) {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.fleet-grid :deep(.vxe-grid--form-wrapper .ant-btn-primary) {
+  font-weight: 600;
+  box-shadow: 0 8px 22px -12px hsl(var(--primary) / 80%);
 }
 
 @media (prefers-reduced-motion: reduce) {

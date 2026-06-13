@@ -78,6 +78,18 @@ export namespace DeviceApi {
     items: DeviceVO[];
   }
 
+  /** 设备更新请求（id 必填；deviceId 唯一索引不可改，仅展示）。 */
+  export interface DeviceUpdateReq {
+    id: number;
+    deviceId?: string;
+    name?: string;
+    ip?: string;
+    port?: number;
+    type?: number; // 协议类型 DeviceAgreementEnum：1=GB28181 IPC / 2=GB28181 NVR / 3=ONVIF
+    serverIp?: string;
+    status?: number; // 1在线 / 0离线
+  }
+
   /** PTZ 控制请求（既有 /ptz/control 端点）。 */
   export interface PtzControlReq {
     deviceId: string;
@@ -158,6 +170,23 @@ export async function getDevicePage(
     `/api/v1/device/getPage?page=${params.page}&size=${params.size}`,
     body ?? {},
   );
+}
+
+/** 更新设备（id 必填）。 */
+export async function updateDevice(data: DeviceApi.DeviceUpdateReq) {
+  return requestClient.put<number>('/api/v1/device/update', data);
+}
+
+/** 删除单个设备（按主键 id）。 */
+export async function deleteDevice(id: number) {
+  return requestClient.delete<boolean>(`/api/v1/device/delete/${id}`);
+}
+
+/** 批量删除设备（按主键 id 列表）。 */
+export async function deleteDeviceBatch(ids: number[]) {
+  return requestClient.delete<boolean>('/api/v1/device/deleteIds', {
+    data: ids,
+  });
 }
 
 /* -------------------------------------------------------------------------- */

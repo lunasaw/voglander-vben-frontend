@@ -7,6 +7,8 @@
     "status": "Status",
     "type": "Protocol",
     "ip": "IP",
+    "port": "Port",
+    "serverIp": "Register Node",
     "channelCount": "Channels",
     "keepaliveTime": "Keepalive Time",
     "registerTime": "Register Time",
@@ -54,7 +56,10 @@
     "alarmQuery": "Query Alarm",
     "alarmControl": "Reset Alarm",
     "broadcast": "Voice Broadcast",
-    "reboot": "Reboot"
+    "reboot": "Reboot",
+    "edit": "Edit",
+    "delete": "Delete",
+    "batchDelete": "Batch Delete"
   },
   "msg": {
     "cmdSent": "Command sent",
@@ -63,6 +68,11 @@
     "liveSent": "Live request sent",
     "recordQuerySent": "Record query sent; result will arrive via realtime events",
     "noPermission": "You do not have permission for this operation",
-    "eventsEmpty": "No device events yet; device reports / responses appear here in realtime"
+    "eventsEmpty": "No device events yet; device reports / responses appear here in realtime",
+    "deleting": "Deleting {0} …",
+    "deleteSuccess": "Deleted",
+    "updateSuccess": "Updated",
+    "batchDeleteEmpty": "Please select devices to delete first",
+    "batchDeleteConfirm": "Delete the selected {0} device(s)?"
   }
 }
