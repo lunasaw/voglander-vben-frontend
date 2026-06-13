@@ -16,6 +16,16 @@
     "online": "Online",
     "offline": "Offline"
   },
+  "fleet": {
+    "heading": "Fleet Console",
+    "subtitle": "GB28181 realtime device status",
+    "live": "LIVE",
+    "total": "Total Devices",
+    "online": "Online",
+    "offline": "Offline",
+    "channels": "Total Channels",
+    "scope": "Current page"
+  },
   "section": {
     "ptz": "PTZ Control",
     "query": "Device Query",
@@ -24,6 +34,8 @@
     "alarm": "Alarm",
     "other": "Other",
     "media": "Live",
+    "commands": "Command Deck",
+    "overview": "Overview",
     "events": "Realtime Events"
   },
   "action": {

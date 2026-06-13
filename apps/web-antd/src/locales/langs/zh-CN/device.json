@@ -16,6 +16,16 @@
     "online": "在线",
     "offline": "离线"
   },
+  "fleet": {
+    "heading": "机群指挥台",
+    "subtitle": "GB28181 设备实时态势",
+    "live": "实时",
+    "total": "设备总数",
+    "online": "在线",
+    "offline": "离线",
+    "channels": "通道总数",
+    "scope": "当前页统计"
+  },
   "section": {
     "ptz": "云台控制",
     "query": "设备查询",
@@ -24,6 +34,8 @@
     "alarm": "报警",
     "other": "其它",
     "media": "点播",
+    "commands": "指令面板",
+    "overview": "设备概览",
     "events": "实时事件"
   },
   "action": {

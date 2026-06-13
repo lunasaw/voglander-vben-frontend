@@ -152,11 +152,13 @@ export function useColumns<T = DeviceApi.DeviceVO>(
       field: 'deviceId',
       title: $t('device.field.deviceId'),
       width: 220,
+      className: 'device-cell-mono',
     },
     {
       field: 'name',
       title: $t('device.field.name'),
       minWidth: 140,
+      className: 'device-cell-name',
     },
     {
       field: 'statusName',
@@ -184,12 +186,14 @@ export function useColumns<T = DeviceApi.DeviceVO>(
       field: 'ip',
       title: $t('device.field.ip'),
       width: 130,
+      className: 'device-cell-mono',
     },
     {
       field: 'channelCount',
       title: $t('device.field.channelCount'),
       width: 90,
       align: 'center',
+      className: 'device-cell-count',
     },
     {
       field: 'keepaliveTime',
