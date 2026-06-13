@@ -32,6 +32,13 @@ export const TOPIC_META: Record<string, TopicMeta> = {
   'device.keepalive': { labelKey: 'keepalive', color: 'blue' },
   'device.catalog': { labelKey: 'catalog', color: 'cyan' },
   'device.info': { labelKey: 'deviceInfo', color: 'cyan' },
+  'device.status': { labelKey: 'deviceStatus', color: 'cyan' },
+  'device.ptz_position': { labelKey: 'ptzPosition', color: 'geekblue' },
+  'device.preset': { labelKey: 'preset', color: 'cyan' },
+  'device.config': { labelKey: 'config', color: 'purple' },
+  'device.config_download': { labelKey: 'configDownload', color: 'purple' },
+  'device.recordinfo': { labelKey: 'recordInfo', color: 'cyan' },
+  'device.mobileposition': { labelKey: 'mobilePosition', color: 'green' },
   'session.invite_ok': { labelKey: 'inviteOk', color: 'purple' },
   'session.bye': { labelKey: 'bye', color: 'orange' },
   'alarm.new': { labelKey: 'alarm', color: 'red' },
@@ -54,6 +61,17 @@ export const TOPIC_META: Record<string, TopicMeta> = {
     labelKey: 'queryDeviceStatus',
     color: 'cyan',
   },
+  'clientcmd.query.recordinfo': { labelKey: 'queryRecordInfo', color: 'cyan' },
+  'clientcmd.query.configdownload': {
+    labelKey: 'queryConfigDownload',
+    color: 'cyan',
+  },
+  'clientcmd.query.preset': { labelKey: 'queryPreset', color: 'cyan' },
+  'clientcmd.query.mobileposition': {
+    labelKey: 'queryMobilePosition',
+    color: 'cyan',
+  },
+  'clientcmd.query.alarm': { labelKey: 'queryAlarm', color: 'orange' },
   'clientcmd.config.basicparam': {
     labelKey: 'configBasicParam',
     color: 'purple',
@@ -65,6 +83,14 @@ export const TOPIC_META: Record<string, TopicMeta> = {
   'clientcmd.push.stopped': { labelKey: 'pushStopped', color: 'orange' },
   'clientcmd.push.failed': { labelKey: 'pushFailed', color: 'red' },
 };
+
+/**
+ * 全部 `device.*` topic（设备→平台上报/应答），从 TOPIC_META 派生为单一来源。
+ * 设备详情页订阅它即可，避免与 TOPIC_META 漂移（新增 device.* 只改 TOPIC_META 一处）。
+ */
+export const DEVICE_TOPICS: string[] = Object.keys(TOPIC_META).filter((t) =>
+  t.startsWith('device.'),
+);
 
 /** 取 topic 的展示标题（找不到映射时回退原始 topic）。 */
 export function topicLabel(topic: string): string {

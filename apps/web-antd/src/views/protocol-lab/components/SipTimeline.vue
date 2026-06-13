@@ -51,6 +51,9 @@ function summaryOf(ev: LabEvent): string {
   if (ev.topic === 'device.info') {
     return `${d.manufacturer ?? ''} / ${d.model ?? ''} / ${d.firmware ?? ''}`;
   }
+  if (ev.topic === 'device.mobileposition') {
+    return d.position ? `lng,lat=${d.position}` : (d.deviceId ?? '');
+  }
   if (ev.topic === 'device.register') {
     return `${d.remoteIp ?? ''}:${d.remotePort ?? ''} ${d.transport ?? ''} expire=${
       d.expire ?? ''

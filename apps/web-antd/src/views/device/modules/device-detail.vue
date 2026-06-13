@@ -7,6 +7,7 @@ import { useVbenDrawer } from '@vben/common-ui';
 
 import { useSseEvents } from '#/composables/useSseEvents';
 import { $t } from '#/locales';
+import { DEVICE_TOPICS } from '#/views/protocol-lab/data';
 
 import DeviceOperations from './device-operations.vue';
 
@@ -26,20 +27,7 @@ const current = ref<DeviceDrawerData | null>(null);
 const autoLive = ref(false);
 
 // 订阅设备生命周期 + 应答事件，供详情时间线展示。
-const { events } = useSseEvents(() => [
-  'device.register',
-  'device.online',
-  'device.offline',
-  'device.keepalive',
-  'device.catalog',
-  'device.info',
-  'device.status',
-  'device.ptz_position',
-  'device.preset',
-  'device.config',
-  'device.config_download',
-  'device.recordinfo',
-]);
+const { events } = useSseEvents(() => DEVICE_TOPICS);
 
 /** 仅保留当前设备的 device.* 事件。 */
 const deviceEvents = computed(() => {
@@ -72,7 +60,7 @@ const drawerTitle = computed(() =>
 </script>
 
 <template>
-  <Drawer :title="drawerTitle" class="w-[860px]">
+  <Drawer :title="drawerTitle" class="w-[920px]">
     <DeviceOperations
       :device="current"
       :events="deviceEvents"
