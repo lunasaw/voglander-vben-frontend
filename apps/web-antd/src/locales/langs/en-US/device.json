@@ -1,0 +1,56 @@
+{
+  "menu": "Device Management",
+  "title": "Device List",
+  "field": {
+    "deviceId": "Device ID",
+    "name": "Name",
+    "status": "Status",
+    "type": "Protocol",
+    "ip": "IP",
+    "channelCount": "Channels",
+    "keepaliveTime": "Keepalive Time",
+    "registerTime": "Register Time",
+    "operation": "Action"
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "section": {
+    "ptz": "PTZ Control",
+    "query": "Device Query",
+    "config": "Device Config",
+    "record": "Record Control",
+    "alarm": "Alarm",
+    "other": "Other",
+    "media": "Live",
+    "events": "Realtime Events"
+  },
+  "action": {
+    "detail": "Detail",
+    "live": "Live",
+    "queryCatalog": "Query Catalog",
+    "queryInfo": "Query Device Info",
+    "queryStatus": "Query Status",
+    "queryPreset": "Query Preset",
+    "queryMobilePosition": "Query Mobile Position",
+    "configDownload": "Download Config",
+    "configSet": "Set Config",
+    "recordStart": "Start Record",
+    "recordStop": "Stop Record",
+    "recordQuery": "Query Record",
+    "alarmQuery": "Query Alarm",
+    "alarmControl": "Reset Alarm",
+    "broadcast": "Voice Broadcast",
+    "reboot": "Reboot"
+  },
+  "msg": {
+    "cmdSent": "Command sent",
+    "cmdFailed": "Command failed",
+    "ptzSent": "PTZ command sent",
+    "liveSent": "Live request sent",
+    "recordQuerySent": "Record query sent; result will arrive via realtime events",
+    "noPermission": "You do not have permission for this operation",
+    "eventsEmpty": "No device events yet; device reports / responses appear here in realtime"
+  }
+}

@@ -8,33 +8,13 @@ import { $t } from '#/locales';
  * 这里集中维护 topic → 文案 / 颜色 的映射，组件按 topic 取展示属性。
  */
 
-/** 八向 + 变倍方向盘（command 直发词表，门面层 PTZ_VOCAB 翻译为规范枚举）。 */
-export interface PtzButton {
-  /** 后端词表（大小写无关）。 */
-  command: string;
-  /** i18n key 后缀（protocolLab.ptz.<key>）。 */
-  key: string;
-  /** 方向盘网格位置（3×3，row/col 从 1 起）。 */
-  row: number;
-  col: number;
-}
-
-export const PTZ_DIRECTIONS: PtzButton[] = [
-  { command: 'UP_LEFT', key: 'upLeft', row: 1, col: 1 },
-  { command: 'UP', key: 'up', row: 1, col: 2 },
-  { command: 'UP_RIGHT', key: 'upRight', row: 1, col: 3 },
-  { command: 'LEFT', key: 'left', row: 2, col: 1 },
-  { command: 'STOP', key: 'stop', row: 2, col: 2 },
-  { command: 'RIGHT', key: 'right', row: 2, col: 3 },
-  { command: 'DOWN_LEFT', key: 'downLeft', row: 3, col: 1 },
-  { command: 'DOWN', key: 'down', row: 3, col: 2 },
-  { command: 'DOWN_RIGHT', key: 'downRight', row: 3, col: 3 },
-];
-
-export const PTZ_ZOOM: PtzButton[] = [
-  { command: 'ZOOM_IN', key: 'zoomIn', row: 1, col: 1 },
-  { command: 'ZOOM_OUT', key: 'zoomOut', row: 1, col: 2 },
-];
+// PTZ 方向盘词表已提取到共享组件层（components/ptz-control.ts），供协议台与设备页共用。
+// 这里 re-export 保持协议台既有 import 路径（`../data`）不变。
+export {
+  PTZ_DIRECTIONS,
+  PTZ_ZOOM,
+  type PtzButton,
+} from '#/components/ptz-control';
 
 /** topic → 时间线展示属性（标题 i18n key + 颜色标签）。 */
 interface TopicMeta {

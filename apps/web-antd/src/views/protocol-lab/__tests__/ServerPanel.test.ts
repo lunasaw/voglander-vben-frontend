@@ -23,20 +23,40 @@ vi.mock('#/locales', () => ({ $t: (k: string) => k }));
 // vi.mock 工厂会被提升到文件顶部，工厂内若引用顶层变量会触发 TDZ；
 // 故用 vi.hoisted 持有所有 spy，保证工厂执行时已初始化。
 const m = vi.hoisted(() => ({
+  broadcast: vi.fn().mockResolvedValue(undefined),
+  controlAlarm: vi.fn().mockResolvedValue(undefined),
+  controlRecordStart: vi.fn().mockResolvedValue(undefined),
+  controlRecordStop: vi.fn().mockResolvedValue(undefined),
+  downloadConfig: vi.fn().mockResolvedValue(undefined),
   liveStart: vi.fn().mockResolvedValue(undefined),
   messageSuccess: vi.fn(),
   messageWarning: vi.fn(),
   ptzControl: vi.fn().mockResolvedValue(undefined),
+  queryAlarm: vi.fn().mockResolvedValue(undefined),
   queryCatalog: vi.fn().mockResolvedValue(undefined),
   queryDeviceInfo: vi.fn().mockResolvedValue(undefined),
+  queryDeviceStatus: vi.fn().mockResolvedValue(undefined),
+  queryMobilePosition: vi.fn().mockResolvedValue(undefined),
+  queryPreset: vi.fn().mockResolvedValue(undefined),
+  queryRecord: vi.fn().mockResolvedValue(undefined),
   rebootDevice: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('#/api/protocol-lab', () => ({
+  broadcast: m.broadcast,
+  controlAlarm: m.controlAlarm,
+  controlRecordStart: m.controlRecordStart,
+  controlRecordStop: m.controlRecordStop,
+  downloadConfig: m.downloadConfig,
   liveStart: m.liveStart,
   ptzControl: m.ptzControl,
+  queryAlarm: m.queryAlarm,
   queryCatalog: m.queryCatalog,
   queryDeviceInfo: m.queryDeviceInfo,
+  queryDeviceStatus: m.queryDeviceStatus,
+  queryMobilePosition: m.queryMobilePosition,
+  queryPreset: m.queryPreset,
+  queryRecord: m.queryRecord,
   rebootDevice: m.rebootDevice,
 }));
 
@@ -61,6 +81,7 @@ vi.mock('ant-design-vue', () => {
         '<button :disabled="disabled" @click="$emit(\'click\', $event)"><slot/></button>',
     },
     Card: { name: 'Card', template: '<div class="card"><slot/></div>' },
+    Divider: { name: 'Divider', template: '<hr class="divider"><slot/></hr>' },
     Empty: EmptyStub,
     List: { name: 'List', template: '<div class="list"><slot/></div>' },
     ListItem: {
@@ -69,6 +90,12 @@ vi.mock('ant-design-vue', () => {
       template: '<li class="list-item" @click="$emit(\'click\')"><slot/></li>',
     },
     message: { success: m.messageSuccess, warning: m.messageWarning },
+    Select: {
+      name: 'Select',
+      props: ['value', 'options', 'disabled'],
+      emits: ['update:value'],
+      template: '<select class="select" :disabled="disabled"></select>',
+    },
     Space: { name: 'Space', template: '<div class="space"><slot/></div>' },
     Tooltip: {
       name: 'Tooltip',
@@ -105,13 +132,27 @@ function buttonByText(wrapper: any, text: string) {
 }
 
 beforeEach(() => {
-  m.ptzControl.mockClear();
-  m.queryCatalog.mockClear();
-  m.queryDeviceInfo.mockClear();
-  m.rebootDevice.mockClear();
-  m.liveStart.mockClear();
-  m.messageWarning.mockClear();
-  m.messageSuccess.mockClear();
+  for (const k of [
+    'broadcast',
+    'controlAlarm',
+    'controlRecordStart',
+    'controlRecordStop',
+    'downloadConfig',
+    'liveStart',
+    'ptzControl',
+    'queryAlarm',
+    'queryCatalog',
+    'queryDeviceInfo',
+    'queryDeviceStatus',
+    'queryMobilePosition',
+    'queryPreset',
+    'queryRecord',
+    'rebootDevice',
+    'messageWarning',
+    'messageSuccess',
+  ] as const) {
+    m[k].mockClear();
+  }
 });
 
 describe('serverPanel —— 设备列表 upsert', () => {
@@ -183,7 +224,7 @@ describe('serverPanel —— 自动选中与命令门控（C2）', () => {
 
   it('无在线设备时命令按钮禁用', () => {
     const wrapper = mountPanel();
-    const btn = buttonByText(wrapper, 'protocolLab.server.queryCatalog');
+    const btn = buttonByText(wrapper, 'device.action.queryCatalog');
     expect(btn?.attributes('disabled')).toBeDefined();
   });
 
@@ -193,7 +234,7 @@ describe('serverPanel —— 自动选中与命令门控（C2）', () => {
       events: [devEvent('device.register', { deviceId: 'd1' })],
     });
     await nextTick();
-    const btn = buttonByText(wrapper, 'protocolLab.server.queryCatalog');
+    const btn = buttonByText(wrapper, 'device.action.queryCatalog');
     expect(btn?.attributes('disabled')).toBeUndefined();
   });
 
@@ -207,7 +248,7 @@ describe('serverPanel —— 自动选中与命令门控（C2）', () => {
       events: [devEvent('device.offline', { deviceId: 'd1' }, 1)],
     });
     await nextTick();
-    const btn = buttonByText(wrapper, 'protocolLab.server.queryCatalog');
+    const btn = buttonByText(wrapper, 'device.action.queryCatalog');
     expect(btn?.attributes('disabled')).toBeDefined();
   });
 });
@@ -224,24 +265,82 @@ describe('serverPanel —— 命令下发', () => {
 
   it('查目录下发 queryCatalog(selectedId)', async () => {
     const wrapper = await onlineWrapper();
-    await buttonByText(wrapper, 'protocolLab.server.queryCatalog')?.trigger(
-      'click',
-    );
+    await buttonByText(wrapper, 'device.action.queryCatalog')?.trigger('click');
     expect(m.queryCatalog).toHaveBeenCalledWith('d1');
   });
 
   it('查设备信息下发 queryDeviceInfo(selectedId)', async () => {
     const wrapper = await onlineWrapper();
-    await buttonByText(wrapper, 'protocolLab.server.queryDeviceInfo')?.trigger(
-      'click',
-    );
+    await buttonByText(wrapper, 'device.action.queryInfo')?.trigger('click');
     expect(m.queryDeviceInfo).toHaveBeenCalledWith('d1');
   });
 
   it('重启下发 rebootDevice(selectedId)', async () => {
     const wrapper = await onlineWrapper();
-    await buttonByText(wrapper, 'protocolLab.server.reboot')?.trigger('click');
+    await buttonByText(wrapper, 'device.action.reboot')?.trigger('click');
     expect(m.rebootDevice).toHaveBeenCalledWith('d1');
+  });
+
+  it('查状态下发 queryDeviceStatus(selectedId)', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.queryStatus')?.trigger('click');
+    expect(m.queryDeviceStatus).toHaveBeenCalledWith('d1');
+  });
+
+  it('查预置位下发 queryPreset(selectedId)', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.queryPreset')?.trigger('click');
+    expect(m.queryPreset).toHaveBeenCalledWith('d1');
+  });
+
+  it('查移动位置下发 queryMobilePosition(selectedId)', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.queryMobilePosition')?.trigger(
+      'click',
+    );
+    expect(m.queryMobilePosition).toHaveBeenCalledWith('d1');
+  });
+
+  it('配置下载下发 downloadConfig(selectedId, BASIC)', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.configDownload')?.trigger(
+      'click',
+    );
+    expect(m.downloadConfig).toHaveBeenCalledWith('d1', 'BASIC');
+  });
+
+  it('开始/停止录像下发 controlRecordStart/Stop(selectedId)', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.recordStart')?.trigger('click');
+    expect(m.controlRecordStart).toHaveBeenCalledWith('d1');
+    await buttonByText(wrapper, 'device.action.recordStop')?.trigger('click');
+    expect(m.controlRecordStop).toHaveBeenCalledWith('d1');
+  });
+
+  it('录像查询下发 queryRecord({deviceId})', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.recordQuery')?.trigger('click');
+    expect(m.queryRecord).toHaveBeenCalledWith(
+      expect.objectContaining({ deviceId: 'd1' }),
+    );
+  });
+
+  it('报警查询 / 复位下发 queryAlarm / controlAlarm({deviceId})', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.alarmQuery')?.trigger('click');
+    expect(m.queryAlarm).toHaveBeenCalledWith(
+      expect.objectContaining({ deviceId: 'd1' }),
+    );
+    await buttonByText(wrapper, 'device.action.alarmControl')?.trigger('click');
+    expect(m.controlAlarm).toHaveBeenCalledWith(
+      expect.objectContaining({ deviceId: 'd1' }),
+    );
+  });
+
+  it('广播下发 broadcast(selectedId)', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.broadcast')?.trigger('click');
+    expect(m.broadcast).toHaveBeenCalledWith('d1');
   });
 
   it('pTZ 下发携带 channelId=deviceId+01 与 command/speed', async () => {
@@ -267,9 +366,7 @@ describe('serverPanel —— 命令下发', () => {
 
   it('下发成功提示 message.success', async () => {
     const wrapper = await onlineWrapper();
-    await buttonByText(wrapper, 'protocolLab.server.queryCatalog')?.trigger(
-      'click',
-    );
+    await buttonByText(wrapper, 'device.action.queryCatalog')?.trigger('click');
     await nextTick();
     expect(m.messageSuccess).toHaveBeenCalled();
   });

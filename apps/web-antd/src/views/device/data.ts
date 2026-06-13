@@ -1,0 +1,230 @@
+import type { VbenFormSchema } from '#/adapter/form';
+import type { OnActionClickFn, VxeTableGridOptions } from '#/adapter/vxe-table';
+import type { DeviceApi } from '#/api/device';
+import type { LabEvent } from '#/composables/useSseEvents';
+
+import { useAccess } from '@vben/access';
+
+import { $t } from '#/locales';
+
+/**
+ * 设备列表页的 Schema / 列定义 + 纯函数（§4.2）。
+ *
+ * 纯函数（buildDevicePageBody / mergeDeviceEvents）抽出便于单测，
+ * list.vue 只做组装与副作用（query / SSE 订阅 / 抽屉）。
+ */
+
+/** 格式化 Unix 毫秒为本地时间串，空值回退 "-"。 */
+function formatMs(cellValue?: number): string {
+  return cellValue ? new Date(cellValue).toLocaleString() : '-';
+}
+
+/**
+ * 把查询表单值转为后端 DevicePageReq：
+ * RangePicker 字段（keepaliveTime / registerTime）输出 [start,end]，
+ * 转为 *TimeStart / *TimeEnd（Unix 毫秒）并删除原 range 字段（§4.2 时间铁律）。
+ */
+export function buildDevicePageBody(
+  formValues: Record<string, any>,
+): DeviceApi.DevicePageReq {
+  const ranges: Array<[string, string, string]> = [
+    ['keepaliveTime', 'keepaliveTimeStart', 'keepaliveTimeEnd'],
+    ['registerTime', 'registerTimeStart', 'registerTimeEnd'],
+  ];
+  // 收集需要剔除的 RangePicker 原字段，重建 body 时排除（避免动态 delete）。
+  const rangeFields = new Set(ranges.map(([field]) => field));
+  const body: Record<string, any> = {};
+  for (const [key, value] of Object.entries(formValues)) {
+    if (!rangeFields.has(key)) {
+      body[key] = value;
+    }
+  }
+  for (const [rangeField, startField, endField] of ranges) {
+    const range = formValues[rangeField];
+    if (Array.isArray(range) && range.length === 2) {
+      body[startField] = +new Date(range[0]);
+      body[endField] = +new Date(range[1]);
+    }
+  }
+  return body as DeviceApi.DevicePageReq;
+}
+
+/**
+ * 按 SSE device.* 事件对当前页行做 upsert（在线态 / 心跳 / 通道数）。
+ *
+ * 服务端分页：只更新当前页已有的 deviceId，新设备等下次 query 才出现。
+ * 返回新数组（不原地改），便于 vxe reloadData 触发刷新。
+ */
+export function mergeDeviceEvents<T extends DeviceApi.DeviceVO>(
+  rows: T[],
+  events: LabEvent[],
+): T[] {
+  if (events.length === 0) {
+    return [...rows];
+  }
+  const byId = new Map(rows.map((r) => [r.deviceId, { ...r }]));
+  for (const ev of events) {
+    const id = ev.data?.deviceId;
+    if (!id) {
+      continue;
+    }
+    const row = byId.get(id);
+    if (!row) {
+      continue; // 不在当前页，忽略
+    }
+    switch (ev.topic) {
+      case 'device.catalog': {
+        row.channelCount = ev.data?.channelCount;
+        break;
+      }
+      case 'device.keepalive': {
+        row.keepaliveTime = ev.ts;
+        row.status = 1;
+        row.statusName = $t('device.status.online');
+        break;
+      }
+      case 'device.offline': {
+        row.status = 0;
+        row.statusName = $t('device.status.offline');
+        break;
+      }
+      case 'device.online':
+      case 'device.register': {
+        row.status = 1;
+        row.statusName = $t('device.status.online');
+        break;
+      }
+      // 其它 topic 不改行
+    }
+  }
+  return rows.map((r) => byId.get(r.deviceId) ?? r);
+}
+
+/** 顶部筛选条件（§1.1：仅 type 维度，禁用派生字段 subType/protocol）。 */
+export function useGridFormSchema(): VbenFormSchema[] {
+  return [
+    {
+      component: 'Input',
+      fieldName: 'deviceId',
+      label: $t('device.field.deviceId'),
+    },
+    {
+      component: 'Input',
+      fieldName: 'name',
+      label: $t('device.field.name'),
+    },
+    {
+      component: 'Select',
+      componentProps: {
+        allowClear: true,
+        options: [
+          { label: $t('device.status.online'), value: 1 },
+          { label: $t('device.status.offline'), value: 0 },
+        ],
+      },
+      fieldName: 'status',
+      label: $t('device.field.status'),
+    },
+    {
+      component: 'Input',
+      fieldName: 'ip',
+      label: $t('device.field.ip'),
+    },
+    {
+      component: 'RangePicker',
+      componentProps: {
+        showTime: true,
+      },
+      fieldName: 'keepaliveTime',
+      label: $t('device.field.keepaliveTime'),
+    },
+  ];
+}
+
+/** 列定义（含 channelCount / statusName，操作列 detail / liveStart）。 */
+export function useColumns<T = DeviceApi.DeviceVO>(
+  onActionClick: OnActionClickFn<T>,
+): VxeTableGridOptions['columns'] {
+  const { hasAccessByCodes } = useAccess();
+
+  return [
+    {
+      field: 'deviceId',
+      title: $t('device.field.deviceId'),
+      width: 220,
+    },
+    {
+      field: 'name',
+      title: $t('device.field.name'),
+      minWidth: 140,
+    },
+    {
+      field: 'statusName',
+      title: $t('device.field.status'),
+      width: 90,
+      align: 'center',
+      cellRender: {
+        name: 'CellTag',
+        options: [
+          {
+            color: 'success',
+            label: $t('device.status.online'),
+            value: '在线',
+          },
+          { color: 'error', label: $t('device.status.offline'), value: '离线' },
+        ],
+      },
+    },
+    {
+      field: 'typeName',
+      title: $t('device.field.type'),
+      width: 120,
+    },
+    {
+      field: 'ip',
+      title: $t('device.field.ip'),
+      width: 130,
+    },
+    {
+      field: 'channelCount',
+      title: $t('device.field.channelCount'),
+      width: 90,
+      align: 'center',
+    },
+    {
+      field: 'keepaliveTime',
+      title: $t('device.field.keepaliveTime'),
+      width: 170,
+      formatter: ({ cellValue }: { cellValue?: number }) => formatMs(cellValue),
+    },
+    {
+      field: 'registerTime',
+      title: $t('device.field.registerTime'),
+      width: 170,
+      formatter: ({ cellValue }: { cellValue?: number }) => formatMs(cellValue),
+    },
+    {
+      align: 'center',
+      cellRender: {
+        attrs: { onClick: onActionClick },
+        name: 'CellOperation',
+        options: [
+          {
+            code: 'detail',
+            text: $t('device.action.detail'),
+            show: () => hasAccessByCodes(['Device:Device:Query']),
+          },
+          {
+            code: 'liveStart',
+            text: $t('device.action.live'),
+            show: () => hasAccessByCodes(['Device:Cmd:Live']),
+          },
+        ],
+      },
+      field: 'operation',
+      fixed: 'right',
+      title: $t('device.field.operation'),
+      width: 180,
+    },
+  ];
+}

@@ -163,6 +163,31 @@ export namespace ProtocolLabApi {
       wsFlv?: string;
     };
   }
+
+  /** 录像查询请求（/device-cmd/record，时间 Unix 毫秒）。 */
+  export interface RecordQueryReq {
+    deviceId: string;
+    startTime?: number;
+    endTime?: number;
+  }
+
+  /** 报警查询请求（/device-cmd/alarm/query，时间 Unix 毫秒）。 */
+  export interface AlarmQueryReq {
+    deviceId: string;
+    startTime?: number;
+    endTime?: number;
+    startPriority?: string;
+    endPriority?: string;
+    alarmMethod?: string;
+    alarmType?: string;
+  }
+
+  /** 报警复位请求（/device-cmd/alarm/control）。 */
+  export interface AlarmControlReq {
+    deviceId: string;
+    alarmMethod?: string;
+    alarmType?: string;
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -283,5 +308,78 @@ export async function liveStart(data: ProtocolLabApi.LiveStartReq) {
     protocol: 'FLV',
     streamMode: 'UDP',
     ...data,
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/*        S2 支链命令——复用 /device-cmd/* 已存在端点（与 device.ts 同源）       */
+/*                                                                            */
+/*  验证台 ServerPanel 经 DeviceCommandPanel 下发，与设备管理页协议能力对等。    */
+/*  全部命中后端已落地端点，无新字段/端点（不触发 .cursorrules 契约登记）。        */
+/* -------------------------------------------------------------------------- */
+
+/** 查设备状态（回包入 extendInfo.deviceStatus）。 */
+export async function queryDeviceStatus(deviceId: string) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/query-status', {
+    deviceId,
+  });
+}
+
+/** 查预置位（回包入 extendInfo.presets；G2：仅查询，不支持下发）。 */
+export async function queryPreset(deviceId: string) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/query-preset', {
+    deviceId,
+  });
+}
+
+/** 查移动位置订阅（interval 选填）。 */
+export async function queryMobilePosition(deviceId: string, interval?: string) {
+  return requestClient.post<boolean>(
+    '/api/v1/device-cmd/query-mobile-position',
+    { deviceId, interval },
+  );
+}
+
+/** 下载配置（configType 后端 @NotBlank，缺失返回 400）。 */
+export async function downloadConfig(deviceId: string, configType: string) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/config/download', {
+    deviceId,
+    configType,
+  });
+}
+
+/** 开始录像（记 [AUDIT]）。 */
+export async function controlRecordStart(deviceId: string) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/record/start', {
+    deviceId,
+  });
+}
+
+/** 停止录像（记 [AUDIT]）。 */
+export async function controlRecordStop(deviceId: string) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/record/stop', {
+    deviceId,
+  });
+}
+
+/** 触发录像查询（G1：结果走 device.recordinfo 通知，列表本体暂无读端点）。 */
+export async function queryRecord(data: ProtocolLabApi.RecordQueryReq) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/record', data);
+}
+
+/** 查报警。 */
+export async function queryAlarm(data: ProtocolLabApi.AlarmQueryReq) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/alarm/query', data);
+}
+
+/** 报警复位（记 [AUDIT]）。 */
+export async function controlAlarm(data: ProtocolLabApi.AlarmControlReq) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/alarm/control', data);
+}
+
+/** 语音广播（记 [AUDIT]）。 */
+export async function broadcast(deviceId: string) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/broadcast', {
+    deviceId,
   });
 }

@@ -1,0 +1,56 @@
+{
+  "menu": "设备管理",
+  "title": "设备列表",
+  "field": {
+    "deviceId": "设备编号",
+    "name": "名称",
+    "status": "状态",
+    "type": "协议类型",
+    "ip": "IP",
+    "channelCount": "通道数",
+    "keepaliveTime": "心跳时间",
+    "registerTime": "注册时间",
+    "operation": "操作"
+  },
+  "status": {
+    "online": "在线",
+    "offline": "离线"
+  },
+  "section": {
+    "ptz": "云台控制",
+    "query": "设备查询",
+    "config": "设备配置",
+    "record": "录像控制",
+    "alarm": "报警",
+    "other": "其它",
+    "media": "点播",
+    "events": "实时事件"
+  },
+  "action": {
+    "detail": "详情",
+    "live": "实时点播",
+    "queryCatalog": "查询目录",
+    "queryInfo": "查询设备信息",
+    "queryStatus": "查询状态",
+    "queryPreset": "查询预置位",
+    "queryMobilePosition": "查询移动位置",
+    "configDownload": "下载配置",
+    "configSet": "下发配置",
+    "recordStart": "开始录像",
+    "recordStop": "停止录像",
+    "recordQuery": "查询录像",
+    "alarmQuery": "查询报警",
+    "alarmControl": "报警复位",
+    "broadcast": "语音广播",
+    "reboot": "远程重启"
+  },
+  "msg": {
+    "cmdSent": "指令已下发",
+    "cmdFailed": "指令下发失败",
+    "ptzSent": "PTZ 指令已下发",
+    "liveSent": "点播请求已下发",
+    "recordQuerySent": "录像查询已下发，结果将通过实时事件通知",
+    "noPermission": "您没有执行该操作的权限",
+    "eventsEmpty": "暂无设备事件，设备上报 / 应答会实时显示"
+  }
+}

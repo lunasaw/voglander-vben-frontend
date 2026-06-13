@@ -17,16 +17,27 @@ import {
 } from 'ant-design-vue';
 
 import {
+  broadcast,
+  controlAlarm,
+  controlRecordStart,
+  controlRecordStop,
+  downloadConfig,
   liveStart,
   ptzControl,
+  queryAlarm,
   queryCatalog,
   queryDeviceInfo,
+  queryDeviceStatus,
+  queryMobilePosition,
+  queryPreset,
+  queryRecord,
   rebootDevice,
 } from '#/api/protocol-lab';
+import DeviceCommandPanel from '#/components/DeviceCommandPanel.vue';
 import MediaPlayer from '#/components/MediaPlayer.vue';
+import PtzControl from '#/components/PtzControl.vue';
 import { $t } from '#/locales';
 
-import { PTZ_DIRECTIONS, PTZ_ZOOM } from '../data';
 import SipTimeline from './SipTimeline.vue';
 
 /**
@@ -146,29 +157,61 @@ async function run(fn: () => Promise<unknown>, okKey: string) {
   }
 }
 
-function onPtz(command: string) {
+function onPtz(payload: {
+  channelId?: string;
+  command: string;
+  deviceId: string;
+  speed: number;
+}) {
   run(
     () =>
       ptzControl({
-        deviceId: selectedId.value,
-        channelId: selectedChannelId.value,
-        command,
-        speed: speed.value,
+        ...payload,
+        channelId: payload.channelId ?? selectedChannelId.value,
       }),
     'protocolLab.msg.ptzSent',
   );
 }
-function onQueryCatalog() {
-  run(() => queryCatalog(selectedId.value), 'protocolLab.msg.queryCatalogSent');
-}
-function onQueryDeviceInfo() {
-  run(
-    () => queryDeviceInfo(selectedId.value),
-    'protocolLab.msg.queryDeviceInfoSent',
-  );
-}
-function onReboot() {
-  run(() => rebootDevice(selectedId.value), 'protocolLab.msg.rebootSent');
+
+/**
+ * 设备命令分发（DeviceCommandPanel emit）。
+ *
+ * 命令集与设备管理页对等（验证台「验协议」、设备页「管设备」）；此处注入的是
+ * 验证台实现：在线态门禁（run() 内）+ #/api/protocol-lab 同源端点。
+ */
+function onCommand({
+  code,
+  configType,
+}: {
+  code: string;
+  configType?: string;
+}) {
+  const id = selectedId.value;
+  // 录像 / 报警查询后端强制时间范围（Unix 毫秒），默认最近 24h（与设备页一致）。
+  const endTime = Date.now();
+  const startTime = endTime - 24 * 60 * 60 * 1000;
+  const map: Record<string, () => Promise<unknown>> = {
+    queryCatalog: () => queryCatalog(id),
+    queryInfo: () => queryDeviceInfo(id),
+    queryStatus: () => queryDeviceStatus(id),
+    queryPreset: () => queryPreset(id),
+    queryMobilePosition: () => queryMobilePosition(id),
+    configDownload: () => downloadConfig(id, configType ?? 'BASIC'),
+    recordStart: () => controlRecordStart(id),
+    recordStop: () => controlRecordStop(id),
+    recordQuery: () => queryRecord({ deviceId: id, startTime, endTime }),
+    alarmQuery: () => queryAlarm({ deviceId: id, startTime, endTime }),
+    // 报警复位默认 alarmMethod=1（电话报警）alarmType=0（全部），后端强制非空。
+    alarmControl: () =>
+      controlAlarm({ deviceId: id, alarmMethod: '1', alarmType: '0' }),
+    broadcast: () => broadcast(id),
+    reboot: () => rebootDevice(id),
+  };
+  const fn = map[code];
+  if (!fn) {
+    return;
+  }
+  run(fn, 'device.msg.cmdSent');
 }
 function onLiveStart() {
   if (!canCommand.value) {
@@ -241,43 +284,22 @@ function onPlayerClose() {
     </div>
 
     <div class="command-area" :class="{ disabled: !canCommand }">
-      <div class="ptz-block">
-        <div class="ptz-pad">
-          <Button
-            v-for="btn in PTZ_DIRECTIONS"
-            :key="btn.command"
-            class="ptz-btn"
-            :style="{ gridRow: btn.row, gridColumn: btn.col }"
-            :disabled="!canCommand || loading"
-            size="small"
-            @click="onPtz(btn.command)"
-          >
-            {{ $t(`protocolLab.ptz.${btn.key}`) }}
-          </Button>
-        </div>
-        <div class="ptz-zoom">
-          <Button
-            v-for="btn in PTZ_ZOOM"
-            :key="btn.command"
-            :disabled="!canCommand || loading"
-            size="small"
-            @click="onPtz(btn.command)"
-          >
-            {{ $t(`protocolLab.ptz.${btn.key}`) }}
-          </Button>
-        </div>
-      </div>
+      <PtzControl
+        :device-id="selectedId"
+        :channel-id="selectedChannelId"
+        :speed="speed"
+        :disabled="!canCommand || loading"
+        @command="onPtz"
+      />
 
+      <!-- 全协议命令面板（与设备管理页同源组件，能力对等）。 -->
+      <DeviceCommandPanel
+        :disabled="!canCommand || loading"
+        @command="onCommand"
+      />
+
+      <!-- 点播留在父页：返回 playUrls 后由本页管理 MediaPlayer 弹窗。 -->
       <Space wrap class="mt-3">
-        <Button :disabled="!canCommand || loading" @click="onQueryCatalog">
-          {{ $t('protocolLab.server.queryCatalog') }}
-        </Button>
-        <Button :disabled="!canCommand || loading" @click="onQueryDeviceInfo">
-          {{ $t('protocolLab.server.queryDeviceInfo') }}
-        </Button>
-        <Button :disabled="!canCommand || loading" @click="onReboot">
-          {{ $t('protocolLab.server.reboot') }}
-        </Button>
         <Button
           type="primary"
           :disabled="!canCommand || loading"
@@ -298,13 +320,13 @@ function onPlayerClose() {
     </div>
 
     <!-- 点播播放器弹窗：liveStart 返回 playUrls 后自动起播。
-         显式钉死 HLS：GB 直播流走 HLS 起播更稳，避免漂到原生管线触发 demuxer 解析失败。
-         无 hls 地址时 MediaPlayerManager 自动回退最佳格式。 -->
+         显式指定 HTTP-FLV：flv.js 自带 demuxer、首帧最快，适配 lab 纯视频流。
+         无 httpFlv 地址时 MediaPlayerManager 自动回退最佳格式。 -->
     <MediaPlayer
       :open="playerOpen"
       :play-urls="playerUrls"
       :title="playerTitle"
-      format="hls"
+      format="httpFlv"
       @close="onPlayerClose"
     />
   </Card>
@@ -372,29 +394,6 @@ function onPlayerClose() {
 
 .command-area.disabled {
   opacity: 0.6;
-}
-
-.ptz-block {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
-
-.ptz-pad {
-  display: grid;
-  grid-template-rows: repeat(3, 1fr);
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-}
-
-.ptz-btn {
-  min-width: 56px;
-}
-
-.ptz-zoom {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 
 .timeline-wrap {
