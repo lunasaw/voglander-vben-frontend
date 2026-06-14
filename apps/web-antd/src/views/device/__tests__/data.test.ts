@@ -214,10 +214,12 @@ describe('useColumns —— 列定义', () => {
     expect(out).not.toBe('-');
   });
 
-  it('末列是操作列（detail / live），fixed right', () => {
+  it('末列是操作列（detail / edit / delete，不含 liveStart），fixed right', () => {
     const opCol = cols.at(-1);
     expect(opCol.fixed).toBe('right');
     const codes = opCol.cellRender.options.map((o: any) => o.code);
-    expect(codes).toEqual(expect.arrayContaining(['detail', 'liveStart']));
+    expect(codes).toEqual(expect.arrayContaining(['detail', 'edit', 'delete']));
+    // 实时点播已下放到通道页/详情面板，列表操作列不再提供。
+    expect(codes).not.toContain('liveStart');
   });
 });

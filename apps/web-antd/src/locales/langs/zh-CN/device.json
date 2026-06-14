@@ -1,15 +1,29 @@
 {
   "menu": "设备管理",
   "title": "设备列表",
+  "channel": {
+    "title": "通道列表",
+    "subtitle": "GB28181 通道实时态势",
+    "back": "返回设备列表",
+    "deviceLabel": "所属设备",
+    "empty": "未指定设备，无法加载通道",
+    "total": "通道总数",
+    "online": "在线",
+    "offline": "离线",
+    "select": "选择通道"
+  },
   "field": {
     "deviceId": "设备编号",
+    "channelId": "通道编号",
     "name": "名称",
     "status": "状态",
     "type": "协议类型",
     "ip": "IP",
     "port": "端口",
     "serverIp": "注册节点",
+    "manufacturer": "厂商",
     "channelCount": "通道数",
+    "createTime": "创建时间",
     "keepaliveTime": "心跳时间",
     "registerTime": "注册时间",
     "operation": "操作"
@@ -26,7 +40,8 @@
     "online": "在线",
     "offline": "离线",
     "channels": "通道总数",
-    "scope": "当前页统计"
+    "scope": "当前页统计",
+    "roster": "设备清单"
   },
   "section": {
     "ptz": "云台控制",
@@ -38,11 +53,15 @@
     "media": "点播",
     "commands": "指令面板",
     "overview": "设备概览",
-    "events": "实时事件"
+    "events": "实时事件",
+    "subscribe": "订阅"
   },
   "action": {
     "detail": "详情",
     "live": "实时点播",
+    "subscribeCatalog": "订阅目录",
+    "subscribePosition": "订阅位置",
+    "subscribeAlarm": "订阅告警",
     "queryCatalog": "查询目录",
     "queryInfo": "查询设备信息",
     "queryStatus": "查询状态",
@@ -59,11 +78,13 @@
     "reboot": "远程重启",
     "edit": "编辑",
     "delete": "删除",
-    "batchDelete": "批量删除"
+    "batchDelete": "批量删除",
+    "clearOffline": "清理离线通道"
   },
   "msg": {
     "cmdSent": "指令已下发",
     "cmdFailed": "指令下发失败",
+    "subscribeSent": "订阅指令已下发",
     "ptzSent": "PTZ 指令已下发",
     "liveSent": "点播请求已下发",
     "recordQuerySent": "录像查询已下发，结果将通过实时事件通知",
@@ -73,6 +94,10 @@
     "deleteSuccess": "删除成功",
     "updateSuccess": "更新成功",
     "batchDeleteEmpty": "请先勾选要删除的设备",
-    "batchDeleteConfirm": "确定删除选中的 {0} 个设备？"
+    "batchDeleteConfirm": "确定删除选中的 {0} 个设备？将同时删除其下全部通道。",
+    "channelDeleting": "正在删除通道 {0} …",
+    "channelBatchConfirm": "确定删除选中的 {0} 个通道？",
+    "clearOfflineConfirm": "确定清理该设备下所有离线通道？此操作不可恢复。",
+    "clearOfflineDone": "离线通道已清理"
   }
 }

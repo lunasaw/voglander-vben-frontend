@@ -7,6 +7,10 @@
 
  与前端 hasAccessByCodes 引用的权限码严格对齐（views/device/*）：
    Device:Device:Query   详情/列表查看
+   Device:Device:Edit    编辑设备（PUT /device/update）
+   Device:Device:Delete  删除/批量删除设备（DELETE /device/delete、/device/deleteIds）
+   Device:Channel:Edit   编辑通道（PUT /deviceChannel/update）
+   Device:Channel:Delete 删除/批量删除/清离线通道（DELETE /deviceChannel/deleteOne、/deleteBatch）
    Device:Cmd:Live       实时点播（复用 /live）
    Device:Cmd:Ptz        云台控制（复用 /ptz）
    Device:Cmd:Query      查目录/信息/状态/预置位/移动位置
@@ -15,7 +19,7 @@
    Device:Cmd:Alarm      报警查询/复位
    Device:Cmd:Broadcast  语音广播
 
- ID 段：目录 500 / 列表 501 / 按钮 50101+（避开 ProtocolLab 的 400/401、Media 的 300 段、System 的 200 段）。
+ ID 段：目录 500 / 列表 501 / 通道列表 502（钻取页，hideInMenu）/ 列表按钮 50101+ / 通道按钮 50201+（避开 ProtocolLab 的 400/401、Media 的 300 段、System 的 200 段）。
  路由 menu_code 用后端 PascalCase（Device / DeviceList），与 accessMode='backend' 下发一致。
  i18n 文案 key 走 device.*（locales/langs/{zh-CN,en-US}/device.json）。
  幂等：INSERT OR IGNORE，可重复执行。
@@ -34,7 +38,12 @@ VALUES
 -- 设备列表
 (501, 500, 'DeviceList', 'device.title', 2, '/device/list', '/device/list', 'mdi:cctv', 1, 1,
  'Device:Device:Query',
- '{"icon": "mdi:cctv", "title": "device.title", "hideInMenu": false}');
+ '{"icon": "mdi:cctv", "title": "device.title", "hideInMenu": false}'),
+
+-- 设备通道列表（S5 钻取页，隐藏于菜单，由设备列表「通道数」path 导航进入）
+(502, 500, 'DeviceChannelList', 'device.channel.title', 2, '/device/channel/:deviceId', '/device/channel/list',
+ 'mdi:video-input-component', 2, 1, 'Device:Device:Query',
+ '{"icon": "mdi:video-input-component", "title": "device.channel.title", "hideInMenu": true}');
 
 -- 设备管理按钮权限（menu_type=3，隐藏，仅用于鉴权）
 INSERT OR IGNORE INTO tb_menu (id, parent_id, menu_code, menu_name, menu_type, path, component, icon, sort_order,
@@ -55,10 +64,20 @@ VALUES
 (50107, 501, 'DeviceAlarm', 'device.section.alarm', 3, null, null, '', 7, 1, 'Device:Cmd:Alarm',
  '{"title": "device.section.alarm", "hideInMenu": true}'),
 (50108, 501, 'DeviceBroadcast', 'device.action.broadcast', 3, null, null, '', 8, 1, 'Device:Cmd:Broadcast',
- '{"title": "device.action.broadcast", "hideInMenu": true}');
+ '{"title": "device.action.broadcast", "hideInMenu": true}'),
+(50109, 501, 'DeviceEdit', 'device.action.edit', 3, null, null, '', 9, 1, 'Device:Device:Edit',
+ '{"title": "device.action.edit", "hideInMenu": true}'),
+(50110, 501, 'DeviceDelete', 'device.action.delete', 3, null, null, '', 10, 1, 'Device:Device:Delete',
+ '{"title": "device.action.delete", "hideInMenu": true}'),
+
+-- 设备通道列表（502）按钮权限：编辑 / 删除（含批量删除、清离线，共用 Delete 权限码）
+(50201, 502, 'DeviceChannelEdit', 'device.action.edit', 3, null, null, '', 1, 1, 'Device:Channel:Edit',
+ '{"title": "device.action.edit", "hideInMenu": true}'),
+(50202, 502, 'DeviceChannelDelete', 'device.action.delete', 3, null, null, '', 2, 1, 'Device:Channel:Delete',
+ '{"title": "device.action.delete", "hideInMenu": true}');
 
 -- 授予系统管理员角色（role_id=1）设备管理全部菜单/按钮
 INSERT OR IGNORE INTO tb_role_menu (role_id, menu_id)
 SELECT 1, id
 FROM tb_menu
-WHERE id IN (500, 501, 50101, 50102, 50103, 50104, 50105, 50106, 50107, 50108);
+WHERE id IN (500, 501, 502, 50101, 50102, 50103, 50104, 50105, 50106, 50107, 50108, 50109, 50110, 50201, 50202);

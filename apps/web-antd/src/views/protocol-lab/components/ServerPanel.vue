@@ -364,6 +364,11 @@ function onPlayerClose() {
 }
 
 .device-list {
+  /* flex-shrink:0：本卡片体是 flex column，timeline-wrap 为 flex:1 抢空间。
+     设备列表带 overflow-y:auto 后其 min-height:auto 被解析为 0，会被压缩到只剩边框
+     （表现为设备已渲染进 DOM、文字可选可复制，但容器塌成 2px、内容被 overflow 裁切不可见）。
+     锁定不收缩，让列表保持内容高度（受 max-height:180px 约束）。 */
+  flex-shrink: 0;
   max-height: 180px;
   overflow-y: auto;
   border: 1px solid hsl(var(--border));

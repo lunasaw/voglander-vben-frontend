@@ -5,7 +5,10 @@ import {
   controlAlarm,
   controlRecordStart,
   controlRecordStop,
+  deleteDeviceChannelBatch,
+  deleteDeviceChannelOne,
   downloadConfig,
+  getDeviceChannelPage,
   getDevicePage,
   liveStart,
   liveStop,
@@ -20,6 +23,7 @@ import {
   queryRecord,
   rebootDevice,
   setDeviceConfig,
+  updateDeviceChannel,
 } from '../device';
 
 /**
@@ -29,6 +33,7 @@ import {
  *   §1.1（DeviceController /device/getPage）
  *   §1.2（DeviceCmdController /device-cmd/* 含 S2 新增支链）
  *   §1.3（复用既有 /ptz、/live 端点，与协议台同源）
+ *   通道 CRUD（DeviceChannelController /deviceChannel/update|deleteOne|deleteBatch）
  *
  * URL / 请求体是逐字核对后端真实代码的契约（.cursorrules 铁律：严禁臆造字段/端点）。
  * 任何漂移都会让真实联调 404 / 400，故用测试钉死。
@@ -36,17 +41,23 @@ import {
 
 const getMock = vi.fn();
 const postMock = vi.fn();
+const putMock = vi.fn();
+const deleteMock = vi.fn();
 
 vi.mock('#/api/request', () => ({
   requestClient: {
     get: (...args: any[]) => getMock(...args),
     post: (...args: any[]) => postMock(...args),
+    put: (...args: any[]) => putMock(...args),
+    delete: (...args: any[]) => deleteMock(...args),
   },
 }));
 
 beforeEach(() => {
   getMock.mockReset().mockResolvedValue(undefined);
   postMock.mockReset().mockResolvedValue(undefined);
+  putMock.mockReset().mockResolvedValue(undefined);
+  deleteMock.mockReset().mockResolvedValue(undefined);
 });
 
 describe('device API —— 分页查询（§1.1 DeviceController）', () => {
@@ -76,6 +87,81 @@ describe('device API —— 分页查询（§1.1 DeviceController）', () => {
       total: 3,
       items: [{ deviceId: 'd1', status: 1, statusName: '在线' }],
     });
+  });
+});
+
+describe('device API —— 通道分页（S5 §1.1 DeviceChannelController）', () => {
+  it('getDeviceChannelPage：page/size 走 query，条件走 body', async () => {
+    await getDeviceChannelPage(
+      { page: 2, size: 20 },
+      { deviceId: 'd1', status: 1 },
+    );
+    expect(postMock).toHaveBeenCalledWith(
+      '/api/v1/deviceChannel/getPage?page=2&size=20',
+      { deviceId: 'd1', status: 1 },
+    );
+  });
+
+  it('getDeviceChannelPage：无条件 body 时发空对象（不发 undefined）', async () => {
+    await getDeviceChannelPage({ page: 1, size: 10 });
+    expect(postMock).toHaveBeenCalledWith(
+      '/api/v1/deviceChannel/getPage?page=1&size=10',
+      {},
+    );
+  });
+
+  it('getDeviceChannelPage：透传后端解包后的 DeviceChannelListResp 本体', async () => {
+    postMock.mockResolvedValueOnce({
+      total: 2,
+      items: [
+        {
+          id: 1,
+          channelId: 'c1',
+          deviceId: 'd1',
+          status: 1,
+          statusName: '在线',
+        },
+      ],
+    });
+    const resp = await getDeviceChannelPage({ page: 1, size: 10 });
+    expect(resp).toEqual({
+      total: 2,
+      items: [
+        {
+          id: 1,
+          channelId: 'c1',
+          deviceId: 'd1',
+          status: 1,
+          statusName: '在线',
+        },
+      ],
+    });
+  });
+});
+
+describe('device API —— 通道 CRUD（DeviceChannelController）', () => {
+  it('updateDeviceChannel：PUT /deviceChannel/update，body 为整条 UpdateReq', async () => {
+    await updateDeviceChannel({ id: 7, name: '前门', status: 0 });
+    expect(putMock).toHaveBeenCalledWith('/api/v1/deviceChannel/update', {
+      id: 7,
+      name: '前门',
+      status: 0,
+    });
+  });
+
+  it('deleteDeviceChannelOne：DELETE /deviceChannel/deleteOne，body 携主键 id', async () => {
+    await deleteDeviceChannelOne(7);
+    expect(deleteMock).toHaveBeenCalledWith('/api/v1/deviceChannel/deleteOne', {
+      data: { id: 7 },
+    });
+  });
+
+  it('deleteDeviceChannelBatch：DELETE /deviceChannel/deleteBatch，body 为查询条件（非 id 数组）', async () => {
+    await deleteDeviceChannelBatch({ deviceId: 'd1', status: 0 });
+    expect(deleteMock).toHaveBeenCalledWith(
+      '/api/v1/deviceChannel/deleteBatch',
+      { data: { deviceId: 'd1', status: 0 } },
+    );
   });
 });
 

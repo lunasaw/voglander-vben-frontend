@@ -20,6 +20,26 @@ function formatMs(cellValue?: number): string {
 }
 
 /**
+ * 从设备扩展信息中解析厂商名。
+ *
+ * 后端 DeviceVO 无顶层厂商字段——厂商埋在 extendInfo.deviceInfo（设备信息应答
+ * DeviceInfo 的 JSON 串，含 manufacturer/model/firmware）。该快照仅在设备应答
+ * 「查设备信息」后才有，故大多数行可能为空 → 统一回退 "-"。
+ */
+export function resolveManufacturer(row: DeviceApi.DeviceVO): string {
+  const raw = row.extendInfo?.deviceInfo;
+  if (!raw) {
+    return '-';
+  }
+  try {
+    const info = JSON.parse(raw) as { manufacturer?: string };
+    return info.manufacturer?.trim() || '-';
+  } catch {
+    return '-'; // deviceInfo 非合法 JSON，容错回退
+  }
+}
+
+/**
  * 把查询表单值转为后端 DevicePageReq：
  * RangePicker 字段（keepaliveTime / registerTime）输出 [start,end]，
  * 转为 *TimeStart / *TimeEnd（Unix 毫秒）并删除原 range 字段（§4.2 时间铁律）。
@@ -260,6 +280,14 @@ export function useColumns<T = DeviceApi.DeviceVO>(
       width: 120,
     },
     {
+      field: 'manufacturer',
+      title: $t('device.field.manufacturer'),
+      width: 120,
+      // 厂商来自 extendInfo.deviceInfo JSON（设备应答快照），用 formatter 现解析。
+      formatter: ({ row }: { row: DeviceApi.DeviceVO }) =>
+        resolveManufacturer(row),
+    },
+    {
       field: 'ip',
       title: $t('device.field.ip'),
       width: 130,
@@ -271,6 +299,7 @@ export function useColumns<T = DeviceApi.DeviceVO>(
       width: 90,
       align: 'center',
       className: 'device-cell-count',
+      slots: { default: 'channelCount' }, // list.vue 提供具名插槽（可点击钻取通道列表）
     },
     {
       field: 'keepaliveTime',
@@ -300,11 +329,6 @@ export function useColumns<T = DeviceApi.DeviceVO>(
             show: () => hasAccessByCodes(['Device:Device:Query']),
           },
           {
-            code: 'liveStart',
-            text: $t('device.action.live'),
-            show: () => hasAccessByCodes(['Device:Cmd:Live']),
-          },
-          {
             code: 'edit',
             text: $t('device.action.edit'),
             show: () => hasAccessByCodes(['Device:Device:Edit']),
@@ -320,7 +344,7 @@ export function useColumns<T = DeviceApi.DeviceVO>(
       field: 'operation',
       fixed: 'right',
       title: $t('device.field.operation'),
-      width: 260,
+      width: 200,
     },
   ];
 }

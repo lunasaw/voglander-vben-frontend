@@ -29,6 +29,7 @@ const m = vi.hoisted(() => ({
   controlRecordStart: vi.fn().mockResolvedValue(true),
   controlRecordStop: vi.fn().mockResolvedValue(true),
   downloadConfig: vi.fn().mockResolvedValue(true),
+  getDeviceChannelPage: vi.fn().mockResolvedValue({ total: 0, items: [] }),
   liveStart: vi.fn().mockResolvedValue(undefined),
   ptzControl: vi.fn().mockResolvedValue(true),
   queryAlarm: vi.fn().mockResolvedValue(true),
@@ -50,6 +51,7 @@ vi.mock('#/api/device', () => ({
   controlRecordStart: m.controlRecordStart,
   controlRecordStop: m.controlRecordStop,
   downloadConfig: m.downloadConfig,
+  getDeviceChannelPage: m.getDeviceChannelPage,
   liveStart: m.liveStart,
   ptzControl: m.ptzControl,
   queryAlarm: m.queryAlarm,
@@ -138,6 +140,7 @@ beforeEach(() => {
     'controlRecordStart',
     'controlRecordStop',
     'downloadConfig',
+    'getDeviceChannelPage',
     'liveStart',
     'ptzControl',
     'queryAlarm',
@@ -150,6 +153,8 @@ beforeEach(() => {
   ] as const) {
     m[k].mockReset().mockResolvedValue(k === 'liveStart' ? undefined : true);
   }
+  // 通道下拉默认空集（保持 channelId 回退 deviceId+'01'）。
+  m.getDeviceChannelPage.mockResolvedValue({ total: 0, items: [] });
 });
 
 describe('deviceOperations —— 查询支链按钮（§1.2/§1.3）', () => {
@@ -229,6 +234,54 @@ describe('deviceOperations —— 配置下载（configType 后端 @NotBlank）'
       'click',
     );
     expect(m.downloadConfig).toHaveBeenCalledWith('d1', 'BASIC');
+  });
+});
+
+describe('deviceOperations —— 订阅快捷分区（S5 §4.4：复用既有 query 端点，无新端点）', () => {
+  it('订阅目录 → queryCatalog(deviceId)（镜像既有端点）', async () => {
+    const wrapper = mountPanel();
+    await buttonByText(wrapper, 'device.action.subscribeCatalog')?.trigger(
+      'click',
+    );
+    expect(m.queryCatalog).toHaveBeenCalledWith('d1');
+  });
+
+  it('订阅位置 → queryMobilePosition(deviceId)', async () => {
+    const wrapper = mountPanel();
+    await buttonByText(wrapper, 'device.action.subscribePosition')?.trigger(
+      'click',
+    );
+    expect(m.queryMobilePosition).toHaveBeenCalledWith('d1');
+  });
+
+  it('订阅告警 → queryAlarm({deviceId, startTime, endTime})（默认最近 24h）', async () => {
+    const wrapper = mountPanel();
+    await buttonByText(wrapper, 'device.action.subscribeAlarm')?.trigger(
+      'click',
+    );
+    expect(m.queryAlarm).toHaveBeenCalledWith(
+      expect.objectContaining({ deviceId: 'd1' }),
+    );
+    const arg = m.queryAlarm.mock.calls[0]?.[0] ?? {};
+    expect(typeof arg.startTime).toBe('number');
+    expect(typeof arg.endTime).toBe('number');
+    expect(arg.endTime).toBeGreaterThan(arg.startTime);
+  });
+
+  it('无权限订阅告警时不调 API 且 message.error', async () => {
+    m.hasAccess.mockReturnValue(false);
+    const wrapper = mountPanel();
+    await buttonByText(wrapper, 'device.action.subscribeAlarm')?.trigger(
+      'click',
+    );
+    expect(m.queryAlarm).not.toHaveBeenCalled();
+    expect(m.messageError).toHaveBeenCalled();
+  });
+
+  it('device=null 时订阅按钮禁用', () => {
+    const wrapper = mountPanel({ device: null });
+    const btn = buttonByText(wrapper, 'device.action.subscribeCatalog');
+    expect(btn?.attributes('disabled')).toBeDefined();
   });
 });
 

@@ -27,6 +27,17 @@ const routes: RouteRecordRaw[] = [
         },
         component: () => import('#/views/device/list.vue'),
       },
+      {
+        // S5 通道层级钻取页（隐藏于菜单，由设备列表「通道数」path 导航进入）。
+        path: '/device/channel/:deviceId',
+        name: 'DeviceChannel',
+        meta: {
+          hideInMenu: true,
+          icon: 'mdi:video-input-component',
+          title: $t('device.channel.title'),
+        },
+        component: () => import('#/views/device/channel/list.vue'),
+      },
     ],
   },
 ];

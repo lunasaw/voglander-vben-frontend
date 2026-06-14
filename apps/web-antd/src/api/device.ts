@@ -78,6 +78,46 @@ export namespace DeviceApi {
     items: DeviceVO[];
   }
 
+  /* ----------------------- S5 通道层级（DeviceChannelController） ----------------------- */
+
+  /** 通道查询请求（全部可选；deviceId 由钻取路由注入）。 */
+  export interface DeviceChannelQueryReq {
+    id?: number;
+    channelId?: string; // 通道 Id
+    deviceId?: string; // 设备 ID（钻取按此过滤）
+    name?: string; // 通道名称
+    status?: number; // 1在线 / 0离线
+  }
+
+  /** 通道出参（时间 Unix 毫秒，字段以 Time 结尾）。 */
+  export interface DeviceChannelVO {
+    id: number;
+    channelId: string;
+    deviceId: string;
+    name?: string;
+    status: number; // 1/0
+    statusName: string; // "在线"/"离线"（后端已派生，前端直接用）
+    createTime?: number;
+    updateTime?: number;
+    extend?: string;
+    extendInfo?: { channelInfo?: string };
+  }
+
+  export interface DeviceChannelListResp {
+    total: number;
+    items: DeviceChannelVO[];
+  }
+
+  /** 通道更新请求（id 必填；channelId/deviceId 为身份字段，仅展示不可改，后端按 id 更新 name/status）。 */
+  export interface DeviceChannelUpdateReq {
+    id: number;
+    channelId?: string;
+    deviceId?: string;
+    name?: string;
+    status?: number; // 1在线 / 0离线
+    extendInfo?: { channelInfo?: string };
+  }
+
   /** 设备更新请求（id 必填；deviceId 唯一索引不可改，仅展示）。 */
   export interface DeviceUpdateReq {
     id: number;
@@ -186,6 +226,47 @@ export async function deleteDevice(id: number) {
 export async function deleteDeviceBatch(ids: number[]) {
   return requestClient.delete<boolean>('/api/v1/device/deleteIds', {
     data: ids,
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/*           S5 通道分页（DeviceChannelController，按 deviceId 钻取）           */
+/* -------------------------------------------------------------------------- */
+
+/** 通道分页：page/size 走 query，body 为查询条件（按 deviceId 过滤该设备下通道，空条件发 {}）。 */
+export async function getDeviceChannelPage(
+  params: { page: number; size: number },
+  body?: DeviceApi.DeviceChannelQueryReq,
+) {
+  return requestClient.post<DeviceApi.DeviceChannelListResp>(
+    `/api/v1/deviceChannel/getPage?page=${params.page}&size=${params.size}`,
+    body ?? {},
+  );
+}
+
+/** 更新通道（id 必填；后端 PUT /deviceChannel/update 按主键改 name/status）。 */
+export async function updateDeviceChannel(
+  data: DeviceApi.DeviceChannelUpdateReq,
+) {
+  return requestClient.put<number>('/api/v1/deviceChannel/update', data);
+}
+
+/** 单删通道（DELETE /deviceChannel/deleteOne，body 携带主键 id）。 */
+export async function deleteDeviceChannelOne(id: number) {
+  return requestClient.delete<boolean>('/api/v1/deviceChannel/deleteOne', {
+    data: { id },
+  });
+}
+
+/**
+ * 按条件批量删除通道（DELETE /deviceChannel/deleteBatch，body=查询条件）。
+ * 清理离线通道即传 { deviceId, status: 0 }——后端按条件匹配删除，非 id 数组。
+ */
+export async function deleteDeviceChannelBatch(
+  query: DeviceApi.DeviceChannelQueryReq,
+) {
+  return requestClient.delete<boolean>('/api/v1/deviceChannel/deleteBatch', {
+    data: query,
   });
 }
 

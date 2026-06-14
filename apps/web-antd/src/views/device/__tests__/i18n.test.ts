@@ -77,6 +77,9 @@ describe('device i18n —— 代码引用的 key 必须存在', () => {
     read('views/device/data.ts'),
     read('views/device/modules/device-operations.vue'),
     read('views/device/modules/device-detail.vue'),
+    read('views/device/channel/list.vue'),
+    read('views/device/channel/data.ts'),
+    read('views/device/channel/modules/channel-form.vue'),
     read('router/routes/modules/device.ts'),
   ].join('\n');
 

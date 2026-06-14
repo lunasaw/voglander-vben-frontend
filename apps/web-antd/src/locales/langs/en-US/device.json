@@ -1,15 +1,29 @@
 {
   "menu": "Device Management",
   "title": "Device List",
+  "channel": {
+    "title": "Channels",
+    "subtitle": "GB28181 realtime channel status",
+    "back": "Back to devices",
+    "deviceLabel": "Device",
+    "empty": "No device specified, cannot load channels",
+    "total": "Total Channels",
+    "online": "Online",
+    "offline": "Offline",
+    "select": "Select channel"
+  },
   "field": {
     "deviceId": "Device ID",
+    "channelId": "Channel ID",
     "name": "Name",
     "status": "Status",
     "type": "Protocol",
     "ip": "IP",
     "port": "Port",
     "serverIp": "Register Node",
+    "manufacturer": "Manufacturer",
     "channelCount": "Channels",
+    "createTime": "Create Time",
     "keepaliveTime": "Keepalive Time",
     "registerTime": "Register Time",
     "operation": "Action"
@@ -26,7 +40,8 @@
     "online": "Online",
     "offline": "Offline",
     "channels": "Total Channels",
-    "scope": "Current page"
+    "scope": "Current page",
+    "roster": "Device Roster"
   },
   "section": {
     "ptz": "PTZ Control",
@@ -38,11 +53,15 @@
     "media": "Live",
     "commands": "Command Deck",
     "overview": "Overview",
-    "events": "Realtime Events"
+    "events": "Realtime Events",
+    "subscribe": "Subscribe"
   },
   "action": {
     "detail": "Detail",
     "live": "Live",
+    "subscribeCatalog": "Subscribe Catalog",
+    "subscribePosition": "Subscribe Position",
+    "subscribeAlarm": "Subscribe Alarm",
     "queryCatalog": "Query Catalog",
     "queryInfo": "Query Device Info",
     "queryStatus": "Query Status",
@@ -59,11 +78,13 @@
     "reboot": "Reboot",
     "edit": "Edit",
     "delete": "Delete",
-    "batchDelete": "Batch Delete"
+    "batchDelete": "Batch Delete",
+    "clearOffline": "Clear Offline Channels"
   },
   "msg": {
     "cmdSent": "Command sent",
     "cmdFailed": "Command failed",
+    "subscribeSent": "Subscribe command sent",
     "ptzSent": "PTZ command sent",
     "liveSent": "Live request sent",
     "recordQuerySent": "Record query sent; result will arrive via realtime events",
@@ -73,6 +94,10 @@
     "deleteSuccess": "Deleted",
     "updateSuccess": "Updated",
     "batchDeleteEmpty": "Please select devices to delete first",
-    "batchDeleteConfirm": "Delete the selected {0} device(s)?"
+    "batchDeleteConfirm": "Delete the selected {0} device(s)? All their channels will be deleted too.",
+    "channelDeleting": "Deleting channel {0} …",
+    "channelBatchConfirm": "Delete the selected {0} channel(s)?",
+    "clearOfflineConfirm": "Clear all offline channels of this device? This cannot be undone.",
+    "clearOfflineDone": "Offline channels cleared"
   }
 }

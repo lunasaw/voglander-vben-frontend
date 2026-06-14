@@ -2,11 +2,11 @@
 import type { DeviceApi } from '#/api/device';
 import type { LabEvent } from '#/composables/useSseEvents';
 
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 import { useAccess } from '@vben/access';
 
-import { Button, message } from 'ant-design-vue';
+import { Button, message, Select } from 'ant-design-vue';
 
 import {
   broadcast,
@@ -14,6 +14,7 @@ import {
   controlRecordStart,
   controlRecordStop,
   downloadConfig,
+  getDeviceChannelPage,
   liveStart,
   ptzControl,
   queryAlarm,
@@ -64,8 +65,53 @@ const playerTitle = ref('');
 
 const deviceId = computed(() => props.device?.deviceId ?? '');
 /** catalog 通道命名规则：deviceId + 两位序号；缺省回退 deviceId+'01'（与协议台一致）。 */
-const channelId = computed(() => (deviceId.value ? `${deviceId.value}01` : ''));
+const defaultChannelId = computed(() =>
+  deviceId.value ? `${deviceId.value}01` : '',
+);
 const hasDevice = computed(() => !!deviceId.value);
+
+/* ----------------------------- 通道选择（点播 / PTZ 共享） -----------------------------
+   点播与 PTZ 必须指定通道。拉取该设备通道列表填充下拉；未加载到时回退 deviceId+'01'
+   （与协议台一致），保证空目录设备仍可操作。 */
+const channelOptions = ref<Array<{ label: string; value: string }>>([]);
+const selectedChannelId = ref('');
+
+/** 生效通道：用户选中优先，否则回退默认 deviceId+'01'。 */
+const channelId = computed(
+  () => selectedChannelId.value || defaultChannelId.value,
+);
+
+async function loadChannels() {
+  const id = deviceId.value;
+  if (!id) {
+    channelOptions.value = [];
+    selectedChannelId.value = '';
+    return;
+  }
+  // 先用默认通道兜底，异步拉取成功后替换为真实列表。
+  selectedChannelId.value = defaultChannelId.value;
+  try {
+    const resp = await getDeviceChannelPage(
+      { page: 1, size: 200 },
+      { deviceId: id },
+    );
+    const items = resp?.items ?? [];
+    channelOptions.value = items.map((c) => ({
+      label: c.name ? `${c.channelId} · ${c.name}` : c.channelId,
+      value: c.channelId,
+    }));
+    // 列表非空且当前选中不在其中时，选第一个真实通道。
+    if (
+      channelOptions.value.length > 0 &&
+      !channelOptions.value.some((o) => o.value === selectedChannelId.value)
+    ) {
+      selectedChannelId.value = channelOptions.value[0]?.value ?? '';
+    }
+  } catch {
+    // 拉取失败保持默认通道兜底，不打扰。
+    channelOptions.value = [];
+  }
+}
 
 /** 在线态：status===1（与后端 statusName 派生一致），驱动状态带脉冲色。 */
 const isOnline = computed(() => props.device?.status === 1);
@@ -181,6 +227,25 @@ function onCommand({
   run(entry.perm, entry.fn, entry.ok);
 }
 
+/* ------------------------- 订阅（复用既有 GB query 端点） -------------------------
+   GB28181「订阅」在该后端实现为 query 指令 + 设备应答经 SSE 回投，无独立 SUBSCRIBE 端点。
+   故镜像既有 device-cmd/query-* 端点（catalog/position/alarm 均设备级，不接 channelId）。 */
+function onSubscribe(kind: 'alarm' | 'catalog' | 'position') {
+  const id = deviceId.value;
+  const end = Date.now();
+  const start = end - 24 * 60 * 60 * 1000;
+  const map = {
+    catalog: { perm: 'Device:Cmd:Query', fn: () => queryCatalog(id) },
+    position: { perm: 'Device:Cmd:Query', fn: () => queryMobilePosition(id) },
+    alarm: {
+      perm: 'Device:Cmd:Alarm',
+      fn: () => queryAlarm({ deviceId: id, startTime: start, endTime: end }),
+    },
+  } as const;
+  const e = map[kind];
+  run(e.perm, e.fn, 'device.msg.subscribeSent');
+}
+
 /* ----------------------------- PTZ（复用 /ptz） ----------------------------- */
 function onPtz(payload: {
   channelId?: string;
@@ -221,10 +286,19 @@ function onPlayerClose() {
 }
 
 onMounted(() => {
+  loadChannels();
   if (props.autoLive && hasDevice.value) {
     onLiveStart();
   }
 });
+
+// 设备切换（抽屉复用同实例时）重新加载通道下拉。
+watch(
+  () => props.device?.deviceId,
+  () => {
+    loadChannels();
+  },
+);
 </script>
 
 <template>
@@ -253,36 +327,55 @@ onMounted(() => {
       </div>
     </header>
 
-    <!-- 概览瓦片 -->
+    <!-- 概览读数条：单行紧凑（状态/通道/类型/地址/心跳/注册），不挤占操作区 -->
+    <section class="meta-rail">
+      <div class="meta-cell">
+        <span class="meta-key">{{ $t('device.field.channelCount') }}</span>
+        <span class="meta-val">{{ device?.channelCount ?? 0 }}</span>
+      </div>
+      <div class="meta-cell">
+        <span class="meta-key">{{ $t('device.field.type') }}</span>
+        <span class="meta-val mono">{{ typeName }}</span>
+      </div>
+      <div class="meta-cell meta-grow">
+        <span class="meta-key">{{ $t('device.field.ip') }}</span>
+        <span class="meta-val mono">{{ address }}</span>
+      </div>
+      <div class="meta-cell meta-grow">
+        <span class="meta-key">{{ $t('device.field.keepaliveTime') }}</span>
+        <span class="meta-val mono sm">{{
+          fmtTime(device?.keepaliveTime)
+        }}</span>
+      </div>
+      <div class="meta-cell meta-grow">
+        <span class="meta-key">{{ $t('device.field.registerTime') }}</span>
+        <span class="meta-val mono sm">{{
+          fmtTime(device?.registerTime)
+        }}</span>
+      </div>
+    </section>
+
+    <!-- SUB 订阅（复用既有 GB query 端点：目录 / 位置 / 告警；回包走 SSE） -->
     <section class="deck">
       <div class="deck-label">
-        <span class="deck-no">00</span>{{ $t('device.section.overview') }}
+        <span class="deck-no">SUB</span>{{ $t('device.section.subscribe') }}
       </div>
-      <div class="tiles">
-        <div class="tile">
-          <div class="tile-val">{{ device?.channelCount ?? 0 }}</div>
-          <div class="tile-key">{{ $t('device.field.channelCount') }}</div>
-        </div>
-        <div class="tile">
-          <div class="tile-val mono">{{ typeName }}</div>
-          <div class="tile-key">{{ $t('device.field.type') }}</div>
-        </div>
-        <div class="tile tile-wide">
-          <div class="tile-val mono">{{ address }}</div>
-          <div class="tile-key">{{ $t('device.field.ip') }}</div>
-        </div>
-        <div class="tile tile-wide">
-          <div class="tile-val mono sm">
-            {{ fmtTime(device?.keepaliveTime) }}
-          </div>
-          <div class="tile-key">{{ $t('device.field.keepaliveTime') }}</div>
-        </div>
-        <div class="tile tile-wide">
-          <div class="tile-val mono sm">
-            {{ fmtTime(device?.registerTime) }}
-          </div>
-          <div class="tile-key">{{ $t('device.field.registerTime') }}</div>
-        </div>
+      <div class="sub-actions">
+        <Button
+          :disabled="!hasDevice || loading"
+          @click="onSubscribe('catalog')"
+        >
+          {{ $t('device.action.subscribeCatalog') }}
+        </Button>
+        <Button
+          :disabled="!hasDevice || loading"
+          @click="onSubscribe('position')"
+        >
+          {{ $t('device.action.subscribePosition') }}
+        </Button>
+        <Button :disabled="!hasDevice || loading" @click="onSubscribe('alarm')">
+          {{ $t('device.action.subscribeAlarm') }}
+        </Button>
       </div>
     </section>
 
@@ -310,18 +403,29 @@ onMounted(() => {
       />
     </section>
 
-    <!-- 03 点播（留在父页：返回 playUrls 后由本页管理 MediaPlayer 弹窗） -->
+    <!-- 03 点播（指定通道）：通道下拉 + 起播按钮，返回 playUrls 后开 MediaPlayer 弹窗 -->
     <section class="deck">
       <div class="deck-label">
         <span class="deck-no">03</span>{{ $t('device.section.media') }}
       </div>
-      <Button
-        type="primary"
-        :disabled="!hasDevice || loading"
-        @click="onLiveStart"
-      >
-        {{ $t('device.action.live') }}
-      </Button>
+      <div class="media-row">
+        <Select
+          v-model:value="selectedChannelId"
+          class="channel-select"
+          :options="channelOptions"
+          :disabled="!hasDevice || loading"
+          :placeholder="$t('device.channel.select')"
+          show-search
+          option-filter-prop="label"
+        />
+        <Button
+          type="primary"
+          :disabled="!hasDevice || loading || !channelId"
+          @click="onLiveStart"
+        >
+          {{ $t('device.action.live') }}
+        </Button>
+      </div>
     </section>
 
     <!-- 04 实时事件时间线（复用 SipTimeline，过滤当前设备 device.*） -->
@@ -370,30 +474,37 @@ onMounted(() => {
 
 /* ---- 入场：分区自上而下错峰淡入上移 ---- */
 .deck,
+.meta-rail,
 .sentinel-band {
   opacity: 0;
   transform: translateY(10px);
   animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.deck:nth-of-type(1) {
+/* 错峰：meta-rail(概览) → SUB → PTZ → 命令 → 点播 → 事件，按 section 序递增。
+   header 非 section，故 section 序列从 meta-rail 起算（nth-of-type 1..6）。 */
+.sentinel section:nth-of-type(1) {
   animation-delay: 0.08s;
 }
 
-.deck:nth-of-type(2) {
-  animation-delay: 0.14s;
+.sentinel section:nth-of-type(2) {
+  animation-delay: 0.13s;
 }
 
-.deck:nth-of-type(3) {
-  animation-delay: 0.2s;
+.sentinel section:nth-of-type(3) {
+  animation-delay: 0.18s;
 }
 
-.deck:nth-of-type(4) {
-  animation-delay: 0.26s;
+.sentinel section:nth-of-type(4) {
+  animation-delay: 0.23s;
 }
 
-.deck:nth-of-type(5) {
-  animation-delay: 0.32s;
+.sentinel section:nth-of-type(5) {
+  animation-delay: 0.28s;
+}
+
+.sentinel section:nth-of-type(6) {
+  animation-delay: 0.33s;
 }
 
 @keyframes rise {
@@ -606,75 +717,90 @@ onMounted(() => {
   border-radius: 4px;
 }
 
-/* ============================ 概览瓦片 ============================ */
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+/* ============================ 订阅快捷分区 ============================ */
+.sub-actions {
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
-.tile {
-  position: relative;
-  padding: 14px 16px;
-  overflow: hidden;
+.sub-actions :deep(.ant-btn) {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* ============================ 概览读数条（单行紧凑） ============================
+   取代原概览瓦片网格——发丝边框横条，cell 间竖向分隔，等宽读数；
+   释放纵向空间给下方操作区。窄屏自动换行。 */
+.meta-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 0;
+  padding: 10px 4px;
   background: hsl(var(--card));
   border: 1px solid var(--hair);
   border-radius: var(--radius);
-  transition:
-    border-color 0.2s,
-    transform 0.2s;
+  box-shadow: inset 0 1px 0 hsl(var(--foreground) / 5%);
 }
 
-.tile::before {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  content: '';
-  background: hsl(var(--accent, var(--muted-foreground)) / 60%);
-  opacity: 0;
-  transition: opacity 0.2s;
+.meta-cell {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 2px 16px;
+  border-left: 1px solid var(--hair);
 }
 
-.tile:hover {
-  border-color: hsl(var(--foreground) / 22%);
-  transform: translateY(-1px);
+.meta-cell:first-child {
+  border-left: 0;
 }
 
-.tile:hover::before {
-  opacity: 1;
+/* IP / 时间等长字段占据剩余空间，均分弹性 */
+.meta-grow {
+  flex: 1 1 150px;
 }
 
-.tile-wide {
-  grid-column: span 2;
-}
-
-.tile-val {
-  font-size: 22px;
-  font-weight: 680;
-  line-height: 1.1;
-  color: hsl(var(--foreground));
-}
-
-.tile-val.mono {
+.meta-key {
   font-family: var(--mono);
-  font-size: 15px;
-  font-weight: 600;
-  word-break: break-all;
-}
-
-.tile-val.sm {
-  font-size: 13px;
-}
-
-.tile-key {
-  margin-top: 6px;
-  font-family: var(--mono);
-  font-size: 10px;
+  font-size: 9.5px;
   color: hsl(var(--muted-foreground));
   text-transform: uppercase;
   letter-spacing: 0.14em;
+}
+
+.meta-val {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.2;
+  color: hsl(var(--foreground));
+  white-space: nowrap;
+}
+
+.meta-val.mono {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.meta-val.sm {
+  font-size: 11.5px;
+}
+
+/* ============================ 点播行（通道下拉 + 起播） ============================ */
+.media-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.channel-select {
+  flex: 1;
+  min-width: 0;
+  max-width: 360px;
 }
 
 /* ============================ 事件流 ============================ */
