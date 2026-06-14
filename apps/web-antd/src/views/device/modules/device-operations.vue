@@ -6,7 +6,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 
 import { useAccess } from '@vben/access';
 
-import { Button, message, Select } from 'ant-design-vue';
+import { Button, message, Select, Switch } from 'ant-design-vue';
 
 import {
   broadcast,
@@ -25,6 +25,7 @@ import {
   queryPreset,
   queryRecord,
   rebootDevice,
+  toggleDeviceSubscription,
 } from '#/api/device';
 import DeviceCommandPanel from '#/components/DeviceCommandPanel.vue';
 import MediaPlayer from '#/components/MediaPlayer.vue';
@@ -227,23 +228,62 @@ function onCommand({
   run(entry.perm, entry.fn, entry.ok);
 }
 
-/* ------------------------- 订阅（复用既有 GB query 端点） -------------------------
-   GB28181「订阅」在该后端实现为 query 指令 + 设备应答经 SSE 回投，无独立 SUBSCRIBE 端点。
-   故镜像既有 device-cmd/query-* 端点（catalog/position/alarm 均设备级，不接 channelId）。 */
-function onSubscribe(kind: 'alarm' | 'catalog' | 'position') {
+/* ------------------------- 订阅（GB28181-2022 §9.11 SUBSCRIBE 意图开关） -------------------------
+   订阅是有状态开关（非一次性 query）：开即下发 SUBSCRIBE、关即撤销，状态由后端
+   按设备回填到 device.subscription{catalog,position,alarm}。开关采用「成功才提交」语义：
+   先乐观置位，失败回退原值（与列表/协议台一致），权限门禁 Device:Subscription:Edit。 */
+const subState = ref({ alarm: false, catalog: false, position: false });
+const subLoading = ref({ alarm: false, catalog: false, position: false });
+
+/** 从 device.subscription 初始化开关态（设备切换时同步）。 */
+watch(
+  () => props.device?.subscription,
+  (sub) => {
+    subState.value = {
+      alarm: sub?.alarm ?? false,
+      catalog: sub?.catalog ?? false,
+      position: sub?.position ?? false,
+    };
+  },
+  { immediate: true, deep: true },
+);
+
+const SUB_TYPE: Record<
+  'alarm' | 'catalog' | 'position',
+  DeviceApi.SubscriptionType
+> = {
+  alarm: 'ALARM',
+  catalog: 'CATALOG',
+  position: 'MOBILE_POSITION',
+};
+
+/** 开关订阅：成功提交、失败回退（CellSwitch 风格）。 */
+async function onSubscriptionToggle(
+  kind: 'alarm' | 'catalog' | 'position',
+  enabled: boolean,
+) {
   const id = deviceId.value;
-  const end = Date.now();
-  const start = end - 24 * 60 * 60 * 1000;
-  const map = {
-    catalog: { perm: 'Device:Cmd:Query', fn: () => queryCatalog(id) },
-    position: { perm: 'Device:Cmd:Query', fn: () => queryMobilePosition(id) },
-    alarm: {
-      perm: 'Device:Cmd:Alarm',
-      fn: () => queryAlarm({ deviceId: id, startTime: start, endTime: end }),
-    },
-  } as const;
-  const e = map[kind];
-  run(e.perm, e.fn, 'device.msg.subscribeSent');
+  if (!id) {
+    return;
+  }
+  if (!hasAccessByCodes(['Device:Subscription:Edit'])) {
+    message.error($t('device.msg.noPermission'));
+    return;
+  }
+  subLoading.value[kind] = true;
+  try {
+    await toggleDeviceSubscription(id, SUB_TYPE[kind], enabled);
+    subState.value[kind] = enabled; // 成功才提交
+    message.success(
+      $t(enabled ? 'device.msg.subscribeOn' : 'device.msg.subscribeOff', [
+        $t(`device.subscription.${kind}`),
+      ]),
+    );
+  } catch {
+    message.error($t('device.msg.cmdFailed'));
+  } finally {
+    subLoading.value[kind] = false;
+  }
 }
 
 /* ----------------------------- PTZ（复用 /ptz） ----------------------------- */
@@ -355,27 +395,42 @@ watch(
       </div>
     </section>
 
-    <!-- SUB 订阅（复用既有 GB query 端点：目录 / 位置 / 告警；回包走 SSE） -->
+    <!-- SUB 订阅（GB28181-2022 §9.11 SUBSCRIBE 意图开关：目录 / 位置 / 告警；状态后端回填） -->
     <section class="deck">
       <div class="deck-label">
         <span class="deck-no">SUB</span>{{ $t('device.section.subscribe') }}
       </div>
-      <div class="sub-actions">
-        <Button
-          :disabled="!hasDevice || loading"
-          @click="onSubscribe('catalog')"
-        >
-          {{ $t('device.action.subscribeCatalog') }}
-        </Button>
-        <Button
-          :disabled="!hasDevice || loading"
-          @click="onSubscribe('position')"
-        >
-          {{ $t('device.action.subscribePosition') }}
-        </Button>
-        <Button :disabled="!hasDevice || loading" @click="onSubscribe('alarm')">
-          {{ $t('device.action.subscribeAlarm') }}
-        </Button>
+      <div class="sub-switches">
+        <label class="sub-switch">
+          <Switch
+            :checked="subState.catalog"
+            :loading="subLoading.catalog"
+            :disabled="!hasDevice"
+            size="small"
+            @change="(v) => onSubscriptionToggle('catalog', !!v)"
+          />
+          <span class="sub-text">{{ $t('device.subscription.catalog') }}</span>
+        </label>
+        <label class="sub-switch">
+          <Switch
+            :checked="subState.position"
+            :loading="subLoading.position"
+            :disabled="!hasDevice"
+            size="small"
+            @change="(v) => onSubscriptionToggle('position', !!v)"
+          />
+          <span class="sub-text">{{ $t('device.subscription.position') }}</span>
+        </label>
+        <label class="sub-switch">
+          <Switch
+            :checked="subState.alarm"
+            :loading="subLoading.alarm"
+            :disabled="!hasDevice"
+            size="small"
+            @change="(v) => onSubscriptionToggle('alarm', !!v)"
+          />
+          <span class="sub-text">{{ $t('device.subscription.alarm') }}</span>
+        </label>
       </div>
     </section>
 
@@ -718,15 +773,22 @@ watch(
 }
 
 /* ============================ 订阅快捷分区 ============================ */
-.sub-actions {
+.sub-switches {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px 28px;
 }
 
-.sub-actions :deep(.ant-btn) {
-  flex: 1;
-  min-width: 120px;
+.sub-switch {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.sub-text {
+  font-size: 13px;
+  color: hsl(var(--foreground) / 88%);
 }
 
 /* ============================ 概览读数条（单行紧凑） ============================

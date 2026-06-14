@@ -28,7 +28,9 @@ const m = vi.hoisted(() => ({
   controlRecordStart: vi.fn().mockResolvedValue(undefined),
   controlRecordStop: vi.fn().mockResolvedValue(undefined),
   downloadConfig: vi.fn().mockResolvedValue(undefined),
+  hasAccess: vi.fn(() => true),
   liveStart: vi.fn().mockResolvedValue(undefined),
+  messageError: vi.fn(),
   messageSuccess: vi.fn(),
   messageWarning: vi.fn(),
   ptzControl: vi.fn().mockResolvedValue(undefined),
@@ -40,6 +42,11 @@ const m = vi.hoisted(() => ({
   queryPreset: vi.fn().mockResolvedValue(undefined),
   queryRecord: vi.fn().mockResolvedValue(undefined),
   rebootDevice: vi.fn().mockResolvedValue(undefined),
+  toggleDeviceSubscription: vi.fn().mockResolvedValue(true),
+}));
+
+vi.mock('@vben/access', () => ({
+  useAccess: () => ({ hasAccessByCodes: m.hasAccess }),
 }));
 
 vi.mock('#/api/protocol-lab', () => ({
@@ -58,6 +65,7 @@ vi.mock('#/api/protocol-lab', () => ({
   queryPreset: m.queryPreset,
   queryRecord: m.queryRecord,
   rebootDevice: m.rebootDevice,
+  toggleDeviceSubscription: m.toggleDeviceSubscription,
 }));
 
 vi.mock('ant-design-vue', () => {
@@ -89,7 +97,11 @@ vi.mock('ant-design-vue', () => {
       emits: ['click'],
       template: '<li class="list-item" @click="$emit(\'click\')"><slot/></li>',
     },
-    message: { success: m.messageSuccess, warning: m.messageWarning },
+    message: {
+      error: m.messageError,
+      success: m.messageSuccess,
+      warning: m.messageWarning,
+    },
     Select: {
       name: 'Select',
       props: ['value', 'options', 'disabled'],
@@ -97,6 +109,13 @@ vi.mock('ant-design-vue', () => {
       template: '<select class="select" :disabled="disabled"></select>',
     },
     Space: { name: 'Space', template: '<div class="space"><slot/></div>' },
+    Switch: {
+      name: 'Switch',
+      props: ['checked', 'loading', 'disabled', 'size'],
+      emits: ['change'],
+      template:
+        '<button class="switch" :disabled="disabled" @click="$emit(\'change\', !checked)"></button>',
+    },
     Tooltip: {
       name: 'Tooltip',
       template: '<div class="tooltip"><slot/></div>',
@@ -132,6 +151,7 @@ function buttonByText(wrapper: any, text: string) {
 }
 
 beforeEach(() => {
+  m.hasAccess.mockReset().mockReturnValue(true);
   for (const k of [
     'broadcast',
     'controlAlarm',
@@ -148,6 +168,8 @@ beforeEach(() => {
     'queryPreset',
     'queryRecord',
     'rebootDevice',
+    'toggleDeviceSubscription',
+    'messageError',
     'messageWarning',
     'messageSuccess',
   ] as const) {
@@ -369,6 +391,75 @@ describe('serverPanel —— 命令下发', () => {
     await buttonByText(wrapper, 'device.action.queryCatalog')?.trigger('click');
     await nextTick();
     expect(m.messageSuccess).toHaveBeenCalled();
+  });
+});
+
+describe('serverPanel —— 行内订阅开关（GB28181-2022 §9.11）', () => {
+  // 每行 3 个 Switch，序：catalog / position / alarm（与模板一致）。
+  const SUB_ORDER = ['catalog', 'position', 'alarm'] as const;
+
+  async function onlineWrapper() {
+    const wrapper = mountPanel();
+    await wrapper.setProps({
+      events: [devEvent('device.register', { deviceId: 'd1' })],
+    });
+    await nextTick();
+    return wrapper;
+  }
+
+  function switchAt(wrapper: any, kind: (typeof SUB_ORDER)[number]) {
+    return wrapper.findAll('.switch').at(SUB_ORDER.indexOf(kind));
+  }
+
+  it('开目录订阅 → toggleDeviceSubscription(d1, CATALOG, true)', async () => {
+    const wrapper = await onlineWrapper();
+    await switchAt(wrapper, 'catalog')?.trigger('click');
+    expect(m.toggleDeviceSubscription).toHaveBeenCalledWith(
+      'd1',
+      'CATALOG',
+      true,
+    );
+  });
+
+  it('开位置订阅 → toggleDeviceSubscription(d1, MOBILE_POSITION, true)', async () => {
+    const wrapper = await onlineWrapper();
+    await switchAt(wrapper, 'position')?.trigger('click');
+    expect(m.toggleDeviceSubscription).toHaveBeenCalledWith(
+      'd1',
+      'MOBILE_POSITION',
+      true,
+    );
+  });
+
+  it('开告警订阅 → toggleDeviceSubscription(d1, ALARM, true)', async () => {
+    const wrapper = await onlineWrapper();
+    await switchAt(wrapper, 'alarm')?.trigger('click');
+    expect(m.toggleDeviceSubscription).toHaveBeenCalledWith(
+      'd1',
+      'ALARM',
+      true,
+    );
+  });
+
+  it('成功后写回开关态，再点即关闭（enabled=false）', async () => {
+    const wrapper = await onlineWrapper();
+    await switchAt(wrapper, 'catalog')?.trigger('click'); // 开
+    await nextTick();
+    await switchAt(wrapper, 'catalog')?.trigger('click'); // 关
+    expect(m.toggleDeviceSubscription).toHaveBeenNthCalledWith(
+      2,
+      'd1',
+      'CATALOG',
+      false,
+    );
+  });
+
+  it('无权限时不调 API 且 message.error', async () => {
+    m.hasAccess.mockReturnValueOnce(false);
+    const wrapper = await onlineWrapper();
+    await switchAt(wrapper, 'catalog')?.trigger('click');
+    expect(m.toggleDeviceSubscription).not.toHaveBeenCalled();
+    expect(m.messageError).toHaveBeenCalled();
   });
 });
 

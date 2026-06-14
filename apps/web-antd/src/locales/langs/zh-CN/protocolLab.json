@@ -79,7 +79,12 @@
     "reboot": "重启",
     "play": "实时点播",
     "events": "平台事件",
-    "eventsEmpty": "暂无平台事件，设备注册 / 上线 / 上报会实时显示"
+    "eventsEmpty": "暂无平台事件，设备注册 / 上线 / 上报会实时显示",
+    "sub": {
+      "catalog": "目录",
+      "position": "位置",
+      "alarm": "告警"
+    }
   },
   "ptz": {
     "up": "上",
@@ -146,6 +151,8 @@
   },
   "msg": {
     "registerSent": "注册请求已发送",
+    "subscribeOn": "已开启{0}订阅",
+    "subscribeOff": "已关闭{0}订阅",
     "unregisterSent": "注销请求已发送",
     "keepaliveSent": "心跳已发送",
     "autoKeepaliveOn": "自动心跳已开启",

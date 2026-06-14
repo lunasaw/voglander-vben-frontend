@@ -4,6 +4,8 @@ import type { LabEvent } from '#/composables/useSseEvents';
 
 import { computed, ref, watch } from 'vue';
 
+import { useAccess } from '@vben/access';
+
 import {
   Badge,
   Button,
@@ -13,6 +15,7 @@ import {
   ListItem,
   message,
   Space,
+  Switch,
   Tooltip,
 } from 'ant-design-vue';
 
@@ -32,6 +35,7 @@ import {
   queryPreset,
   queryRecord,
   rebootDevice,
+  toggleDeviceSubscription,
 } from '#/api/protocol-lab';
 import DeviceCommandPanel from '#/components/DeviceCommandPanel.vue';
 import MediaPlayer from '#/components/MediaPlayer.vue';
@@ -61,12 +65,21 @@ interface DeviceRow {
   manufacturer?: string;
   model?: string;
   lastTs: number;
+  // GB28181-2022 §9.11 订阅意图开关。验证台设备列表来自 SSE 内存，无后端订阅态回填，
+  // 故为乐观意图（默认关，点击即下发/撤销 SUBSCRIBE，成功才提交）。
+  subCatalog: boolean;
+  subPosition: boolean;
+  subAlarm: boolean;
 }
+
+const { hasAccessByCodes } = useAccess();
 
 const devices = ref<Map<string, DeviceRow>>(new Map());
 const selectedId = ref<string>('');
 const speed = ref(128);
 const loading = ref(false);
+/** 订阅开关 in-flight 标记，键 `${deviceId}:${kind}`，防重复点击 + loading 态。 */
+const subBusy = ref<Set<string>>(new Set());
 
 /** 点播播放器弹窗：onLiveStart 拿到 playUrls 后打开。 */
 const playerOpen = ref(false);
@@ -102,6 +115,9 @@ watch(
         deviceId: id,
         online: false,
         lastTs: 0,
+        subCatalog: false,
+        subPosition: false,
+        subAlarm: false,
       };
       row.lastTs = Math.max(row.lastTs, ev.ts);
       switch (ev.topic) {
@@ -141,6 +157,74 @@ watch(
 
 function selectDevice(id: string) {
   selectedId.value = id;
+}
+
+const SUB_TYPE: Record<
+  'alarm' | 'catalog' | 'position',
+  ProtocolLabApi.SubscriptionType
+> = {
+  alarm: 'ALARM',
+  catalog: 'CATALOG',
+  position: 'MOBILE_POSITION',
+};
+
+const SUB_FIELD: Record<
+  'alarm' | 'catalog' | 'position',
+  'subAlarm' | 'subCatalog' | 'subPosition'
+> = {
+  alarm: 'subAlarm',
+  catalog: 'subCatalog',
+  position: 'subPosition',
+};
+
+/** 订阅开关 busy key。 */
+function subKey(deviceId: string, kind: string) {
+  return `${deviceId}:${kind}`;
+}
+
+/**
+ * 行内订阅开关（GB28181-2022 §9.11）：点击即下发/撤销 SUBSCRIBE，成功才提交开关态。
+ * 验证台设备来自 SSE 内存列表、无后端订阅态回填，故为乐观意图开关。
+ * 权限门禁 Device:Subscription:Edit（与设备管理页一致）。
+ */
+async function onSubscriptionToggle(
+  row: DeviceRow,
+  kind: 'alarm' | 'catalog' | 'position',
+  enabled: boolean,
+) {
+  if (!hasAccessByCodes(['Device:Subscription:Edit'])) {
+    message.error($t('device.msg.noPermission'));
+    return;
+  }
+  const key = subKey(row.deviceId, kind);
+  const busy = new Set(subBusy.value);
+  busy.add(key);
+  subBusy.value = busy;
+  try {
+    await toggleDeviceSubscription(row.deviceId, SUB_TYPE[kind], enabled);
+    // 成功才提交：写回 Map 触发列表刷新。
+    const map = new Map(devices.value);
+    const cur = map.get(row.deviceId);
+    if (cur) {
+      cur[SUB_FIELD[kind]] = enabled;
+      map.set(row.deviceId, cur);
+      devices.value = map;
+    }
+    message.success(
+      $t(
+        enabled
+          ? 'protocolLab.msg.subscribeOn'
+          : 'protocolLab.msg.subscribeOff',
+        [$t(`protocolLab.server.sub.${kind}`)],
+      ),
+    );
+  } catch {
+    // 失败不提交：开关受控于 row.subXxx，未写回即自动回弹。
+  } finally {
+    const next = new Set(subBusy.value);
+    next.delete(key);
+    subBusy.value = next;
+  }
 }
 
 async function run(fn: () => Promise<unknown>, okKey: string) {
@@ -260,14 +344,46 @@ function onPlayerClose() {
           :class="{ active: dev.deviceId === selectedId }"
           @click="selectDevice(dev.deviceId)"
         >
-          <Badge :status="dev.online ? 'success' : 'default'" />
-          <span class="device-id">{{ dev.deviceId }}</span>
-          <span v-if="dev.channelCount" class="device-meta">
-            {{ $t('protocolLab.field.channelCount') }}:{{ dev.channelCount }}
-          </span>
-          <span v-if="dev.manufacturer" class="device-meta">
-            {{ dev.manufacturer }}
-          </span>
+          <div class="device-head">
+            <Badge :status="dev.online ? 'success' : 'default'" />
+            <span class="device-id">{{ dev.deviceId }}</span>
+            <span v-if="dev.channelCount" class="device-meta">
+              {{ $t('protocolLab.field.channelCount') }}:{{ dev.channelCount }}
+            </span>
+            <span v-if="dev.manufacturer" class="device-meta">
+              {{ dev.manufacturer }}
+            </span>
+          </div>
+          <!-- 行内订阅开关：@click.stop 防误触发选中；点击即下发/撤销 SUBSCRIBE -->
+          <div class="device-subs" @click.stop>
+            <label class="sub-switch">
+              <Switch
+                :checked="dev.subCatalog"
+                :loading="subBusy.has(subKey(dev.deviceId, 'catalog'))"
+                size="small"
+                @change="(v) => onSubscriptionToggle(dev, 'catalog', !!v)"
+              />
+              <span>{{ $t('protocolLab.server.sub.catalog') }}</span>
+            </label>
+            <label class="sub-switch">
+              <Switch
+                :checked="dev.subPosition"
+                :loading="subBusy.has(subKey(dev.deviceId, 'position'))"
+                size="small"
+                @change="(v) => onSubscriptionToggle(dev, 'position', !!v)"
+              />
+              <span>{{ $t('protocolLab.server.sub.position') }}</span>
+            </label>
+            <label class="sub-switch">
+              <Switch
+                :checked="dev.subAlarm"
+                :loading="subBusy.has(subKey(dev.deviceId, 'alarm'))"
+                size="small"
+                @change="(v) => onSubscriptionToggle(dev, 'alarm', !!v)"
+              />
+              <span>{{ $t('protocolLab.server.sub.alarm') }}</span>
+            </label>
+          </div>
         </ListItem>
       </List>
     </div>
@@ -367,9 +483,9 @@ function onPlayerClose() {
   /* flex-shrink:0：本卡片体是 flex column，timeline-wrap 为 flex:1 抢空间。
      设备列表带 overflow-y:auto 后其 min-height:auto 被解析为 0，会被压缩到只剩边框
      （表现为设备已渲染进 DOM、文字可选可复制，但容器塌成 2px、内容被 overflow 裁切不可见）。
-     锁定不收缩，让列表保持内容高度（受 max-height:180px 约束）。 */
+     锁定不收缩，让列表保持内容高度（受 max-height 约束）。 */
   flex-shrink: 0;
-  max-height: 180px;
+  max-height: 240px;
   overflow-y: auto;
   border: 1px solid hsl(var(--border));
   border-radius: 6px;
@@ -377,9 +493,32 @@ function onPlayerClose() {
 
 .device-item {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.device-head {
+  display: flex;
   gap: 8px;
   align-items: center;
-  padding: 6px 10px;
+}
+
+.device-subs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  padding-left: 18px;
+  cursor: default;
+}
+
+.sub-switch {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
   cursor: pointer;
 }
 

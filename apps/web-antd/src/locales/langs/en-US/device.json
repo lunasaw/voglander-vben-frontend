@@ -59,9 +59,6 @@
   "action": {
     "detail": "Detail",
     "live": "Live",
-    "subscribeCatalog": "Subscribe Catalog",
-    "subscribePosition": "Subscribe Position",
-    "subscribeAlarm": "Subscribe Alarm",
     "queryCatalog": "Query Catalog",
     "queryInfo": "Query Device Info",
     "queryStatus": "Query Status",
@@ -84,7 +81,6 @@
   "msg": {
     "cmdSent": "Command sent",
     "cmdFailed": "Command failed",
-    "subscribeSent": "Subscribe command sent",
     "ptzSent": "PTZ command sent",
     "liveSent": "Live request sent",
     "recordQuerySent": "Record query sent; result will arrive via realtime events",

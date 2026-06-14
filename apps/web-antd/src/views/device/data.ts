@@ -232,41 +232,11 @@ export function useGridFormSchema(): VbenFormSchema[] {
   ];
 }
 
-/** 列定义（含 channelCount / statusName，操作列 detail / liveStart）。 */
+/** 列定义（含 channelCount / statusName，操作列 detail / edit / delete）。 */
 export function useColumns<T = DeviceApi.DeviceVO>(
   onActionClick: OnActionClickFn<T>,
-  onSubscriptionToggle?: (
-    type: DeviceApi.SubscriptionType,
-    enabled: boolean,
-    row: T,
-  ) => PromiseLike<boolean | undefined>,
 ): VxeTableGridOptions['columns'] {
   const { hasAccessByCodes } = useAccess();
-
-  /** 构造一个订阅开关列（CellSwitch + beforeChange）。 */
-  function subColumn(
-    field: 'subAlarm' | 'subCatalog' | 'subPosition',
-    type: DeviceApi.SubscriptionType,
-    titleKey: string,
-  ) {
-    return {
-      field,
-      title: $t(titleKey),
-      width: 110,
-      align: 'center' as const,
-      cellRender: {
-        name: 'CellSwitch',
-        attrs: {
-          beforeChange: (newVal: boolean, row: T) =>
-            onSubscriptionToggle
-              ? onSubscriptionToggle(type, newVal, row)
-              : Promise.resolve(false),
-          disabled: () => !hasAccessByCodes(['Device:Subscription:Edit']),
-        },
-        props: { checkedValue: true, unCheckedValue: false },
-      },
-    };
-  }
 
   return [
     {
@@ -343,9 +313,6 @@ export function useColumns<T = DeviceApi.DeviceVO>(
       width: 170,
       formatter: ({ cellValue }: { cellValue?: number }) => formatMs(cellValue),
     },
-    subColumn('subCatalog', 'CATALOG', 'device.subscription.catalog'),
-    subColumn('subPosition', 'MOBILE_POSITION', 'device.subscription.position'),
-    subColumn('subAlarm', 'ALARM', 'device.subscription.alarm'),
     {
       align: 'center',
       cellRender: {

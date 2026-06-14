@@ -79,7 +79,12 @@
     "reboot": "Reboot",
     "play": "Live Play",
     "events": "Platform Events",
-    "eventsEmpty": "No platform events yet. Device register / online / reports show here in real time"
+    "eventsEmpty": "No platform events yet. Device register / online / reports show here in real time",
+    "sub": {
+      "catalog": "Catalog",
+      "position": "Position",
+      "alarm": "Alarm"
+    }
   },
   "ptz": {
     "up": "Up",
@@ -146,6 +151,8 @@
   },
   "msg": {
     "registerSent": "Register request sent",
+    "subscribeOn": "{0} subscription enabled",
+    "subscribeOff": "{0} subscription disabled",
     "unregisterSent": "Unregister request sent",
     "keepaliveSent": "Keepalive sent",
     "autoKeepaliveOn": "Auto keepalive enabled",

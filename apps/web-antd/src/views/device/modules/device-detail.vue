@@ -7,7 +7,7 @@ import { useVbenDrawer } from '@vben/common-ui';
 
 import { useSseEvents } from '#/composables/useSseEvents';
 import { $t } from '#/locales';
-import { DEVICE_TOPICS } from '#/views/protocol-lab/data';
+import { DEVICE_DETAIL_TOPICS } from '#/views/protocol-lab/data';
 
 import DeviceOperations from './device-operations.vue';
 
@@ -27,7 +27,7 @@ const current = ref<DeviceDrawerData | null>(null);
 const autoLive = ref(false);
 
 // 订阅设备生命周期 + 应答事件，供详情时间线展示。
-const { events } = useSseEvents(() => DEVICE_TOPICS);
+const { events } = useSseEvents(() => DEVICE_DETAIL_TOPICS);
 
 /** 仅保留当前设备的 device.* 事件。 */
 const deviceEvents = computed(() => {

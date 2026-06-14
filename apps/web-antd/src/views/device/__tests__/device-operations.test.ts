@@ -39,6 +39,7 @@ const m = vi.hoisted(() => ({
   queryMobilePosition: vi.fn().mockResolvedValue(true),
   queryPreset: vi.fn().mockResolvedValue(true),
   queryRecord: vi.fn().mockResolvedValue(true),
+  toggleDeviceSubscription: vi.fn().mockResolvedValue(true),
 }));
 
 vi.mock('@vben/access', () => ({
@@ -61,6 +62,7 @@ vi.mock('#/api/device', () => ({
   queryMobilePosition: m.queryMobilePosition,
   queryPreset: m.queryPreset,
   queryRecord: m.queryRecord,
+  toggleDeviceSubscription: m.toggleDeviceSubscription,
 }));
 
 vi.mock('ant-design-vue', () => ({
@@ -89,6 +91,14 @@ vi.mock('ant-design-vue', () => ({
     template: '<select class="select"></select>',
   },
   Space: { name: 'Space', template: '<div class="space"><slot/></div>' },
+  // 订阅开关：受控 :checked，点击 emit change(!checked)（模拟 ant Switch 切换）。
+  Switch: {
+    name: 'Switch',
+    props: ['checked', 'loading', 'disabled', 'size'],
+    emits: ['change'],
+    template:
+      '<button class="switch" :disabled="disabled" @click="$emit(\'change\', !checked)"></button>',
+  },
 }));
 
 const device = {
@@ -99,6 +109,7 @@ const device = {
   statusName: '在线',
   channelCount: 4,
   keepaliveTime: 1000,
+  subscription: { catalog: false, position: false, alarm: false },
 };
 
 function mountPanel(props: Record<string, any> = {}) {
@@ -150,6 +161,7 @@ beforeEach(() => {
     'queryMobilePosition',
     'queryPreset',
     'queryRecord',
+    'toggleDeviceSubscription',
   ] as const) {
     m[k].mockReset().mockResolvedValue(k === 'liveStart' ? undefined : true);
   }
@@ -237,51 +249,77 @@ describe('deviceOperations —— 配置下载（configType 后端 @NotBlank）'
   });
 });
 
-describe('deviceOperations —— 订阅快捷分区（S5 §4.4：复用既有 query 端点，无新端点）', () => {
-  it('订阅目录 → queryCatalog(deviceId)（镜像既有端点）', async () => {
+describe('deviceOperations —— 订阅开关（GB28181-2022 §9.11 SUBSCRIBE 真订阅）', () => {
+  // 3 个 Switch 渲染序：catalog / position / alarm（与模板一致）。
+  const SUB_ORDER = ['catalog', 'position', 'alarm'] as const;
+  function switchAt(wrapper: any, kind: (typeof SUB_ORDER)[number]) {
+    return wrapper.findAll('.switch').at(SUB_ORDER.indexOf(kind));
+  }
+
+  it('开目录订阅 → toggleDeviceSubscription(d1, CATALOG, true)', async () => {
     const wrapper = mountPanel();
-    await buttonByText(wrapper, 'device.action.subscribeCatalog')?.trigger(
-      'click',
+    await switchAt(wrapper, 'catalog')?.trigger('click');
+    expect(m.toggleDeviceSubscription).toHaveBeenCalledWith(
+      'd1',
+      'CATALOG',
+      true,
     );
-    expect(m.queryCatalog).toHaveBeenCalledWith('d1');
   });
 
-  it('订阅位置 → queryMobilePosition(deviceId)', async () => {
+  it('开位置订阅 → toggleDeviceSubscription(d1, MOBILE_POSITION, true)', async () => {
     const wrapper = mountPanel();
-    await buttonByText(wrapper, 'device.action.subscribePosition')?.trigger(
-      'click',
+    await switchAt(wrapper, 'position')?.trigger('click');
+    expect(m.toggleDeviceSubscription).toHaveBeenCalledWith(
+      'd1',
+      'MOBILE_POSITION',
+      true,
     );
-    expect(m.queryMobilePosition).toHaveBeenCalledWith('d1');
   });
 
-  it('订阅告警 → queryAlarm({deviceId, startTime, endTime})（默认最近 24h）', async () => {
+  it('开告警订阅 → toggleDeviceSubscription(d1, ALARM, true)', async () => {
     const wrapper = mountPanel();
-    await buttonByText(wrapper, 'device.action.subscribeAlarm')?.trigger(
-      'click',
+    await switchAt(wrapper, 'alarm')?.trigger('click');
+    expect(m.toggleDeviceSubscription).toHaveBeenCalledWith(
+      'd1',
+      'ALARM',
+      true,
     );
-    expect(m.queryAlarm).toHaveBeenCalledWith(
-      expect.objectContaining({ deviceId: 'd1' }),
-    );
-    const arg = m.queryAlarm.mock.calls[0]?.[0] ?? {};
-    expect(typeof arg.startTime).toBe('number');
-    expect(typeof arg.endTime).toBe('number');
-    expect(arg.endTime).toBeGreaterThan(arg.startTime);
   });
 
-  it('无权限订阅告警时不调 API 且 message.error', async () => {
+  it('已开启的订阅再点 → 关闭（enabled=false）', async () => {
+    const wrapper = mountPanel({
+      device: {
+        ...device,
+        subscription: { catalog: true, position: false, alarm: false },
+      },
+    });
+    await nextTick();
+    await switchAt(wrapper, 'catalog')?.trigger('click');
+    expect(m.toggleDeviceSubscription).toHaveBeenCalledWith(
+      'd1',
+      'CATALOG',
+      false,
+    );
+  });
+
+  it('成功后 message.success', async () => {
+    const wrapper = mountPanel();
+    await switchAt(wrapper, 'catalog')?.trigger('click');
+    await nextTick();
+    expect(m.messageSuccess).toHaveBeenCalled();
+  });
+
+  it('无权限时不调 API 且 message.error', async () => {
     m.hasAccess.mockReturnValue(false);
     const wrapper = mountPanel();
-    await buttonByText(wrapper, 'device.action.subscribeAlarm')?.trigger(
-      'click',
-    );
-    expect(m.queryAlarm).not.toHaveBeenCalled();
+    await switchAt(wrapper, 'alarm')?.trigger('click');
+    expect(m.toggleDeviceSubscription).not.toHaveBeenCalled();
     expect(m.messageError).toHaveBeenCalled();
   });
 
-  it('device=null 时订阅按钮禁用', () => {
+  it('device=null 时订阅开关禁用', () => {
     const wrapper = mountPanel({ device: null });
-    const btn = buttonByText(wrapper, 'device.action.subscribeCatalog');
-    expect(btn?.attributes('disabled')).toBeDefined();
+    expect(switchAt(wrapper, 'catalog')?.attributes('disabled')).toBeDefined();
   });
 });
 

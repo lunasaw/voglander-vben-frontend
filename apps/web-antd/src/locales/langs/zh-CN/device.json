@@ -59,9 +59,6 @@
   "action": {
     "detail": "详情",
     "live": "实时点播",
-    "subscribeCatalog": "订阅目录",
-    "subscribePosition": "订阅位置",
-    "subscribeAlarm": "订阅告警",
     "queryCatalog": "查询目录",
     "queryInfo": "查询设备信息",
     "queryStatus": "查询状态",
@@ -84,7 +81,6 @@
   "msg": {
     "cmdSent": "指令已下发",
     "cmdFailed": "指令下发失败",
-    "subscribeSent": "订阅指令已下发",
     "ptzSent": "PTZ 指令已下发",
     "liveSent": "点播请求已下发",
     "recordQuerySent": "录像查询已下发，结果将通过实时事件通知",

@@ -188,6 +188,9 @@ export namespace ProtocolLabApi {
     alarmMethod?: string;
     alarmType?: string;
   }
+
+  /** 订阅类型（与后端 SubscriptionConstant.Type 一致，与 device.ts 同源）。 */
+  export type SubscriptionType = 'ALARM' | 'CATALOG' | 'MOBILE_POSITION';
 }
 
 /* -------------------------------------------------------------------------- */
@@ -381,5 +384,21 @@ export async function controlAlarm(data: ProtocolLabApi.AlarmControlReq) {
 export async function broadcast(deviceId: string) {
   return requestClient.post<boolean>('/api/v1/device-cmd/broadcast', {
     deviceId,
+  });
+}
+
+/**
+ * 开关设备订阅（GB28181-2022 §9.11：目录/位置/告警）。
+ * 与 device.ts 同源端点：开关即下发/撤销 SUBSCRIBE。
+ */
+export async function toggleDeviceSubscription(
+  deviceId: string,
+  type: ProtocolLabApi.SubscriptionType,
+  enabled: boolean,
+) {
+  return requestClient.put<boolean>('/api/v1/device/subscription/toggle', {
+    deviceId,
+    type,
+    enabled,
   });
 }

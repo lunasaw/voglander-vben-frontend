@@ -85,11 +85,18 @@ export const TOPIC_META: Record<string, TopicMeta> = {
 };
 
 /**
- * 全部 `device.*` topic（设备→平台上报/应答），从 TOPIC_META 派生为单一来源。
- * 设备详情页订阅它即可，避免与 TOPIC_META 漂移（新增 device.* 只改 TOPIC_META 一处）。
+ * 设备详情时间线订阅的 topic 全集 = **设备→平台方向**（协议台右侧时间线同一集合）：
+ * `device.*`（上报/查询应答）+ `session.*`（点播会话）+ `alarm.*`（报警上报/查询应答）。
+ *
+ * 派生口径 = 全部非 `clientcmd.*`（`clientcmd.*` 是平台→设备下发，不属于设备视角的"收到事件"）。
+ * 从 TOPIC_META 派生为单一来源，新增右侧 topic 只改 TOPIC_META 一处即可。
+ *
+ * ⚠️ 报警应答走 `alarm.new`（非 `device.alarm`）：若此处只订阅 `device.*`，
+ * 则 useSseEvents 的「订阅前缀 + addEventListener」两层都收不到 `alarm`/`session` 帧
+ * （设备详情「查询报警/点播会话」无 SSE 信号的根因）。
  */
-export const DEVICE_TOPICS: string[] = Object.keys(TOPIC_META).filter((t) =>
-  t.startsWith('device.'),
+export const DEVICE_DETAIL_TOPICS: string[] = Object.keys(TOPIC_META).filter(
+  (t) => !t.startsWith('clientcmd.'),
 );
 
 /** 取 topic 的展示标题（找不到映射时回退原始 topic）。 */

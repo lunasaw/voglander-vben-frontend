@@ -19,7 +19,6 @@ import {
   deleteDeviceBatch,
   deleteDeviceChannelBatch,
   getDevicePage,
-  toggleDeviceSubscription,
 } from '#/api/device';
 import { useSseEvents } from '#/composables/useSseEvents';
 import { $t } from '#/locales';
@@ -84,7 +83,7 @@ const [Grid, gridApi] = useVbenVxeGrid({
     wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
   },
   gridOptions: {
-    columns: useColumns(onActionClick, onSubscriptionToggle),
+    columns: useColumns(onActionClick),
     height: 'auto',
     keepSource: true,
     proxyConfig: {
@@ -97,15 +96,8 @@ const [Grid, gridApi] = useVbenVxeGrid({
           );
           // 同步态势带统计（服务端分页：在线/离线/通道为当前页口径）。
           totalDevices.value = resp?.total ?? 0;
-          // 拍平订阅意图为顶层布尔字段，供 CellSwitch 读取（vxe 列 field=subXxx）。
-          const items = (resp?.items ?? []).map((row) => ({
-            ...row,
-            subCatalog: row.subscription?.catalog ?? false,
-            subPosition: row.subscription?.position ?? false,
-            subAlarm: row.subscription?.alarm ?? false,
-          }));
-          pageRows.value = items;
-          return { ...resp, items };
+          pageRows.value = resp?.items ?? [];
+          return resp;
         },
       },
     },
@@ -165,37 +157,6 @@ function onActionClick(e: OnActionClickParams<DeviceApi.DeviceVO>) {
       onEdit(e.row);
       break;
     }
-  }
-}
-
-/**
- * 订阅开关回调（CellSwitch beforeChange）：下发/撤销 SUBSCRIBE，成功才提交开关。
- * 返回 true 提交、false 回退（vxe CellSwitch 约定）。
- */
-async function onSubscriptionToggle(
-  type: DeviceApi.SubscriptionType,
-  enabled: boolean,
-  row: DeviceApi.DeviceVO,
-): Promise<boolean> {
-  if (!hasAccessByCodes(['Device:Subscription:Edit'])) {
-    message.error($t('device.msg.noPermission'));
-    return false;
-  }
-  const labelMap: Record<DeviceApi.SubscriptionType, string> = {
-    CATALOG: $t('device.subscription.catalog'),
-    MOBILE_POSITION: $t('device.subscription.position'),
-    ALARM: $t('device.subscription.alarm'),
-  };
-  try {
-    await toggleDeviceSubscription(row.deviceId, type, enabled);
-    message.success(
-      $t(enabled ? 'device.msg.subscribeOn' : 'device.msg.subscribeOff', [
-        labelMap[type],
-      ]),
-    );
-    return true;
-  } catch {
-    return false;
   }
 }
 

@@ -9,6 +9,7 @@
    Device:Device:Query   详情/列表查看
    Device:Device:Edit    编辑设备（PUT /device/update）
    Device:Device:Delete  删除/批量删除设备（DELETE /device/delete、/device/deleteIds）
+   Device:Subscription:Edit  目录/位置/告警订阅开关（PUT /device/subscription/toggle，1.0.7 §9.11）
    Device:Channel:Edit   编辑通道（PUT /deviceChannel/update）
    Device:Channel:Delete 删除/批量删除/清离线通道（DELETE /deviceChannel/deleteOne、/deleteBatch）
    Device:Cmd:Live       实时点播（复用 /live）
@@ -69,6 +70,8 @@ VALUES
  '{"title": "device.action.edit", "hideInMenu": true}'),
 (50110, 501, 'DeviceDelete', 'device.action.delete', 3, null, null, '', 10, 1, 'Device:Device:Delete',
  '{"title": "device.action.delete", "hideInMenu": true}'),
+(50111, 501, 'DeviceSubscription', 'device.section.subscribe', 3, null, null, '', 11, 1, 'Device:Subscription:Edit',
+ '{"title": "device.section.subscribe", "hideInMenu": true}'),
 
 -- 设备通道列表（502）按钮权限：编辑 / 删除（含批量删除、清离线，共用 Delete 权限码）
 (50201, 502, 'DeviceChannelEdit', 'device.action.edit', 3, null, null, '', 1, 1, 'Device:Channel:Edit',
@@ -80,4 +83,4 @@ VALUES
 INSERT OR IGNORE INTO tb_role_menu (role_id, menu_id)
 SELECT 1, id
 FROM tb_menu
-WHERE id IN (500, 501, 502, 50101, 50102, 50103, 50104, 50105, 50106, 50107, 50108, 50109, 50110, 50201, 50202);
+WHERE id IN (500, 501, 502, 50101, 50102, 50103, 50104, 50105, 50106, 50107, 50108, 50109, 50110, 50111, 50201, 50202);
