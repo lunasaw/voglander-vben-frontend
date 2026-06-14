@@ -98,6 +98,13 @@
     "channelDeleting": "正在删除通道 {0} …",
     "channelBatchConfirm": "确定删除选中的 {0} 个通道？",
     "clearOfflineConfirm": "确定清理该设备下所有离线通道？此操作不可恢复。",
-    "clearOfflineDone": "离线通道已清理"
+    "clearOfflineDone": "离线通道已清理",
+    "subscribeOn": "已开启{0}",
+    "subscribeOff": "已关闭{0}"
+  },
+  "subscription": {
+    "catalog": "目录订阅",
+    "position": "位置订阅",
+    "alarm": "告警订阅"
   }
 }

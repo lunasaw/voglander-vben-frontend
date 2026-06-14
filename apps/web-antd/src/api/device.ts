@@ -71,7 +71,19 @@ export namespace DeviceApi {
     channelCount?: number; // S1 新增：该设备下通道数
     extend?: string;
     extendInfo?: ExtendInfoVO;
+    // GB28181-2022 §9.11 订阅意图开关状态（后端批量回填）
+    subscription?: SubscriptionVO;
   }
+
+  /** 订阅意图开关状态（目录/位置/告警）。 */
+  export interface SubscriptionVO {
+    catalog: boolean;
+    position: boolean;
+    alarm: boolean;
+  }
+
+  /** 订阅类型（与后端 SubscriptionConstant.Type 一致）。 */
+  export type SubscriptionType = 'ALARM' | 'CATALOG' | 'MOBILE_POSITION';
 
   export interface DeviceListResp {
     total: number;
@@ -385,5 +397,21 @@ export async function controlAlarm(data: DeviceApi.AlarmControlReq) {
 export async function broadcast(deviceId: string) {
   return requestClient.post<boolean>('/api/v1/device-cmd/broadcast', {
     deviceId,
+  });
+}
+
+/**
+ * 开关设备订阅（GB28181-2022 §9.11：目录/位置/告警）。
+ * 开关即下发/撤销 SUBSCRIBE。
+ */
+export async function toggleDeviceSubscription(
+  deviceId: string,
+  type: DeviceApi.SubscriptionType,
+  enabled: boolean,
+) {
+  return requestClient.put<boolean>('/api/v1/device/subscription/toggle', {
+    deviceId,
+    type,
+    enabled,
   });
 }

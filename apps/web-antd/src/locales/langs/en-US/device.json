@@ -98,6 +98,13 @@
     "channelDeleting": "Deleting channel {0} …",
     "channelBatchConfirm": "Delete the selected {0} channel(s)?",
     "clearOfflineConfirm": "Clear all offline channels of this device? This cannot be undone.",
-    "clearOfflineDone": "Offline channels cleared"
+    "clearOfflineDone": "Offline channels cleared",
+    "subscribeOn": "{0} enabled",
+    "subscribeOff": "{0} disabled"
+  },
+  "subscription": {
+    "catalog": "Catalog Sub.",
+    "position": "Position Sub.",
+    "alarm": "Alarm Sub."
   }
 }
