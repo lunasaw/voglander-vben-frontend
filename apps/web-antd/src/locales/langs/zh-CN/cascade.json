@@ -1,0 +1,113 @@
+{
+  "menu": "级联管理",
+  "title": "级联管理",
+  "platform": {
+    "title": "上级平台管理",
+    "name": "上级平台",
+    "add": "新增上级平台",
+    "create": "新增平台",
+    "edit": "编辑上级平台",
+    "delete": "删除平台",
+    "status": "启停平台",
+    "detail": "平台详情",
+    "refreshScheduler": "刷新调度",
+    "field": {
+      "id": "ID",
+      "platformId": "平台ID",
+      "platformName": "平台名称",
+      "serverIp": "服务器IP",
+      "serverPort": "服务器端口",
+      "serverDomain": "服务器域名",
+      "localClientId": "本地客户端ID",
+      "localClientIp": "本地客户端IP",
+      "localClientPort": "本地客户端端口",
+      "transport": "传输协议",
+      "username": "认证用户名",
+      "password": "认证密码",
+      "registerExpires": "注册有效期(秒)",
+      "keepaliveInterval": "心跳间隔(秒)",
+      "enabled": "启用状态",
+      "createTime": "创建时间",
+      "updateTime": "更新时间",
+      "operation": "操作"
+    },
+    "transport": {
+      "udp": "UDP",
+      "tcp": "TCP"
+    },
+    "enabled": {
+      "enabled": "已启用",
+      "disabled": "已停用"
+    },
+    "action": {
+      "enable": "启用",
+      "disable": "停用"
+    },
+    "msg": {
+      "enableConfirm": "确定启用平台【{0}】吗？启用后将自动启动注册调度。",
+      "disableConfirm": "确定停用平台【{0}】吗？停用后将立即停止注册任务并发送注销请求。",
+      "refreshConfirm": "确定刷新注册调度吗？将批量重载所有已启用平台的注册任务。",
+      "enableSuccess": "平台已启用",
+      "disableSuccess": "平台已停用",
+      "refreshSuccess": "注册调度已刷新",
+      "deleteConfirm": "确定删除平台【{0}】吗？删除前请确保已停用且无关联通道映射。",
+      "platformIdRequired": "平台ID为必填项",
+      "platformIdFormat": "平台ID必须符合国标20位格式",
+      "serverIpRequired": "服务器IP为必填项",
+      "serverPortRequired": "服务器端口为必填项",
+      "localClientIdRequired": "本地客户端ID为必填项"
+    },
+    "placeholder": {
+      "platformId": "请输入20位国标平台ID",
+      "platformName": "请输入平台名称",
+      "serverIp": "请输入服务器IP地址",
+      "serverPort": "请输入服务器端口（默认5060）",
+      "serverDomain": "请输入服务器域名（可选）",
+      "localClientId": "请输入20位本地客户端ID",
+      "localClientIp": "请输入本地客户端IP（可选）",
+      "localClientPort": "请输入本地客户端端口（可选）",
+      "username": "请输入认证用户名（可选）",
+      "password": "请输入认证密码（可选）",
+      "registerExpires": "请输入注册有效期（秒，默认3600）",
+      "keepaliveInterval": "请输入心跳间隔（秒，默认60）"
+    }
+  },
+  "channel": {
+    "title": "级联通道管理",
+    "name": "级联通道",
+    "add": "新增通道映射",
+    "create": "新增映射",
+    "edit": "编辑通道映射",
+    "delete": "删除映射",
+    "detail": "通道详情",
+    "field": {
+      "id": "ID",
+      "platformId": "上级平台",
+      "localDeviceId": "本地设备ID",
+      "localChannelId": "本地通道ID",
+      "cascadeChannelId": "级联通道ID",
+      "cascadeName": "级联名称",
+      "createTime": "创建时间",
+      "updateTime": "更新时间",
+      "operation": "操作"
+    },
+    "msg": {
+      "deleteConfirm": "确定删除通道映射【{0}】吗？",
+      "platformIdRequired": "上级平台为必填项",
+      "localDeviceIdRequired": "本地设备ID为必填项",
+      "localChannelIdRequired": "本地通道ID为必填项",
+      "cascadeChannelIdRequired": "级联通道ID为必填项",
+      "cascadeChannelIdFormat": "级联通道ID必须符合国标20位格式"
+    },
+    "placeholder": {
+      "platformId": "请选择上级平台",
+      "localDeviceId": "请输入本地设备ID",
+      "localChannelId": "请输入本地通道ID",
+      "cascadeChannelId": "请输入级联通道ID（20位国标编码）",
+      "cascadeName": "请输入级联名称（可选）"
+    },
+    "help": {
+      "cascadeChannelId": "对上级平台暴露的通道编码，必须符合国标20位规则"
+    }
+  }
+}

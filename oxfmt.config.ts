@@ -23,5 +23,6 @@ export default defineConfig({
     '*-lock.yaml',
     'skills-lock.json',
     '.playwright-mcp',
+    'doc',
   ],
 });

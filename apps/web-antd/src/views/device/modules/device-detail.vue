@@ -29,15 +29,22 @@ const autoLive = ref(false);
 // 订阅设备生命周期 + 应答事件，供详情时间线展示。
 const { events } = useSseEvents(() => DEVICE_DETAIL_TOPICS);
 
-/** 仅保留当前设备的 device.* 事件。 */
+/**
+ * 仅保留当前设备的设备→平台事件（device.* / session.* / alarm.*）。
+ *
+ * 按 deviceId 匹配而非 topic 前缀：报警查询应答走 `alarm.new`、点播会话走 `session.*`，
+ * 若只留 `device.*` 会把它们全滤掉（与 DEVICE_DETAIL_TOPICS 纳入 alarm/session 的设计相悖）。
+ * 部分 session/alarm 帧的设备标识可能落在 deviceId 之外的字段，故一并匹配 data.id/deviceCode。
+ */
 const deviceEvents = computed(() => {
   const id = current.value?.deviceId;
   if (!id) {
     return [];
   }
-  return events.value.filter(
-    (e) => e.topic.startsWith('device.') && e.data?.deviceId === id,
-  );
+  return events.value.filter((e) => {
+    const d = e.data ?? {};
+    return d.deviceId === id || d.id === id || d.deviceCode === id;
+  });
 });
 
 const [Drawer, drawerApi] = useVbenDrawer({
@@ -52,6 +59,26 @@ const [Drawer, drawerApi] = useVbenDrawer({
   },
 });
 
+/**
+ * 订阅意图变更回写：直接改 current（即 grid 行同一对象引用），
+ * 使抽屉 destroyOnClose 重建后从行值 watch 出最新意图，无需整页刷新。
+ */
+function onSubscriptionChange(payload: {
+  enabled: boolean;
+  kind: 'alarm' | 'catalog' | 'position';
+}) {
+  const row = current.value;
+  if (!row) {
+    return;
+  }
+  const sub = row.subscription ?? {
+    alarm: false,
+    catalog: false,
+    position: false,
+  };
+  row.subscription = { ...sub, [payload.kind]: payload.enabled };
+}
+
 const drawerTitle = computed(() =>
   current.value?.deviceId
     ? `${$t('device.action.detail')} · ${current.value.deviceId}`
@@ -65,6 +92,7 @@ const drawerTitle = computed(() =>
       :device="current"
       :events="deviceEvents"
       :auto-live="autoLive"
+      @subscription-change="onSubscriptionChange"
     />
   </Drawer>
 </template>

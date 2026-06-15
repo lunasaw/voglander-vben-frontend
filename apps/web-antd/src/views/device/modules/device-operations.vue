@@ -55,6 +55,16 @@ const props = withDefaults(
   { autoLive: false, device: null, events: () => [] },
 );
 
+const emit = defineEmits<{
+  /**
+   * 订阅意图变更（开关成功后）。父级（device-detail）据此回写 grid 行 subscription，
+   * 使关闭抽屉后重开仍显示最新意图，规避 destroyOnClose 重建时读到陈旧行值。
+   */
+  subscriptionChange: [
+    { enabled: boolean; kind: 'alarm' | 'catalog' | 'position' },
+  ];
+}>();
+
 const { hasAccessByCodes } = useAccess();
 
 const loading = ref(false);
@@ -274,6 +284,9 @@ async function onSubscriptionToggle(
   try {
     await toggleDeviceSubscription(id, SUB_TYPE[kind], enabled);
     subState.value[kind] = enabled; // 成功才提交
+    // 回写 grid 行 subscription（经父级）：抽屉 destroyOnClose 重建时从行值重新 watch 初始化，
+    // 不回写则关闭重开会读到 toggle 前的陈旧意图（问题：开关不持久化的前端根因）。
+    emit('subscriptionChange', { kind, enabled });
     message.success(
       $t(enabled ? 'device.msg.subscribeOn' : 'device.msg.subscribeOff', [
         $t(`device.subscription.${kind}`),

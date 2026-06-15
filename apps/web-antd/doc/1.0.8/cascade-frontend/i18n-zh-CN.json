@@ -1,0 +1,41 @@
+/**
+ * 级联管理 i18n 中文
+ *
+ * 位置: locales/zh-CN/cascade.json
+ */
+{
+  "cascade": {
+    "platform": {
+      "title": "上级平台管理",
+      "add": "新增上级平台",
+      "edit": "编辑上级平台",
+      "platformId": "平台ID",
+      "platformName": "平台名称",
+      "serverIp": "服务器IP",
+      "serverPort": "服务器端口",
+      "serverDomain": "服务器域名",
+      "localClientId": "本地客户端ID",
+      "localClientIp": "本地客户端IP",
+      "localClientPort": "本地客户端端口",
+      "transport": "传输协议",
+      "username": "用户名",
+      "password": "密码",
+      "registerExpires": "注册有效期",
+      "keepaliveInterval": "心跳间隔",
+      "enabled": "启用状态",
+      "refreshScheduler": "刷新调度",
+      "refreshSuccess": "刷新调度成功"
+    },
+    "channel": {
+      "title": "级联通道管理",
+      "add": "新增通道映射",
+      "edit": "编辑通道映射",
+      "platformId": "上级平台",
+      "localDeviceId": "本地设备ID",
+      "localChannelId": "本地通道ID",
+      "cascadeChannelId": "级联通道ID",
+      "cascadeName": "级联名称",
+      "cascadeChannelIdTip": "对上级平台暴露的通道编码,符合国标20位规则"
+    }
+  }
+}

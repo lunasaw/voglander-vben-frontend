@@ -1,0 +1,113 @@
+{
+  "menu": "Cascade Management",
+  "title": "Cascade Management",
+  "platform": {
+    "title": "Cascade Platform Management",
+    "name": "Cascade Platform",
+    "add": "Add Platform",
+    "create": "Add Platform",
+    "edit": "Edit Platform",
+    "delete": "Delete Platform",
+    "status": "Enable/Disable",
+    "detail": "Platform Detail",
+    "refreshScheduler": "Refresh Scheduler",
+    "field": {
+      "id": "ID",
+      "platformId": "Platform ID",
+      "platformName": "Platform Name",
+      "serverIp": "Server IP",
+      "serverPort": "Server Port",
+      "serverDomain": "Server Domain",
+      "localClientId": "Local Client ID",
+      "localClientIp": "Local Client IP",
+      "localClientPort": "Local Client Port",
+      "transport": "Transport Protocol",
+      "username": "Auth Username",
+      "password": "Auth Password",
+      "registerExpires": "Register Expires (s)",
+      "keepaliveInterval": "Keepalive Interval (s)",
+      "enabled": "Status",
+      "createTime": "Create Time",
+      "updateTime": "Update Time",
+      "operation": "Action"
+    },
+    "transport": {
+      "udp": "UDP",
+      "tcp": "TCP"
+    },
+    "enabled": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "action": {
+      "enable": "Enable",
+      "disable": "Disable"
+    },
+    "msg": {
+      "enableConfirm": "Enable platform [{0}]? Registration scheduler will start automatically.",
+      "disableConfirm": "Disable platform [{0}]? Registration task will stop and logout request will be sent.",
+      "refreshConfirm": "Refresh registration scheduler? All enabled platforms will be reloaded.",
+      "enableSuccess": "Platform enabled",
+      "disableSuccess": "Platform disabled",
+      "refreshSuccess": "Scheduler refreshed",
+      "deleteConfirm": "Delete platform [{0}]? Ensure it's disabled and has no associated channel mappings.",
+      "platformIdRequired": "Platform ID is required",
+      "platformIdFormat": "Platform ID must be 20-digit GB28181 format",
+      "serverIpRequired": "Server IP is required",
+      "serverPortRequired": "Server port is required",
+      "localClientIdRequired": "Local client ID is required"
+    },
+    "placeholder": {
+      "platformId": "Enter 20-digit GB28181 platform ID",
+      "platformName": "Enter platform name",
+      "serverIp": "Enter server IP address",
+      "serverPort": "Enter server port (default 5060)",
+      "serverDomain": "Enter server domain (optional)",
+      "localClientId": "Enter 20-digit local client ID",
+      "localClientIp": "Enter local client IP (optional)",
+      "localClientPort": "Enter local client port (optional)",
+      "username": "Enter auth username (optional)",
+      "password": "Enter auth password (optional)",
+      "registerExpires": "Enter register expires (seconds, default 3600)",
+      "keepaliveInterval": "Enter keepalive interval (seconds, default 60)"
+    }
+  },
+  "channel": {
+    "title": "Cascade Channel Management",
+    "name": "Cascade Channel",
+    "add": "Add Channel Mapping",
+    "create": "Add Mapping",
+    "edit": "Edit Channel Mapping",
+    "delete": "Delete Mapping",
+    "detail": "Channel Detail",
+    "field": {
+      "id": "ID",
+      "platformId": "Platform",
+      "localDeviceId": "Local Device ID",
+      "localChannelId": "Local Channel ID",
+      "cascadeChannelId": "Cascade Channel ID",
+      "cascadeName": "Cascade Name",
+      "createTime": "Create Time",
+      "updateTime": "Update Time",
+      "operation": "Action"
+    },
+    "msg": {
+      "deleteConfirm": "Delete channel mapping [{0}]?",
+      "platformIdRequired": "Platform is required",
+      "localDeviceIdRequired": "Local device ID is required",
+      "localChannelIdRequired": "Local channel ID is required",
+      "cascadeChannelIdRequired": "Cascade channel ID is required",
+      "cascadeChannelIdFormat": "Cascade channel ID must be 20-digit GB28181 format"
+    },
+    "placeholder": {
+      "platformId": "Select platform",
+      "localDeviceId": "Enter local device ID",
+      "localChannelId": "Enter local channel ID",
+      "cascadeChannelId": "Enter cascade channel ID (20-digit GB28181)",
+      "cascadeName": "Enter cascade name (optional)"
+    },
+    "help": {
+      "cascadeChannelId": "Channel ID exposed to upstream platform, must follow GB28181 20-digit rule"
+    }
+  }
+}
