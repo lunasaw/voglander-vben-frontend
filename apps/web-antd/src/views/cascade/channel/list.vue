@@ -9,7 +9,7 @@ import { onMounted, ref } from 'vue';
 
 import { useAccess } from '@vben/access';
 import { Page, useVbenDrawer } from '@vben/common-ui';
-import { Plus } from '@vben/icons';
+import { Link2, Plus } from '@vben/icons';
 
 import { Button, message, Modal } from 'ant-design-vue';
 
@@ -22,6 +22,7 @@ import { getCascadePlatformPage } from '#/api/cascade/platform';
 import { $t } from '#/locales';
 
 import { useChannelColumns, useChannelGridFormSchema } from './data';
+import BatchBindForm from './modules/batch-bind-form.vue';
 import Form from './modules/form.vue';
 
 const { hasAccessByCodes } = useAccess();
@@ -31,6 +32,11 @@ const platformOptions = ref<Array<{ label: string; value: string }>>([]);
 
 const [FormDrawer, formDrawerApi] = useVbenDrawer({
   connectedComponent: Form,
+  destroyOnClose: true,
+});
+
+const [BatchBindDrawer, batchBindDrawerApi] = useVbenDrawer({
+  connectedComponent: BatchBindForm,
   destroyOnClose: true,
 });
 
@@ -84,7 +90,7 @@ async function loadPlatformOptions() {
       enabled: 1, // 只加载已启用的平台
     });
     platformOptions.value = result.items.map((item) => ({
-      label: item.platformName || item.platformId || '',
+      label: item.platformId || '',
       value: item.platformId || '',
     }));
   } catch (error) {
@@ -132,6 +138,14 @@ function onCreate() {
     return;
   }
   formDrawerApi.setData({ platformOptions: platformOptions.value }).open();
+}
+
+function onBatchBind() {
+  if (!hasAccessByCodes(['Cascade:Channel:Create'])) {
+    message.error($t('device.msg.noPermission'));
+    return;
+  }
+  batchBindDrawerApi.setData({ platformOptions: platformOptions.value }).open();
 }
 
 function onEdit(row: CascadeChannelApi.CascadeChannelVO) {
@@ -197,11 +211,16 @@ function onRefresh() {
     </template>
 
     <FormDrawer @success="onRefresh" />
+    <BatchBindDrawer @success="onRefresh" />
     <Grid :table-title="$t('cascade.channel.title')">
       <template #toolbar-tools>
         <Button type="primary" @click="onCreate">
           <Plus class="size-5" />
           {{ $t('ui.actionTitle.create', [$t('cascade.channel.name')]) }}
+        </Button>
+        <Button class="ml-2" @click="onBatchBind">
+          <Link2 class="size-5" />
+          {{ $t('cascade.channel.batchBind.title') }}
         </Button>
       </template>
     </Grid>

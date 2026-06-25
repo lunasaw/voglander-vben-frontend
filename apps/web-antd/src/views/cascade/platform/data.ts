@@ -6,6 +6,30 @@ import { useAccess } from '@vben/access';
 
 import { $t } from '#/locales';
 
+/** 注册状态 Tag 选项（在线绿/离线灰/注册中蓝/失败红）。 */
+const REGISTER_STATUS_OPTIONS = [
+  {
+    label: $t('cascade.platform.registerStatus.offline'),
+    value: 0,
+    type: 'default',
+  },
+  {
+    label: $t('cascade.platform.registerStatus.online'),
+    value: 1,
+    type: 'success',
+  },
+  {
+    label: $t('cascade.platform.registerStatus.registering'),
+    value: 2,
+    type: 'processing',
+  },
+  {
+    label: $t('cascade.platform.registerStatus.failed'),
+    value: 3,
+    type: 'error',
+  },
+];
+
 /**
  * 平台管理表单 Schema（新增/编辑）
  */
@@ -21,59 +45,52 @@ export function usePlatformFormSchema(isEditMode = false): VbenFormSchema[] {
       fieldName: 'id',
       label: 'id',
     },
-    // 第一行：平台ID和平台名称
+    // 平台ID（编辑不可改）
     {
       component: 'Input',
       componentProps: {
         placeholder: $t('cascade.platform.placeholder.platformId'),
-        disabled: isEditMode, // 编辑模式下平台ID不可改
+        disabled: isEditMode,
       },
       fieldName: 'platformId',
       label: $t('cascade.platform.field.platformId'),
       rules: 'required',
+      formItemClass: 'col-span-2',
     },
+    // 上级平台 IP 和端口
     {
       component: 'Input',
       componentProps: {
-        placeholder: $t('cascade.platform.placeholder.platformName'),
+        placeholder: $t('cascade.platform.placeholder.platformIp'),
       },
-      fieldName: 'platformName',
-      label: $t('cascade.platform.field.platformName'),
-    },
-    // 第二行：服务器IP和端口
-    {
-      component: 'Input',
-      componentProps: {
-        placeholder: $t('cascade.platform.placeholder.serverIp'),
-      },
-      fieldName: 'serverIp',
-      label: $t('cascade.platform.field.serverIp'),
+      fieldName: 'platformIp',
+      label: $t('cascade.platform.field.platformIp'),
       rules: 'required',
     },
     {
       component: 'InputNumber',
       componentProps: {
-        placeholder: $t('cascade.platform.placeholder.serverPort'),
+        placeholder: $t('cascade.platform.placeholder.platformPort'),
         min: 1,
         max: 65_535,
         precision: 0,
       },
-      fieldName: 'serverPort',
-      label: $t('cascade.platform.field.serverPort'),
+      fieldName: 'platformPort',
+      label: $t('cascade.platform.field.platformPort'),
       rules: 'required',
       defaultValue: isEditMode ? undefined : 5060,
     },
-    // 第三行：服务器域名（占满整行）
+    // 上级平台域（占满整行）
     {
       component: 'Input',
       componentProps: {
-        placeholder: $t('cascade.platform.placeholder.serverDomain'),
+        placeholder: $t('cascade.platform.placeholder.platformDomain'),
       },
-      fieldName: 'serverDomain',
-      label: $t('cascade.platform.field.serverDomain'),
+      fieldName: 'platformDomain',
+      label: $t('cascade.platform.field.platformDomain'),
       formItemClass: 'col-span-2',
     },
-    // 第四行：本地客户端ID和IP
+    // 本端客户端ID 和 本端 IP
     {
       component: 'Input',
       componentProps: {
@@ -86,42 +103,36 @@ export function usePlatformFormSchema(isEditMode = false): VbenFormSchema[] {
     {
       component: 'Input',
       componentProps: {
-        placeholder: $t('cascade.platform.placeholder.localClientIp'),
+        placeholder: $t('cascade.platform.placeholder.localIp'),
       },
-      fieldName: 'localClientIp',
-      label: $t('cascade.platform.field.localClientIp'),
+      fieldName: 'localIp',
+      label: $t('cascade.platform.field.localIp'),
     },
-    // 第五行：本地客户端端口和传输协议
+    // 本端端口 和 传输协议
     {
       component: 'InputNumber',
       componentProps: {
-        placeholder: $t('cascade.platform.placeholder.localClientPort'),
+        placeholder: $t('cascade.platform.placeholder.localPort'),
         min: 1,
         max: 65_535,
         precision: 0,
       },
-      fieldName: 'localClientPort',
-      label: $t('cascade.platform.field.localClientPort'),
+      fieldName: 'localPort',
+      label: $t('cascade.platform.field.localPort'),
     },
     {
       component: 'Select',
       componentProps: {
         options: [
-          {
-            label: $t('cascade.platform.transport.udp'),
-            value: 'UDP',
-          },
-          {
-            label: $t('cascade.platform.transport.tcp'),
-            value: 'TCP',
-          },
+          { label: $t('cascade.platform.transport.udp'), value: 'UDP' },
+          { label: $t('cascade.platform.transport.tcp'), value: 'TCP' },
         ],
       },
       fieldName: 'transport',
       label: $t('cascade.platform.field.transport'),
       defaultValue: isEditMode ? undefined : 'UDP',
     },
-    // 第六行：认证用户名和密码
+    // 认证用户名 和 密码
     {
       component: 'Input',
       componentProps: {
@@ -139,7 +150,7 @@ export function usePlatformFormSchema(isEditMode = false): VbenFormSchema[] {
       fieldName: 'password',
       label: $t('cascade.platform.field.password'),
     },
-    // 第七行：注册有效期和心跳间隔
+    // 注册有效期 和 心跳间隔
     {
       component: 'InputNumber',
       componentProps: {
@@ -164,6 +175,21 @@ export function usePlatformFormSchema(isEditMode = false): VbenFormSchema[] {
       label: $t('cascade.platform.field.keepaliveInterval'),
       defaultValue: isEditMode ? undefined : 60,
     },
+    // 编码（占满整行）
+    {
+      component: 'Select',
+      componentProps: {
+        allowClear: true,
+        options: [
+          { label: 'GB2312', value: 'GB2312' },
+          // eslint-disable-next-line unicorn/text-encoding-identifier-case -- GB28181 charset 业务值，须与协议/后端一致
+          { label: 'UTF-8', value: 'UTF-8' },
+        ],
+      },
+      fieldName: 'charset',
+      label: $t('cascade.platform.field.charset'),
+      formItemClass: 'col-span-2',
+    },
   ];
 }
 
@@ -183,36 +209,34 @@ export function usePlatformGridFormSchema(): VbenFormSchema[] {
     {
       component: 'Input',
       componentProps: {
-        placeholder: $t('cascade.platform.placeholder.platformName'),
+        placeholder: $t('cascade.platform.placeholder.platformIp'),
       },
-      fieldName: 'platformName',
-      label: $t('cascade.platform.field.platformName'),
-    },
-    {
-      component: 'Input',
-      componentProps: {
-        placeholder: $t('cascade.platform.placeholder.serverIp'),
-      },
-      fieldName: 'serverIp',
-      label: $t('cascade.platform.field.serverIp'),
+      fieldName: 'platformIp',
+      label: $t('cascade.platform.field.platformIp'),
     },
     {
       component: 'Select',
       componentProps: {
         allowClear: true,
         options: [
-          {
-            label: $t('cascade.platform.enabled.enabled'),
-            value: 1,
-          },
-          {
-            label: $t('cascade.platform.enabled.disabled'),
-            value: 0,
-          },
+          { label: $t('cascade.platform.enabled.enabled'), value: 1 },
+          { label: $t('cascade.platform.enabled.disabled'), value: 0 },
         ],
       },
       fieldName: 'enabled',
       label: $t('cascade.platform.field.enabled'),
+    },
+    {
+      component: 'Select',
+      componentProps: {
+        allowClear: true,
+        options: REGISTER_STATUS_OPTIONS.map((o) => ({
+          label: o.label,
+          value: o.value,
+        })),
+      },
+      fieldName: 'registerStatus',
+      label: $t('cascade.platform.field.registerStatus'),
     },
   ];
 }
@@ -222,6 +246,7 @@ export function usePlatformGridFormSchema(): VbenFormSchema[] {
  */
 export function usePlatformColumns<T = CascadePlatformApi.CascadePlatformVO>(
   onActionClick: OnActionClickFn<T>,
+  onStatusChange?: (newStatus: any, row: T) => PromiseLike<boolean | undefined>,
 ): VxeTableGridOptions['columns'] {
   const { hasAccessByCodes } = useAccess();
 
@@ -233,19 +258,13 @@ export function usePlatformColumns<T = CascadePlatformApi.CascadePlatformVO>(
       showOverflow: 'tooltip',
     },
     {
-      field: 'platformName',
-      title: $t('cascade.platform.field.platformName'),
-      width: 150,
-      showOverflow: 'tooltip',
-    },
-    {
-      field: 'serverIp',
-      title: $t('cascade.platform.field.serverIp'),
+      field: 'platformIp',
+      title: $t('cascade.platform.field.platformIp'),
       width: 140,
     },
     {
-      field: 'serverPort',
-      title: $t('cascade.platform.field.serverPort'),
+      field: 'platformPort',
+      title: $t('cascade.platform.field.platformPort'),
       width: 100,
       align: 'center',
     },
@@ -282,19 +301,38 @@ export function usePlatformColumns<T = CascadePlatformApi.CascadePlatformVO>(
       width: 100,
       align: 'center',
       cellRender: {
+        attrs: {
+          beforeChange: onStatusChange,
+          disabled: () => !hasAccessByCodes(['Cascade:Platform:Status']),
+        },
+        name: onStatusChange ? 'CellSwitch' : 'CellTag',
+        props: onStatusChange
+          ? { checkedValue: 1, unCheckedValue: 0 }
+          : undefined,
+        options: onStatusChange
+          ? undefined
+          : [
+              {
+                label: $t('cascade.platform.enabled.enabled'),
+                value: 1,
+                type: 'success',
+              },
+              {
+                label: $t('cascade.platform.enabled.disabled'),
+                value: 0,
+                type: 'error',
+              },
+            ],
+      },
+    },
+    {
+      field: 'registerStatus',
+      title: $t('cascade.platform.field.registerStatus'),
+      width: 110,
+      align: 'center',
+      cellRender: {
         name: 'CellTag',
-        options: [
-          {
-            label: $t('cascade.platform.enabled.enabled'),
-            value: 1,
-            type: 'success',
-          },
-          {
-            label: $t('cascade.platform.enabled.disabled'),
-            value: 0,
-            type: 'error',
-          },
-        ],
+        options: REGISTER_STATUS_OPTIONS,
       },
     },
     {
@@ -307,30 +345,21 @@ export function usePlatformColumns<T = CascadePlatformApi.CascadePlatformVO>(
       align: 'center',
       cellRender: {
         attrs: {
-          nameField: 'platformName',
-          nameTitle: $t('cascade.platform.field.platformName'),
+          nameField: 'platformId',
+          nameTitle: $t('cascade.platform.field.platformId'),
           onClick: onActionClick,
         },
         name: 'CellOperation',
         options: [
           {
-            code: 'enable',
-            text: $t('cascade.platform.action.enable'),
-            show: (row: any) =>
-              row.enabled === 0 &&
-              hasAccessByCodes(['Cascade:Platform:Status']),
-          },
-          {
-            code: 'disable',
-            text: $t('cascade.platform.action.disable'),
-            show: (row: any) =>
-              row.enabled === 1 &&
-              hasAccessByCodes(['Cascade:Platform:Status']),
-          },
-          {
             code: 'edit',
             text: $t('common.edit'),
             show: () => hasAccessByCodes(['Cascade:Platform:Edit']),
+          },
+          {
+            code: 'subscribe',
+            text: $t('cascade.subscribe.action.view'),
+            show: () => hasAccessByCodes(['Cascade:Platform:List']),
           },
           {
             code: 'delete',
@@ -343,7 +372,7 @@ export function usePlatformColumns<T = CascadePlatformApi.CascadePlatformVO>(
       field: 'operation',
       fixed: 'right',
       title: $t('cascade.platform.field.operation'),
-      width: 240,
+      width: 220,
     },
   ];
 }

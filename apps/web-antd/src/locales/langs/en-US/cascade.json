@@ -14,19 +14,20 @@
     "field": {
       "id": "ID",
       "platformId": "Platform ID",
-      "platformName": "Platform Name",
-      "serverIp": "Server IP",
-      "serverPort": "Server Port",
-      "serverDomain": "Server Domain",
+      "platformIp": "Platform IP",
+      "platformPort": "Platform Port",
+      "platformDomain": "Platform Domain",
       "localClientId": "Local Client ID",
-      "localClientIp": "Local Client IP",
-      "localClientPort": "Local Client Port",
+      "localIp": "Local IP",
+      "localPort": "Local Port",
       "transport": "Transport Protocol",
+      "charset": "Charset",
       "username": "Auth Username",
       "password": "Auth Password",
       "registerExpires": "Register Expires (s)",
       "keepaliveInterval": "Keepalive Interval (s)",
       "enabled": "Status",
+      "registerStatus": "Register Status",
       "createTime": "Create Time",
       "updateTime": "Update Time",
       "operation": "Action"
@@ -39,6 +40,12 @@
       "enabled": "Enabled",
       "disabled": "Disabled"
     },
+    "registerStatus": {
+      "offline": "Offline",
+      "online": "Online",
+      "registering": "Registering",
+      "failed": "Failed"
+    },
     "action": {
       "enable": "Enable",
       "disable": "Disable"
@@ -49,23 +56,25 @@
       "refreshConfirm": "Refresh registration scheduler? All enabled platforms will be reloaded.",
       "enableSuccess": "Platform enabled",
       "disableSuccess": "Platform disabled",
+      "registering": "Platform [{0}] registering, please wait...",
+      "registerSuccess": "Platform [{0}] registered successfully",
+      "registerFailed": "Platform [{0}] registration failed",
       "refreshSuccess": "Scheduler refreshed",
       "deleteConfirm": "Delete platform [{0}]? Ensure it's disabled and has no associated channel mappings.",
       "platformIdRequired": "Platform ID is required",
       "platformIdFormat": "Platform ID must be 20-digit GB28181 format",
-      "serverIpRequired": "Server IP is required",
-      "serverPortRequired": "Server port is required",
+      "platformIpRequired": "Platform IP is required",
+      "platformPortRequired": "Platform port is required",
       "localClientIdRequired": "Local client ID is required"
     },
     "placeholder": {
       "platformId": "Enter 20-digit GB28181 platform ID",
-      "platformName": "Enter platform name",
-      "serverIp": "Enter server IP address",
-      "serverPort": "Enter server port (default 5060)",
-      "serverDomain": "Enter server domain (optional)",
+      "platformIp": "Enter platform IP address",
+      "platformPort": "Enter platform port (default 5060)",
+      "platformDomain": "Enter platform domain (optional)",
       "localClientId": "Enter 20-digit local client ID",
-      "localClientIp": "Enter local client IP (optional)",
-      "localClientPort": "Enter local client port (optional)",
+      "localIp": "Enter local IP (optional)",
+      "localPort": "Enter local port (optional)",
       "username": "Enter auth username (optional)",
       "password": "Enter auth password (optional)",
       "registerExpires": "Enter register expires (seconds, default 3600)",
@@ -108,6 +117,28 @@
     },
     "help": {
       "cascadeChannelId": "Channel ID exposed to upstream platform, must follow GB28181 20-digit rule"
+    },
+    "batchBind": {
+      "title": "Batch Bind Channels",
+      "channels": "Channel List",
+      "placeholder": "One per line: localChannelId, or localChannelId,localDeviceId,cascadeName",
+      "help": "One per line; cascade ID defaults to localChannelId when only that is given; optionally append localDeviceId and cascadeName by comma",
+      "platformRequired": "Please select a platform first",
+      "channelsRequired": "Please enter at least one channel",
+      "success": "Batch bind succeeded, {0} added"
+    }
+  },
+  "subscribe": {
+    "title": "Subscription Detail",
+    "empty": "No active subscription for this platform",
+    "action": {
+      "view": "Subscriptions"
+    },
+    "field": {
+      "subType": "Subscribe Type",
+      "expires": "Expires (s)",
+      "expireTime": "Expire Time",
+      "status": "Status"
     }
   }
 }

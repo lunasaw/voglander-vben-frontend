@@ -25,7 +25,7 @@ const routes: RouteRecordRaw[] = [
           icon: 'lucide:cloud-upload',
           title: $t('cascade.platform.title'),
         },
-        component: () => import('#/views/cascade/platform/index.vue'),
+        component: () => import('#/views/cascade/platform/list.vue'),
       },
       {
         path: '/cascade/channel',
@@ -34,7 +34,7 @@ const routes: RouteRecordRaw[] = [
           icon: 'lucide:git-branch',
           title: $t('cascade.channel.title'),
         },
-        component: () => import('#/views/cascade/channel/index.vue'),
+        component: () => import('#/views/cascade/channel/list.vue'),
       },
     ],
   },

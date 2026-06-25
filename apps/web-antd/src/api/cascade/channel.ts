@@ -9,7 +9,7 @@ import { requestClient } from '#/api/request';
  * Base URL: `/api/v1/cascade/channel`
  */
 export namespace CascadeChannelApi {
-  /** 通道映射 DTO（时间均 Unix 毫秒，字段以 Time 结尾）。 */
+  /** 通道映射 VO（镜像后端 CascadeChannelVO，时间 Unix 毫秒）。 */
   export interface CascadeChannelVO {
     id?: number;
     platformId?: string;
@@ -17,6 +17,8 @@ export namespace CascadeChannelApi {
     localChannelId?: string;
     cascadeChannelId?: string;
     cascadeName?: string;
+    /** 启用状态 0停用 1启用 */
+    enabled?: number;
     createTime?: number;
     updateTime?: number;
   }
@@ -52,6 +54,20 @@ export namespace CascadeChannelApi {
     localChannelId?: string;
     cascadeChannelId?: string;
     cascadeName?: string;
+  }
+
+  /** 批量绑定单条。 */
+  export interface BatchBindItem {
+    localDeviceId?: string;
+    localChannelId: string;
+    cascadeChannelId?: string;
+    cascadeName?: string;
+  }
+
+  /** 批量绑定请求。 */
+  export interface BatchBindReq {
+    platformId: string;
+    channels: BatchBindItem[];
   }
 }
 
@@ -91,7 +107,7 @@ export async function getCascadeChannelById(id: number) {
 }
 
 /**
- * 分页查询通道列表
+ * 分页查询通道列表（POST /getPage，page/size 走 query，条件走 body）。
  */
 export async function getCascadeChannelPage(params: {
   cascadeChannelId?: string;
@@ -101,15 +117,19 @@ export async function getCascadeChannelPage(params: {
   platformId?: string;
   size: number;
 }) {
-  const { page, size, ...queryParams } = params;
-  return requestClient.get<CascadeChannelApi.ChannelListResp>(
-    `/api/v1/cascade/channel/page`,
-    {
-      params: {
-        page,
-        size,
-        ...queryParams,
-      },
-    },
+  const { page, size, ...body } = params;
+  return requestClient.post<CascadeChannelApi.ChannelListResp>(
+    `/api/v1/cascade/channel/getPage`,
+    body,
+    { params: { page, size } },
   );
+}
+
+/**
+ * 批量绑定级联通道（已存在的跳过，返回新增条数）。
+ */
+export async function batchBindCascadeChannels(
+  data: CascadeChannelApi.BatchBindReq,
+) {
+  return requestClient.post<number>('/api/v1/cascade/channel/batchBind', data);
 }

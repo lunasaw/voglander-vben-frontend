@@ -19,15 +19,25 @@ import {
   getCascadePlatformPage,
   refreshCascadeScheduler,
 } from '#/api/cascade/platform';
+import { useCascadeStatusRefresh } from '#/composables/useCascadeStatusRefresh';
 import { $t } from '#/locales';
 
 import { usePlatformColumns, usePlatformGridFormSchema } from './data';
 import Form from './modules/form.vue';
+import SubscribeDrawer from './modules/subscribe-drawer.vue';
 
 const { hasAccessByCodes } = useAccess();
 
+// 跟踪正在等待注册结果的平台（启用后等 SSE 回调）
+const awaitingRegister = new Set<string>();
+
 const [FormDrawer, formDrawerApi] = useVbenDrawer({
   connectedComponent: Form,
+  destroyOnClose: true,
+});
+
+const [SubscribeDrawerComp, subscribeDrawerApi] = useVbenDrawer({
+  connectedComponent: SubscribeDrawer,
   destroyOnClose: true,
 });
 
@@ -37,7 +47,7 @@ const [Grid, gridApi] = useVbenVxeGrid({
     submitOnChange: true,
   },
   gridOptions: {
-    columns: usePlatformColumns(onActionClick),
+    columns: usePlatformColumns(onActionClick, onStatusChange),
     height: 'auto',
     keepSource: true,
     proxyConfig: {
@@ -80,19 +90,49 @@ function onActionClick(
       onDelete(e.row);
       break;
     }
-    case 'disable': {
-      onDisable(e.row);
-      break;
-    }
     case 'edit': {
       onEdit(e.row);
       break;
     }
-    case 'enable': {
-      onEnable(e.row);
+    case 'subscribe': {
+      onViewSubscribe(e.row);
       break;
     }
   }
+}
+
+/** CellSwitch beforeChange 回调：启用→发注册请求+等待SSE；停用→直接调 API */
+async function onStatusChange(
+  newStatus: number,
+  row: CascadePlatformApi.CascadePlatformVO,
+): Promise<boolean> {
+  if (!hasAccessByCodes(['Cascade:Platform:Status'])) {
+    message.error($t('device.msg.noPermission'));
+    return false;
+  }
+  try {
+    if (newStatus === 1) {
+      await enableCascadePlatform(row.id as number);
+      row.registerStatus = 2;
+      awaitingRegister.add(row.platformId as string);
+      message.loading({
+        content: $t('cascade.platform.msg.registering', [row.platformId]),
+        duration: 0,
+        key: `reg_${row.platformId}`,
+      });
+    } else {
+      await disableCascadePlatform(row.id as number);
+      row.registerStatus = 0;
+      message.success($t('cascade.platform.msg.disableSuccess'));
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function onViewSubscribe(row: CascadePlatformApi.CascadePlatformVO) {
+  subscribeDrawerApi.setData({ platformId: row.platformId }).open();
 }
 
 function confirm(content: string, title: string) {
@@ -134,79 +174,25 @@ async function onDelete(row: CascadePlatformApi.CascadePlatformVO) {
 
   try {
     await confirm(
-      $t('cascade.platform.msg.deleteConfirm', [
-        row.platformName || row.platformId,
-      ]),
+      $t('cascade.platform.msg.deleteConfirm', [row.platformId]),
       $t('common.delete'),
     );
 
     message.loading({
-      content: $t('ui.actionMessage.deleting', [
-        row.platformName || row.platformId,
-      ]),
+      content: $t('ui.actionMessage.deleting', [row.platformId]),
       duration: 0,
       key: 'action_process_msg',
     });
 
     await deleteCascadePlatform(row.id as number);
     message.success({
-      content: $t('ui.actionMessage.deleteSuccess', [
-        row.platformName || row.platformId,
-      ]),
+      content: $t('ui.actionMessage.deleteSuccess', [row.platformId]),
       key: 'action_process_msg',
     });
     onRefresh();
   } catch (error: any) {
     if (error.message !== '已取消') {
       console.error('删除失败:', error);
-    }
-  }
-}
-
-async function onEnable(row: CascadePlatformApi.CascadePlatformVO) {
-  if (!hasAccessByCodes(['Cascade:Platform:Status'])) {
-    message.error($t('device.msg.noPermission'));
-    return;
-  }
-
-  try {
-    await confirm(
-      $t('cascade.platform.msg.enableConfirm', [
-        row.platformName || row.platformId,
-      ]),
-      $t('cascade.platform.action.enable'),
-    );
-
-    await enableCascadePlatform(row.id as number);
-    message.success($t('cascade.platform.msg.enableSuccess'));
-    onRefresh();
-  } catch (error: any) {
-    if (error.message !== '已取消') {
-      console.error('启用失败:', error);
-    }
-  }
-}
-
-async function onDisable(row: CascadePlatformApi.CascadePlatformVO) {
-  if (!hasAccessByCodes(['Cascade:Platform:Status'])) {
-    message.error($t('device.msg.noPermission'));
-    return;
-  }
-
-  try {
-    await confirm(
-      $t('cascade.platform.msg.disableConfirm', [
-        row.platformName || row.platformId,
-      ]),
-      $t('cascade.platform.action.disable'),
-    );
-
-    await disableCascadePlatform(row.id as number);
-    message.success($t('cascade.platform.msg.disableSuccess'));
-    onRefresh();
-  } catch (error: any) {
-    if (error.message !== '已取消') {
-      console.error('停用失败:', error);
     }
   }
 }
@@ -240,6 +226,34 @@ async function onRefreshScheduler() {
 function onRefresh() {
   gridApi.query();
 }
+
+// 注册状态实时刷新：SSE(cascade.register) 更新对应行 + 可见时 15s 轮询兜底
+useCascadeStatusRefresh((platformId, registerStatus) => {
+  const rows =
+    gridApi.grid?.getData?.() as CascadePlatformApi.CascadePlatformVO[];
+  const row = rows?.find((r) => r.platformId === platformId);
+  if (row) {
+    row.registerStatus = registerStatus;
+  }
+
+  // 用户主动启用后等待注册结果，SSE 到达时给出提示
+  if (awaitingRegister.has(platformId)) {
+    if (registerStatus === 1) {
+      awaitingRegister.delete(platformId);
+      message.success({
+        content: $t('cascade.platform.msg.registerSuccess', [platformId]),
+        key: `reg_${platformId}`,
+      });
+    } else if (registerStatus === 3) {
+      awaitingRegister.delete(platformId);
+      message.error({
+        content: $t('cascade.platform.msg.registerFailed', [platformId]),
+        key: `reg_${platformId}`,
+      });
+    }
+    // registerStatus === 2 仍在注册中，保持 loading 继续等待
+  }
+}, onRefresh);
 </script>
 
 <template>
@@ -253,6 +267,7 @@ function onRefresh() {
     </template>
 
     <FormDrawer @success="onRefresh" />
+    <SubscribeDrawerComp />
     <Grid :table-title="$t('cascade.platform.title')">
       <template #toolbar-tools>
         <Button type="primary" @click="onCreate">

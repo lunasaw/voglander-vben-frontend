@@ -67,7 +67,10 @@
     "start": "模拟推流",
     "stop": "停止推流",
     "target": "推流目标",
-    "countdown": "请在 {sec}s 内点击推流（平台点播超时窗）"
+    "countdown": "请在 {sec}s 内点击推流（平台点播超时窗）",
+    "zlmMode": "推流模式",
+    "zlmModeOn": "ZLM中继",
+    "zlmModeOff": "直推RTP"
   },
   "server": {
     "title": "平台端 (Server)",

@@ -35,6 +35,8 @@ export namespace ProtocolLabApi {
     topics: string[];
     /** push.auto：收到 INVITE 是否自动起 ffmpeg（只读展示）。 */
     pushAuto?: boolean;
+    /** push.zlm-mode：ZLM中继模式开关初值（ffmpeg→ZLM RTMP→RTP）。 */
+    pushZlmMode?: boolean;
     /** push.ffmpeg-path：ffmpeg 路径输入框初值。 */
     ffmpegPath?: string;
     /** push.media-file：视频文件路径输入框初值（可能为空，联调前填）。 */
@@ -106,6 +108,8 @@ export namespace ProtocolLabApi {
     ffmpegPath?: string;
     /** 待推视频文件绝对路径，覆盖配置。 */
     mediaFile?: string;
+    /** 推流模式：true=ZLM中继，false=直推RTP，undefined=用后端配置默认。 */
+    zlmMode?: boolean;
   }
 
   /**

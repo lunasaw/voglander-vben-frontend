@@ -67,7 +67,10 @@
     "start": "Push",
     "stop": "Stop Push",
     "target": "Push Target",
-    "countdown": "Click push within {sec}s (platform invite timeout window)"
+    "countdown": "Click push within {sec}s (platform invite timeout window)",
+    "zlmMode": "Push Mode",
+    "zlmModeOn": "ZLM Relay",
+    "zlmModeOff": "Direct RTP"
   },
   "server": {
     "title": "Platform (Server)",

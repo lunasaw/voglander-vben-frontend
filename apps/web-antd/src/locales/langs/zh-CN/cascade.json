@@ -14,19 +14,20 @@
     "field": {
       "id": "ID",
       "platformId": "平台ID",
-      "platformName": "平台名称",
-      "serverIp": "服务器IP",
-      "serverPort": "服务器端口",
-      "serverDomain": "服务器域名",
-      "localClientId": "本地客户端ID",
-      "localClientIp": "本地客户端IP",
-      "localClientPort": "本地客户端端口",
+      "platformIp": "平台IP",
+      "platformPort": "平台端口",
+      "platformDomain": "平台域",
+      "localClientId": "本端客户端ID",
+      "localIp": "本端IP",
+      "localPort": "本端端口",
       "transport": "传输协议",
+      "charset": "编码",
       "username": "认证用户名",
       "password": "认证密码",
       "registerExpires": "注册有效期(秒)",
       "keepaliveInterval": "心跳间隔(秒)",
       "enabled": "启用状态",
+      "registerStatus": "注册状态",
       "createTime": "创建时间",
       "updateTime": "更新时间",
       "operation": "操作"
@@ -39,33 +40,41 @@
       "enabled": "已启用",
       "disabled": "已停用"
     },
+    "registerStatus": {
+      "offline": "离线",
+      "online": "在线",
+      "registering": "注册中",
+      "failed": "注册失败"
+    },
     "action": {
       "enable": "启用",
       "disable": "停用"
     },
     "msg": {
       "enableConfirm": "确定启用平台【{0}】吗？启用后将自动启动注册调度。",
-      "disableConfirm": "确定停用平台【{0}】吗？停用后将立即停止注册任务并发送注销请求。",
+      "disableConfirm": "确定停用平台【{0}】吗？停用后将立即停止注册任务并发送注���请求。",
       "refreshConfirm": "确定刷新注册调度吗？将批量重载所有已启用平台的注册任务。",
       "enableSuccess": "平台已启用",
       "disableSuccess": "平台已停用",
+      "registering": "平台【{0}】注册中，请稍候...",
+      "registerSuccess": "平台【{0}】注册成功",
+      "registerFailed": "平台【{0}】注册失败",
       "refreshSuccess": "注册调度已刷新",
       "deleteConfirm": "确定删除平台【{0}】吗？删除前请确保已停用且无关联通道映射。",
       "platformIdRequired": "平台ID为必填项",
       "platformIdFormat": "平台ID必须符合国标20位格式",
-      "serverIpRequired": "服务器IP为必填项",
-      "serverPortRequired": "服务器端口为必填项",
-      "localClientIdRequired": "本地客户端ID为必填项"
+      "platformIpRequired": "平台IP为必填项",
+      "platformPortRequired": "平台端口为必填项",
+      "localClientIdRequired": "本端客户端ID为必填项"
     },
     "placeholder": {
       "platformId": "请输入20位国标平台ID",
-      "platformName": "请输入平台名称",
-      "serverIp": "请输入服务器IP地址",
-      "serverPort": "请输入服务器端口（默认5060）",
-      "serverDomain": "请输入服务器域名（可选）",
-      "localClientId": "请输入20位本地客户端ID",
-      "localClientIp": "请输入本地客户端IP（可选）",
-      "localClientPort": "请输入本地客户端端口（可选）",
+      "platformIp": "请输入上级平台IP地址",
+      "platformPort": "请输入平台端口（默认5060）",
+      "platformDomain": "请输入平台域（可选）",
+      "localClientId": "请输入20位本端客户端ID",
+      "localIp": "请输入本端IP（可选）",
+      "localPort": "请输入本端端口（可选）",
       "username": "请输入认证用户名（可选）",
       "password": "请输入认证密码（可选）",
       "registerExpires": "请输入注册有效期（秒，默认3600）",
@@ -108,6 +117,28 @@
     },
     "help": {
       "cascadeChannelId": "对上级平台暴露的通道编码，必须符合国标20位规则"
+    },
+    "batchBind": {
+      "title": "批量绑定通道",
+      "channels": "通道列表",
+      "placeholder": "每行一条，格式：本地通道ID 或 本地通道ID,本地设备ID,级联名称",
+      "help": "每行一条；仅填本地通道ID时级联编码默认同本地通道ID；可选用逗号追加 本地设备ID、级联名称",
+      "platformRequired": "请先选择上级平台",
+      "channelsRequired": "请至少输入一条通道",
+      "success": "批量绑定成功，新增 {0} 条"
+    }
+  },
+  "subscribe": {
+    "title": "订阅详情",
+    "empty": "该平台暂无活跃订阅",
+    "action": {
+      "view": "订阅详情"
+    },
+    "field": {
+      "subType": "订阅类型",
+      "expires": "有效期(秒)",
+      "expireTime": "过期时间",
+      "status": "状态"
     }
   }
 }

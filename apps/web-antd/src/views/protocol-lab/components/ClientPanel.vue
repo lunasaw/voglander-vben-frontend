@@ -114,7 +114,7 @@ const identity = computed(() => {
 /* -------------------------------------------------------------------------- */
 
 /** ffmpeg / 文件路径输入框（初值来自 config 回显，提交时覆盖后端配置默认）。 */
-const pushForm = reactive({ ffmpegPath: '', mediaFile: '' });
+const pushForm = reactive({ ffmpegPath: '', mediaFile: '', zlmMode: false });
 /** 当前推流状态（push/status 回包）。 */
 const pushStatus = ref<ProtocolLabApi.PushStatus>({ state: 'IDLE' });
 /** 手动模式 8s 倒计时（秒），0 = 非倒计时态。 */
@@ -131,6 +131,7 @@ watch(
     }
     pushForm.ffmpegPath = c.ffmpegPath ?? '';
     pushForm.mediaFile = c.mediaFile ?? '';
+    pushForm.zlmMode = c.pushZlmMode ?? false;
     refreshPushStatus();
   },
   { immediate: true },
@@ -211,6 +212,7 @@ async function onPushStart() {
     pushStatus.value = await labPushStart({
       ffmpegPath: pushForm.ffmpegPath.trim() || undefined,
       mediaFile: pushForm.mediaFile.trim() || undefined,
+      zlmMode: pushForm.zlmMode,
     });
     stopCountdown();
     message.success($t('protocolLab.msg.pushStarted'));
@@ -542,6 +544,15 @@ async function onToggleAutoKeepalive(checked: boolean) {
         </Tag>
       </div>
 
+      <div class="push-row">
+        <span class="push-label">{{ $t('protocolLab.push.zlmMode') }}</span>
+        <Switch
+          v-model:checked="pushForm.zlmMode"
+          :checked-children="$t('protocolLab.push.zlmModeOn')"
+          :un-checked-children="$t('protocolLab.push.zlmModeOff')"
+        />
+      </div>
+
       <Input
         v-model:value="pushForm.ffmpegPath"
         allow-clear
@@ -714,7 +725,8 @@ async function onToggleAutoKeepalive(checked: boolean) {
 .register-form {
   padding: 12px 14px;
   margin-top: 10px;
-  overflow: hidden;
+
+  /* 移除 overflow: hidden，允许表单完整展开，由父容器 .ant-card-body 的 overflow-y: auto 控制滚动 */
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
   border-radius: 8px;
