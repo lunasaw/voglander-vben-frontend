@@ -1,0 +1,95 @@
+{
+  "management": { "title": "Image Management" },
+  "common": {
+    "permissionDenied": "You do not have permission for this action"
+  },
+  "assets": {
+    "title": "Image Assets",
+    "empty": "No image assets",
+    "stats": {
+      "total": "Total Assets",
+      "available": "Available",
+      "today": "Added Today"
+    },
+    "field": {
+      "name": "Name",
+      "file": "File",
+      "format": "Format",
+      "size": "Size",
+      "dimensions": "Dimensions",
+      "source": "Source",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "action": {
+      "upload": "Upload Image",
+      "chooseFile": "Choose file",
+      "submit": "Submit",
+      "detail": "Details",
+      "download": "Download",
+      "viewForCamera": "View camera assets",
+      "delete": "Delete",
+      "retryDelete": "Retry Delete",
+      "retryUpload": "Retry upload"
+    },
+    "detail": { "title": "Asset details" },
+    "confirm": {
+      "delete": "Delete this image asset?",
+      "retryDelete": "Retry deleting this asset?"
+    },
+    "error": {
+      "load": "Failed to load assets. Try again.",
+      "uploadRetry": "The upload result is unknown; retry with the same request."
+    },
+    "status": {
+      "AVAILABLE": "Available",
+      "DELETING": "Deleting",
+      "DELETED": "Deleted",
+      "DELETE_FAILED": "Delete Failed",
+      "unknown": "Unknown"
+    }
+  },
+  "collections": {
+    "title": "Image Collection",
+    "empty": "No collection tasks",
+    "action": {
+      "create": "New Collection",
+      "cancel": "Cancel",
+      "submit": "Submit",
+      "detail": "Details",
+      "pause": "Pause",
+      "resume": "Resume",
+      "retry": "Retry",
+      "viewAsset": "View asset"
+    },
+    "field": {
+      "name": "Task Name",
+      "camera": "Camera",
+      "mode": "Mode",
+      "state": "State",
+      "progress": "Progress",
+      "actions": "Actions",
+      "deviceId": "Device ID",
+      "channelId": "Channel ID",
+      "scheduleStart": "Start time (ms)",
+      "scheduleEnd": "End time (ms)",
+      "interval": "Interval"
+    },
+    "mode": { "ONCE": "Once", "SCHEDULED": "Scheduled" },
+    "status": {
+      "SCHEDULED": "Scheduled",
+      "RUNNING": "Running",
+      "PAUSED": "Paused",
+      "COMPLETED": "Completed",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled",
+      "unknown": "Unknown"
+    },
+    "schedule": { "count": "Estimated {count} planned points" },
+    "error": {
+      "invalid": "Enter a valid task and camera; scheduled mode must satisfy time and interval constraints",
+      "unknown": "The result is unknown; refresh the task list to confirm",
+      "stateConflict": "The task state changed; refresh and try again"
+    }
+  }
+}

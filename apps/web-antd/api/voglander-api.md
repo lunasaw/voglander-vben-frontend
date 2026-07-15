@@ -22,7 +22,108 @@ generator: '@tarslib/widdershins v4.0.30'
 
 Base URLs:
 
+# 图像资产与采集
+
+图像接口以 `/api/v1/images` 与 `/api/v1/image-collection-tasks` 为前缀。所有时间字段为 Unix 毫秒；响应只返回 `assetId`、`taskId`、`executionId` 等稳定业务标识，不返回 provider、storage key、绝对路径、secret 或 URL query。
+
+## 图像资产
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/api/v1/images/constraints` | 上传字节数、像素数与格式约束 |
+| GET | `/api/v1/images/statistics` | 当前可见范围的总数、可用数、今日新增、删除失败数 |
+| POST | `/api/v1/images/getPage?page=1&size=24` | 资产分页，筛选放在请求体 |
+| GET | `/api/v1/images/{assetId}` | 资产与来源详情 |
+| POST | `/api/v1/images/uploads` | multipart `file`，使用 `Idempotency-Key` |
+| GET | `/api/v1/images/{assetId}/content` | 私有预览流，支持 ETag/304 与 `nosniff` |
+| GET | `/api/v1/images/{assetId}/download` | 私有下载流，使用 RFC 5987 文件名 |
+| DELETE | `/api/v1/images/{assetId}` | 幂等删除请求 |
+| POST | `/api/v1/images/{assetId}/delete:retry` | 重试删除失败资产 |
+
+## 图像采集领域接口
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/api/v1/image-collection-tasks/constraints` | ONCE/SCHEDULED 与图像约束 |
+| POST | `/api/v1/image-collection-tasks` | 创建一个 `IMAGE_COLLECTION` 通用任务，使用 `Idempotency-Key` |
+| POST | `/api/v1/image-collection-tasks/getPage?page=1&size=20` | 通用任务事实与机位配置 enriched 查询 |
+| GET | `/api/v1/image-collection-tasks/{taskId}` | enriched 任务详情 |
+| POST | `/api/v1/image-collection-tasks/{taskId}:reschedule` | 仅 PAUSED 任务可重排程，机位不可变 |
+
+暂停、恢复、取消、人工重试、执行历史与事件时间线统一使用下方 Durable Business Task API；图像模块不提供重复控制端点。成功采集的 `resultRefType/resultRefId` 为 `IMAGE_ASSET/{assetId}`。
+
 # Authentication
+
+# 业务任务管理（Durable Business Task）
+
+统一任务查询与控制接口。所有时间字段均为 Unix 毫秒；响应只包含稳定业务标识、状态码和脱敏摘要。
+
+## POST 任务分页查询
+
+POST /api/v1/business-tasks/getPage?page=1&size=10
+
+请求体 `BusinessTaskPageReq`：`taskId`、`taskType`、`state`、`taskName`、`ownerType`、`ownerId`、`organizationId`、`subjectType`、`subjectId`、`bizKey`、`createStartTime`、`createEndTime`、`scheduleStartTime`、`scheduleEndTime`、`sortField`、`sortDirection` 均为可选字段。
+
+返回 `AjaxResult<BusinessTaskListResp>`，其中 `total: integer(int64)`、`items: BusinessTaskVO[]`。
+
+## GET 任务详情
+
+GET /api/v1/business-tasks/{taskId}
+
+返回 `AjaxResult<BusinessTaskDetailVO>`。详情在 `BusinessTaskVO` 基础上包含 `activeExecution: BusinessTaskExecutionVO|null` 和 `capabilities: string[]`。
+
+## GET 任务统计
+
+GET /api/v1/business-tasks/statistics
+
+返回 `AjaxResult<BusinessTaskStatisticsVO>`，字段为 `scheduledCount`、`runningCount`、`pausedCount`、`cancellingCount`、`completedTodayCount`、`failedCount`（均为 `integer(int64)`）。
+
+## GET 任务约束与 Handler 能力
+
+GET /api/v1/business-tasks/constraints
+
+返回 `AjaxResult<BusinessTaskConstraintsVO>`：`taskTypes`、`taskModes`、`taskStates`、`executionStates`（字符串数组）、`capabilities`（`Map<string,string[]>`）、`maxPlannedCount`、`maxScheduleDurationDays`、`maxPayloadBytes`。
+
+## POST 执行分页查询
+
+POST /api/v1/business-task-executions/getPage?page=1&size=10
+
+请求体 `BusinessTaskExecutionPageReq`：`executionId`、`taskId`、`state`、`retryable`、`plannedStartTime`、`plannedEndTime`、`createStartTime`、`createEndTime`、`sortField`、`sortDirection` 均为可选字段。
+
+返回 `AjaxResult<BusinessTaskExecutionListResp>`，其中 `total: integer(int64)`、`items: BusinessTaskExecutionVO[]`。
+
+## GET 执行详情与事件时间线
+
+GET /api/v1/business-task-executions/{executionId}
+
+返回 `AjaxResult<BusinessTaskExecutionDetailVO>`。详情在 `BusinessTaskExecutionVO` 基础上包含只追加的 `events: BusinessTaskEventVO[]`。
+
+## POST 任务控制
+
+以下端点均接受可选 `BusinessTaskControlReq` 请求体：`expectedVersion: integer`、`executionId: string`、`idempotencyKey: string`、`reason: string`，并返回 `AjaxResult<BusinessTaskDetailVO>`。
+
+| 操作     | 方法与路径                                    | 权限           |
+| -------- | --------------------------------------------- | -------------- |
+| 暂停     | `POST /api/v1/business-tasks/{taskId}:pause`  | `Task:Control` |
+| 恢复     | `POST /api/v1/business-tasks/{taskId}:resume` | `Task:Control` |
+| 取消     | `POST /api/v1/business-tasks/{taskId}:cancel` | `Task:Control` |
+| 人工重试 | `POST /api/v1/business-tasks/{taskId}:retry`  | `Task:Control` |
+
+人工重试要求 `executionId` 与 `idempotencyKey`，会创建新的 ONCE 任务，原任务和执行历史保持不变。
+
+### BusinessTaskVO（安全任务摘要）
+
+`createTime`、`updateTime`、`scheduleStartTime`、`scheduleEndTime`、`nextPlanTime`、`lastExecuteTime`、`completedTime` 为 `integer(int64)` 毫秒；`intervalSeconds` 为 `integer(int64)`；`scheduleVersion`、`priority`、`plannedCount`、`successCount`、`failedCount`、`missedCount`、`cancelledCount` 为 `integer`；进度字段 `progressCurrent`、`progressTotal`、`progressRevision` 为 `integer(int64)`。其余字段为稳定 `string`：`taskId`、`taskType`、`taskName`、`description`、`taskMode`、`state`、`lastExecutionId`、`progressMessage`、`bizKey`、`subjectType`、`subjectId`、`resultRefType`、`resultRefId`、`resultSummary`、`lastFailureCode`、`lastFailureMessage`、`originTaskId`、`originExecutionId`、`ownerType`、`ownerId`、`organizationId`。
+
+### BusinessTaskExecutionVO（安全执行事实）
+
+稳定字段包括 `executionId`、`taskId`、`state`、`resultRefType`、`resultRefId`、`resultSummary`、`failureCode`、`failureMessage`、`retryOriginExecutionId`（`string`）；`scheduleVersion`、`attemptCount`、`maxAttempts` 为 `integer`；`plannedAt`、`deadlineAt`、`nextAttemptTime`、`startedAt`、`heartbeatAt`、`finishedAt`、`progressCurrent`、`progressTotal`、`progressRevision` 为 `integer(int64)`；`progressMessage` 为 `string`；`retryable` 为 `boolean`。
+
+### BusinessTaskEventVO（脱敏追加事件）
+
+字段：`eventId`、`taskId`、`executionId`、`eventType`、`fromState`、`toState`、`progressMessage`、`failureCode`、`failureMessage`、`actorType`、`actorId`、`eventData`（`string`）；`attemptNo` 为 `integer`；`progressCurrent`、`progressTotal`、`occurredAt` 为 `integer(int64)`。
+
+响应不会返回 payload、租约凭据、存储 key、绝对路径、secret 或异常堆栈。
 
 # 首页控制器
 

@@ -157,6 +157,16 @@ export function useColumns<T = DeviceApi.DeviceChannelVO>(
             show: () => hasAccessByCodes(['Device:Cmd:Live']),
           },
           {
+            code: 'imageCollect',
+            text: $t('image.collections.action.create'),
+            show: () => hasAccessByCodes(['Image:Collection:Create']),
+          },
+          {
+            code: 'imageAssets',
+            text: $t('image.assets.action.viewForCamera'),
+            show: () => hasAccessByCodes(['Image:Asset:Query']),
+          },
+          {
             code: 'edit',
             text: $t('device.action.edit'),
             show: () => hasAccessByCodes(['Device:Channel:Edit']),

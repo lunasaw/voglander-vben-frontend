@@ -1,0 +1,150 @@
+{
+  "management": {
+    "title": "任务管理"
+  },
+  "center": {
+    "title": "任务中心",
+    "stats": {
+      "scheduled": "等待中",
+      "running": "运行中",
+      "paused": "已暂停",
+      "cancelling": "取消中",
+      "completedToday": "今日完成",
+      "failed": "失败"
+    },
+    "filter": {
+      "taskId": "任务 ID",
+      "taskType": "任务类型",
+      "state": "状态",
+      "taskName": "任务名称",
+      "owner": "发起人",
+      "createdAt": "创建时间",
+      "scheduleAt": "计划时间",
+      "executionState": "执行状态",
+      "all": "全部",
+      "apply": "查询",
+      "reset": "重置"
+    },
+    "field": {
+      "taskId": "任务 ID",
+      "taskType": "任务类型",
+      "taskName": "任务名称",
+      "state": "状态",
+      "progress": "进度",
+      "schedule": "计划时间",
+      "lastExecution": "最近执行",
+      "owner": "发起人",
+      "createTime": "创建时间",
+      "executionId": "执行 ID",
+      "attempt": "尝试次数",
+      "plannedAt": "计划时间",
+      "startedAt": "开始时间",
+      "finishedAt": "结束时间",
+      "failureCode": "失败码",
+      "failureMessage": "失败说明",
+      "result": "结果"
+    },
+    "action": {
+      "detail": "详情",
+      "pause": "暂停",
+      "resume": "恢复",
+      "cancel": "取消",
+      "retry": "重试",
+      "refresh": "刷新",
+      "viewExecution": "查看执行",
+      "viewResult": "查看结果"
+    },
+    "status": {
+      "SCHEDULED": "已计划",
+      "RUNNING": "运行中",
+      "PAUSED": "已暂停",
+      "CANCELLING": "取消中",
+      "COMPLETED": "已完成",
+      "PARTIAL_COMPLETED": "部分完成",
+      "FAILED": "失败",
+      "CANCELLED": "已取消",
+      "PENDING": "等待执行",
+      "RETRY_WAIT": "等待重试",
+      "SUCCEEDED": "执行成功",
+      "MISSED": "已错过"
+    },
+    "mode": {
+      "ONCE": "立即",
+      "AT_TIME": "指定时间",
+      "FIXED_RATE": "固定间隔"
+    },
+    "capability": {
+      "PAUSE": "暂停",
+      "CANCEL": "取消",
+      "MANUAL_RETRY": "人工重试",
+      "PROGRESS": "进度",
+      "RESCHEDULE": "改期"
+    },
+    "progress": {
+      "indeterminate": "处理中",
+      "completed": "已完成",
+      "currentOfTotal": "{0} / {1}",
+      "phase": "当前阶段：{0}"
+    },
+    "detail": {
+      "title": "任务详情",
+      "summary": "概览",
+      "schedule": "调度计划",
+      "owner": "任务归属",
+      "counters": "执行统计",
+      "businessSummary": "业务摘要",
+      "executions": "执行历史",
+      "timeline": "事件时间线",
+      "capabilities": "可用操作",
+      "noResult": "暂无结果",
+      "unknownType": "未知任务类型"
+    },
+    "type": {
+      "imageCollection": "图像采集",
+      "dataExport": "数据导出",
+      "dataImport": "数据导入",
+      "aiAnalysis": "AI 分析",
+      "test": "测试任务"
+    },
+    "execution": {
+      "title": "执行详情",
+      "events": "事件时间线",
+      "empty": "暂无执行记录"
+    },
+    "event": {
+      "CREATED": "创建",
+      "SCHEDULED": "计划",
+      "CLAIMED": "领取",
+      "STARTED": "开始",
+      "PROGRESS": "进度更新",
+      "RETRY_SCHEDULED": "安排重试",
+      "SUCCEEDED": "成功",
+      "FAILED": "失败",
+      "MISSED": "错过",
+      "PAUSED": "暂停",
+      "RESUMED": "恢复",
+      "CANCELLING": "取消中",
+      "CANCELLED": "取消",
+      "LEASE_EXPIRED": "租约过期",
+      "MANUAL_RETRY": "人工重试"
+    },
+    "failure": {
+      "guidance": "请根据失败码检查任务配置或稍后重试。",
+      "unknown": "任务执行失败，请联系管理员。"
+    },
+    "message": {
+      "pauseConfirm": "确定暂停该任务吗？",
+      "resumeConfirm": "确定恢复该任务吗？",
+      "cancelConfirm": "确定取消该任务吗？取消后未开始的执行将不会继续。",
+      "retryConfirm": "确定重试该执行吗？系统将创建新的任务。",
+      "controlSuccess": "操作已提交",
+      "stateConflict": "任务状态已变化，页面将刷新。",
+      "permissionDenied": "没有执行该操作的权限。",
+      "reconnect": "实时连接已断开，正在重新查询任务。"
+    }
+  },
+  "action": {
+    "query": "查询任务",
+    "control": "控制任务"
+  }
+}

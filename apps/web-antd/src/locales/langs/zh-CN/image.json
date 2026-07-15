@@ -1,0 +1,93 @@
+{
+  "management": { "title": "图像管理" },
+  "common": { "permissionDenied": "没有执行此操作的权限" },
+  "assets": {
+    "title": "图像资产",
+    "empty": "暂无图像资产",
+    "stats": {
+      "total": "资产总数",
+      "available": "可用资产",
+      "today": "今日新增"
+    },
+    "field": {
+      "name": "名称",
+      "file": "文件",
+      "format": "格式",
+      "size": "大小",
+      "dimensions": "尺寸",
+      "source": "来源",
+      "status": "状态",
+      "actions": "操作"
+    },
+    "action": {
+      "upload": "上传图像",
+      "chooseFile": "选择文件",
+      "submit": "提交",
+      "detail": "详情",
+      "download": "下载",
+      "viewForCamera": "查看该机位资产",
+      "delete": "删除",
+      "retryDelete": "重试删除",
+      "retryUpload": "重试上传"
+    },
+    "detail": { "title": "资产详情" },
+    "confirm": {
+      "delete": "确认删除此图像资产？",
+      "retryDelete": "确认重试删除此资产？"
+    },
+    "error": {
+      "load": "资产加载失败，请重试",
+      "uploadRetry": "上传结果未知，可使用相同请求重试"
+    },
+    "status": {
+      "AVAILABLE": "可用",
+      "DELETING": "删除中",
+      "DELETED": "已删除",
+      "DELETE_FAILED": "删除失败",
+      "unknown": "未知"
+    }
+  },
+  "collections": {
+    "title": "图像采集",
+    "empty": "暂无采集任务",
+    "action": {
+      "create": "新建采集",
+      "cancel": "取消",
+      "submit": "提交",
+      "detail": "详情",
+      "pause": "暂停",
+      "resume": "恢复",
+      "retry": "重试",
+      "viewAsset": "查看资产"
+    },
+    "field": {
+      "name": "任务名称",
+      "camera": "机位",
+      "mode": "模式",
+      "state": "状态",
+      "progress": "进度",
+      "actions": "操作",
+      "deviceId": "设备 ID",
+      "channelId": "通道 ID",
+      "scheduleStart": "开始时间（毫秒）",
+      "scheduleEnd": "结束时间（毫秒）",
+      "interval": "间隔"
+    },
+    "mode": { "ONCE": "单次", "SCHEDULED": "定时" },
+    "status": {
+      "SCHEDULED": "已计划",
+      "RUNNING": "运行中",
+      "PAUSED": "已暂停",
+      "COMPLETED": "已完成",
+      "FAILED": "失败",
+      "CANCELLED": "已取消",
+      "unknown": "未知"
+    },
+    "schedule": { "count": "预计 {count} 个计划点" },
+    "error": {
+      "invalid": "请填写有效的任务和机位；定时模式需满足时间与间隔约束",
+      "unknown": "提交结果未知，请刷新任务列表确认",
+      "stateConflict": "任务状态已变化，请刷新后重试"
+    }
+  }
+}

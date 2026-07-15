@@ -149,6 +149,28 @@ function onActionClick(e: OnActionClickParams<DeviceApi.DeviceChannelVO>) {
       onEdit(e.row);
       break;
     }
+    case 'imageAssets': {
+      if (!hasAccessByCodes(['Image:Asset:Query'])) {
+        message.error($t('image.common.permissionDenied'));
+        return;
+      }
+      router.push({
+        path: '/image/assets',
+        query: { deviceId: e.row.deviceId, channelId: e.row.channelId },
+      });
+      break;
+    }
+    case 'imageCollect': {
+      if (!hasAccessByCodes(['Image:Collection:Create'])) {
+        message.error($t('image.common.permissionDenied'));
+        return;
+      }
+      router.push({
+        path: '/image/collection',
+        query: { deviceId: e.row.deviceId, channelId: e.row.channelId },
+      });
+      break;
+    }
     case 'liveStart': {
       onLiveStart(e.row);
       break;
