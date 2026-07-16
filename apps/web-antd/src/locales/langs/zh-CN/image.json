@@ -1,6 +1,9 @@
 {
   "management": { "title": "图像管理" },
   "common": { "permissionDenied": "没有执行此操作的权限" },
+  "asset": {
+    "title": "图像资产"
+  },
   "assets": {
     "title": "图像资产",
     "empty": "暂无图像资产",
@@ -20,6 +23,7 @@
       "actions": "操作"
     },
     "action": {
+      "query": "查询图像",
       "upload": "上传图像",
       "chooseFile": "选择文件",
       "submit": "提交",
@@ -47,10 +51,14 @@
       "unknown": "未知"
     }
   },
+  "collection": {
+    "title": "图像采集"
+  },
   "collections": {
     "title": "图像采集",
     "empty": "暂无采集任务",
     "action": {
+      "query": "查询采集任务",
       "create": "新建采集",
       "cancel": "取消",
       "submit": "提交",

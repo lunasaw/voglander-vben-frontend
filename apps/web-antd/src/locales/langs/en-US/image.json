@@ -3,6 +3,9 @@
   "common": {
     "permissionDenied": "You do not have permission for this action"
   },
+  "asset": {
+    "title": "Image Assets"
+  },
   "assets": {
     "title": "Image Assets",
     "empty": "No image assets",
@@ -22,6 +25,7 @@
       "actions": "Actions"
     },
     "action": {
+      "query": "Query Images",
       "upload": "Upload Image",
       "chooseFile": "Choose file",
       "submit": "Submit",
@@ -49,10 +53,14 @@
       "unknown": "Unknown"
     }
   },
+  "collection": {
+    "title": "Image Collection"
+  },
   "collections": {
     "title": "Image Collection",
     "empty": "No collection tasks",
     "action": {
+      "query": "Query Collection Tasks",
       "create": "New Collection",
       "cancel": "Cancel",
       "submit": "Submit",

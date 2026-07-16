@@ -27,17 +27,17 @@ const routes: RouteRecordRaw[] = [
       {
         path: '/image/collection',
         name: 'ImageCollections',
-        meta: { icon: 'lucide:camera', title: $t('image.collections.title') },
-        component: () => import('#/views/image/collections/list.vue'),
+        meta: { icon: 'lucide:camera', title: $t('image.collection.title') },
+        component: () => import('#/views/image/collection/list.vue'),
       },
       {
         path: '/image/collections',
-        name: 'ImageCollectionsLegacy',
+        name: 'ImageCollectionsAlias',
         meta: {
           hideInMenu: true,
-          title: $t('image.collections.title'),
+          title: $t('image.collection.title'),
         },
-        component: () => import('#/views/image/collections/list.vue'),
+        component: () => import('#/views/image/collection/list.vue'),
       },
     ],
   },
