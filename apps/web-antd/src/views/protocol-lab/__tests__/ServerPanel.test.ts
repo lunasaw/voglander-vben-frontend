@@ -1,6 +1,6 @@
 import type { LabEvent } from '../../../composables/useSseEvents';
 
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -15,7 +15,7 @@ import ServerPanel from '../components/ServerPanel.vue';
  *  - catalog 写 channelCount，info 写 manufacturer/model
  *  - 自动选中首个设备
  *  - C2 时序约束：未选中在线设备时命令区禁用
- *  - 通道号约定 deviceId+'01'
+ *  - 点播 / PTZ 通道来自持久化通道分页，无通道时禁止下发
  */
 
 vi.mock('#/locales', () => ({ $t: (k: string) => k }));
@@ -28,6 +28,7 @@ const m = vi.hoisted(() => ({
   controlRecordStart: vi.fn().mockResolvedValue(undefined),
   controlRecordStop: vi.fn().mockResolvedValue(undefined),
   downloadConfig: vi.fn().mockResolvedValue(undefined),
+  getDeviceChannelPage: vi.fn(),
   hasAccess: vi.fn(() => true),
   liveStart: vi.fn().mockResolvedValue(undefined),
   messageError: vi.fn(),
@@ -47,6 +48,10 @@ const m = vi.hoisted(() => ({
 
 vi.mock('@vben/access', () => ({
   useAccess: () => ({ hasAccessByCodes: m.hasAccess }),
+}));
+
+vi.mock('#/api/device', () => ({
+  getDeviceChannelPage: m.getDeviceChannelPage,
 }));
 
 vi.mock('#/api/protocol-lab', () => ({
@@ -104,7 +109,7 @@ vi.mock('ant-design-vue', () => {
     },
     Select: {
       name: 'Select',
-      props: ['value', 'options', 'disabled'],
+      props: ['value', 'options', 'disabled', 'loading', 'placeholder'],
       emits: ['update:value'],
       template: '<select class="select" :disabled="disabled"></select>',
     },
@@ -150,8 +155,34 @@ function buttonByText(wrapper: any, text: string) {
   return wrapper.findAll('button').find((b: any) => b.text() === text);
 }
 
+function channelPage(...channels: Array<{ channelId: string; name?: string }>) {
+  return {
+    items: channels.map((channel, index) => ({
+      deviceId: 'd1',
+      id: index + 1,
+      status: 1,
+      statusName: '在线',
+      ...channel,
+    })),
+    total: channels.length,
+  };
+}
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+  return { promise, reject, resolve };
+}
+
 beforeEach(() => {
   m.hasAccess.mockReset().mockReturnValue(true);
+  m.getDeviceChannelPage
+    .mockReset()
+    .mockResolvedValue(channelPage({ channelId: 'c1', name: 'Camera 1' }));
   for (const k of [
     'broadcast',
     'controlAlarm',
@@ -206,10 +237,19 @@ describe('serverPanel —— 设备列表 upsert', () => {
   it('device.catalog 写入 channelCount 并置在线', async () => {
     const wrapper = mountPanel();
     await wrapper.setProps({
-      events: [devEvent('device.catalog', { deviceId: 'd1', channelCount: 8 })],
+      events: [
+        devEvent('device.catalog', {
+          deviceId: 'd1',
+          channelCount: 2,
+          channels: [
+            { deviceId: '34020000001320000001', name: 'Lab-ch1' },
+            { deviceId: '34020000001320000002', name: 'Lab-ch2' },
+          ],
+        }),
+      ],
     });
     await nextTick();
-    expect(wrapper.text()).toContain('8');
+    expect(wrapper.text()).toContain('2');
     expect(wrapper.find('.badge').attributes('data-status')).toBe('success');
   });
 
@@ -275,13 +315,128 @@ describe('serverPanel —— 自动选中与命令门控（C2）', () => {
   });
 });
 
+describe('serverPanel —— 真实通道加载与选择', () => {
+  async function registerDevice(deviceId = 'd1') {
+    const wrapper = mountPanel();
+    await wrapper.setProps({
+      events: [devEvent('device.register', { deviceId })],
+    });
+    await flushPromises();
+    return wrapper;
+  }
+
+  it('选中设备后按 deviceId 拉取通道，并默认选中第一条', async () => {
+    m.getDeviceChannelPage.mockResolvedValueOnce(
+      channelPage(
+        { channelId: 'c1', name: 'Camera 1' },
+        { channelId: 'c2', name: 'Camera 2' },
+      ),
+    );
+
+    const wrapper = await registerDevice();
+
+    expect(m.getDeviceChannelPage).toHaveBeenCalledWith(
+      { page: 1, size: 200 },
+      { deviceId: 'd1' },
+    );
+    const select = wrapper.findComponent({ name: 'Select' });
+    expect(select.props('value')).toBe('c1');
+    expect(select.props('options')).toEqual([
+      { label: 'c1 · Camera 1', value: 'c1' },
+      { label: 'c2 · Camera 2', value: 'c2' },
+    ]);
+  });
+
+  it('没有通道时提示并禁用点播和 PTZ', async () => {
+    m.getDeviceChannelPage.mockResolvedValueOnce(channelPage());
+
+    const wrapper = await registerDevice();
+
+    expect(m.messageWarning).toHaveBeenCalledWith(
+      'protocolLab.msg.noAvailableChannel',
+    );
+    expect(
+      buttonByText(wrapper, 'protocolLab.server.play')?.attributes('disabled'),
+    ).toBeDefined();
+    expect(
+      wrapper.findComponent({ name: 'PtzControl' }).props('disabled'),
+    ).toBe(true);
+    expect(m.liveStart).not.toHaveBeenCalled();
+    expect(m.ptzControl).not.toHaveBeenCalled();
+  });
+
+  it('通道加载失败时提示且不猜测通道 ID', async () => {
+    m.getDeviceChannelPage.mockRejectedValueOnce(new Error('network'));
+
+    const wrapper = await registerDevice();
+
+    expect(m.messageError).toHaveBeenCalledWith(
+      'protocolLab.msg.channelLoadFailed',
+    );
+    expect(wrapper.findComponent({ name: 'Select' }).props('value')).toBe('');
+    expect(
+      buttonByText(wrapper, 'protocolLab.server.play')?.attributes('disabled'),
+    ).toBeDefined();
+  });
+
+  it('切换设备后忽略前一个设备的迟到响应', async () => {
+    const first = deferred<ReturnType<typeof channelPage>>();
+    m.getDeviceChannelPage
+      .mockReturnValueOnce(first.promise)
+      .mockResolvedValueOnce(channelPage({ channelId: 'd2c1' }));
+    const wrapper = mountPanel();
+    await wrapper.setProps({
+      events: [
+        devEvent('device.register', { deviceId: 'd1' }, 1),
+        devEvent('device.register', { deviceId: 'd2' }, 2),
+      ],
+    });
+    await nextTick();
+
+    const d2 = wrapper
+      .findAll('.list-item')
+      .find((item) => item.text().includes('d2'));
+    await d2?.trigger('click');
+    await flushPromises();
+    expect(wrapper.findComponent({ name: 'Select' }).props('value')).toBe(
+      'd2c1',
+    );
+
+    first.resolve(channelPage({ channelId: 'd1c1' }));
+    await flushPromises();
+    expect(wrapper.findComponent({ name: 'Select' }).props('value')).toBe(
+      'd2c1',
+    );
+  });
+
+  it('所选设备收到 catalog 后重新拉取持久化通道', async () => {
+    const wrapper = await registerDevice();
+    m.getDeviceChannelPage.mockResolvedValueOnce(
+      channelPage({ channelId: 'catalog-c1' }),
+    );
+
+    await wrapper.setProps({
+      events: [
+        devEvent('device.register', { deviceId: 'd1' }),
+        devEvent('device.catalog', { channelCount: 1, deviceId: 'd1' }, 1),
+      ],
+    });
+    await flushPromises();
+
+    expect(m.getDeviceChannelPage).toHaveBeenCalledTimes(2);
+    expect(wrapper.findComponent({ name: 'Select' }).props('value')).toBe(
+      'catalog-c1',
+    );
+  });
+});
+
 describe('serverPanel —— 命令下发', () => {
   async function onlineWrapper() {
     const wrapper = mountPanel();
     await wrapper.setProps({
       events: [devEvent('device.register', { deviceId: 'd1' })],
     });
-    await nextTick();
+    await flushPromises();
     return wrapper;
   }
 
@@ -365,24 +520,30 @@ describe('serverPanel —— 命令下发', () => {
     expect(m.broadcast).toHaveBeenCalledWith('d1');
   });
 
-  it('pTZ 下发携带 channelId=deviceId+01 与 command/speed', async () => {
+  it('pTZ 下发携带通道接口返回的真实 channelId', async () => {
     const wrapper = await onlineWrapper();
     // 方向盘"上"按钮文案 = protocolLab.ptz.up
     await buttonByText(wrapper, 'protocolLab.ptz.up')?.trigger('click');
     expect(m.ptzControl).toHaveBeenCalledWith({
       deviceId: 'd1',
-      channelId: 'd101',
+      channelId: 'c1',
       command: 'UP',
       speed: 128,
     });
   });
 
-  it('点播下发 liveStart(deviceId, channelId)', async () => {
+  it('点播下发 liveStart(deviceId, channelId) 使用所选真实通道', async () => {
+    m.getDeviceChannelPage.mockResolvedValueOnce(
+      channelPage({ channelId: 'c1' }, { channelId: 'c2' }),
+    );
     const wrapper = await onlineWrapper();
+    const select = wrapper.findComponent({ name: 'Select' });
+    await select.vm.$emit('update:value', 'c2');
+    await nextTick();
     await buttonByText(wrapper, 'protocolLab.server.play')?.trigger('click');
     expect(m.liveStart).toHaveBeenCalledWith({
       deviceId: 'd1',
-      channelId: 'd101',
+      channelId: 'c2',
     });
   });
 
@@ -403,7 +564,7 @@ describe('serverPanel —— 行内订阅开关（GB28181-2022 §9.11）', () =>
     await wrapper.setProps({
       events: [devEvent('device.register', { deviceId: 'd1' })],
     });
-    await nextTick();
+    await flushPromises();
     return wrapper;
   }
 

@@ -14,11 +14,13 @@ import {
   List,
   ListItem,
   message,
+  Select,
   Space,
   Switch,
   Tooltip,
 } from 'ant-design-vue';
 
+import { getDeviceChannelPage } from '#/api/device';
 import {
   broadcast,
   controlAlarm,
@@ -78,6 +80,10 @@ const devices = ref<Map<string, DeviceRow>>(new Map());
 const selectedId = ref<string>('');
 const speed = ref(128);
 const loading = ref(false);
+const channelLoading = ref(false);
+const channelOptions = ref<Array<{ label: string; value: string }>>([]);
+const selectedChannelId = ref('');
+let channelLoadSequence = 0;
 /** 订阅开关 in-flight 标记，键 `${deviceId}:${kind}`，防重复点击 + loading 态。 */
 const subBusy = ref<Set<string>>(new Set());
 
@@ -90,16 +96,95 @@ const deviceList = computed(() =>
   [...devices.value.values()].toSorted((a, b) => b.lastTs - a.lastTs),
 );
 
-const selectedChannelId = computed(() => {
-  const dev = selectedId.value ? devices.value.get(selectedId.value) : null;
-  // catalog 通道命名规则：clientId + 两位序号；缺省回退 deviceId+'01'
-  return dev ? `${dev.deviceId}01` : '';
+const selectedCatalogRevision = computed(() => {
+  const deviceId = selectedId.value;
+  if (!deviceId) {
+    return '';
+  }
+  for (let index = props.events.length - 1; index >= 0; index -= 1) {
+    const event = props.events[index];
+    if (
+      event?.topic === 'device.catalog' &&
+      event.data?.deviceId === deviceId
+    ) {
+      return `${event.seq}:${event.ts}:${event.data?.channelCount ?? ''}`;
+    }
+  }
+  return '';
 });
 
 const canCommand = computed(() => {
   const dev = selectedId.value ? devices.value.get(selectedId.value) : null;
   return !!dev && dev.online;
 });
+
+const canMediaCommand = computed(
+  () => canCommand.value && !channelLoading.value && !!selectedChannelId.value,
+);
+
+const channelEmpty = computed(
+  () =>
+    canCommand.value &&
+    !channelLoading.value &&
+    channelOptions.value.length === 0,
+);
+
+async function loadChannels(deviceId: string, resetSelection: boolean) {
+  const requestSequence = ++channelLoadSequence;
+  if (resetSelection) {
+    channelOptions.value = [];
+    selectedChannelId.value = '';
+  }
+  if (!deviceId) {
+    channelLoading.value = false;
+    return;
+  }
+
+  channelLoading.value = true;
+  try {
+    const response = await getDeviceChannelPage(
+      { page: 1, size: 200 },
+      { deviceId },
+    );
+    if (
+      requestSequence !== channelLoadSequence ||
+      selectedId.value !== deviceId
+    ) {
+      return;
+    }
+
+    const options = (response?.items ?? []).map((channel) => ({
+      label: channel.name
+        ? `${channel.channelId} · ${channel.name}`
+        : channel.channelId,
+      value: channel.channelId,
+    }));
+    channelOptions.value = options;
+    if (!options.some((option) => option.value === selectedChannelId.value)) {
+      selectedChannelId.value = options[0]?.value ?? '';
+    }
+    if (options.length === 0) {
+      message.warning($t('protocolLab.msg.noAvailableChannel'));
+    }
+  } catch {
+    if (
+      requestSequence !== channelLoadSequence ||
+      selectedId.value !== deviceId
+    ) {
+      return;
+    }
+    channelOptions.value = [];
+    selectedChannelId.value = '';
+    message.error($t('protocolLab.msg.channelLoadFailed'));
+  } finally {
+    if (
+      requestSequence === channelLoadSequence &&
+      selectedId.value === deviceId
+    ) {
+      channelLoading.value = false;
+    }
+  }
+}
 
 /** 监听事件流，对设备列表做 upsert（R8：用 upsert 语义容忍乱序）。 */
 watch(
@@ -153,6 +238,20 @@ watch(
     }
   },
   { deep: true },
+);
+
+watch(
+  [selectedId, selectedCatalogRevision],
+  (
+    [deviceId, catalogRevision],
+    [previousDeviceId, previousCatalogRevision],
+  ) => {
+    const deviceChanged = deviceId !== previousDeviceId;
+    if (deviceChanged || catalogRevision !== previousCatalogRevision) {
+      void loadChannels(deviceId, deviceChanged);
+    }
+  },
+  { flush: 'post' },
 );
 
 function selectDevice(id: string) {
@@ -247,11 +346,20 @@ function onPtz(payload: {
   deviceId: string;
   speed: number;
 }) {
+  if (!canCommand.value) {
+    message.warning($t('protocolLab.msg.selectOnlineDevice'));
+    return;
+  }
+  const channelId = selectedChannelId.value;
+  if (!channelId) {
+    message.warning($t('protocolLab.msg.noAvailableChannel'));
+    return;
+  }
   run(
     () =>
       ptzControl({
         ...payload,
-        channelId: payload.channelId ?? selectedChannelId.value,
+        channelId,
       }),
     'protocolLab.msg.ptzSent',
   );
@@ -302,17 +410,22 @@ function onLiveStart() {
     message.warning($t('protocolLab.msg.selectOnlineDevice'));
     return;
   }
+  const channelId = selectedChannelId.value;
+  if (!channelId) {
+    message.warning($t('protocolLab.msg.noAvailableChannel'));
+    return;
+  }
   loading.value = true;
   liveStart({
     deviceId: selectedId.value,
-    channelId: selectedChannelId.value,
+    channelId,
   })
     .then((vo) => {
       message.success($t('protocolLab.msg.liveSent'));
       // 点播成功且有可播地址 → 打开播放器弹窗自动起播；失败/无地址不打扰
       if (vo?.playUrls && Object.keys(vo.playUrls).length > 0) {
         playerUrls.value = vo.playUrls;
-        playerTitle.value = `${selectedId.value} · ${selectedChannelId.value}`;
+        playerTitle.value = `${selectedId.value} · ${channelId}`;
         playerOpen.value = true;
       }
     })
@@ -400,11 +513,35 @@ function onPlayerClose() {
     </div>
 
     <div class="command-area" :class="{ disabled: !canCommand }">
+      <div class="channel-target">
+        <div class="channel-target-copy">
+          <span class="channel-target-label">
+            {{ $t('protocolLab.server.commandChannel') }}
+          </span>
+          <span class="channel-target-help">
+            {{ $t('protocolLab.server.commandChannelHint') }}
+          </span>
+        </div>
+        <Select
+          v-model:value="selectedChannelId"
+          class="channel-select"
+          :disabled="!canCommand || channelLoading || channelEmpty"
+          :loading="channelLoading"
+          :options="channelOptions"
+          :placeholder="$t('protocolLab.server.channelSelect')"
+          option-filter-prop="label"
+          show-search
+        />
+        <span v-if="channelEmpty" class="channel-empty">
+          {{ $t('protocolLab.server.channelEmpty') }}
+        </span>
+      </div>
+
       <PtzControl
         :device-id="selectedId"
         :channel-id="selectedChannelId"
         :speed="speed"
-        :disabled="!canCommand || loading"
+        :disabled="!canMediaCommand || loading"
         @command="onPtz"
       />
 
@@ -418,7 +555,7 @@ function onPlayerClose() {
       <Space wrap class="mt-3">
         <Button
           type="primary"
-          :disabled="!canCommand || loading"
+          :disabled="!canMediaCommand || loading"
           @click="onLiveStart"
         >
           {{ $t('protocolLab.server.play') }}
@@ -538,6 +675,59 @@ function onPlayerClose() {
 
 .command-area.disabled {
   opacity: 0.6;
+}
+
+.channel-target {
+  display: grid;
+  grid-template-columns: minmax(140px, auto) minmax(220px, 1fr);
+  gap: 4px 14px;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: linear-gradient(
+    110deg,
+    hsl(var(--accent) / 34%),
+    hsl(var(--card) / 12%)
+  );
+  border: 1px solid hsl(var(--border));
+  border-left: 3px solid hsl(var(--primary));
+  border-radius: 6px;
+}
+
+.channel-target-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.channel-target-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.channel-target-help,
+.channel-empty {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+
+.channel-empty {
+  grid-column: 2;
+  color: hsl(var(--destructive));
+}
+
+.channel-select {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .channel-target {
+    grid-template-columns: 1fr;
+  }
+
+  .channel-empty {
+    grid-column: 1;
+  }
 }
 
 .timeline-wrap {

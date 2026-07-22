@@ -81,6 +81,10 @@
     "queryDeviceInfo": "Query Device Info",
     "reboot": "Reboot",
     "play": "Live Play",
+    "commandChannel": "Command Channel",
+    "commandChannelHint": "Live play and PTZ share a persisted channel",
+    "channelSelect": "Select a real device channel",
+    "channelEmpty": "No channel available. Query the catalog first",
     "events": "Platform Events",
     "eventsEmpty": "No platform events yet. Device register / online / reports show here in real time",
     "sub": {
@@ -169,6 +173,8 @@
     "rebootSent": "Reboot command sent",
     "liveSent": "Live play request sent",
     "selectOnlineDevice": "Please select an online device from the list first",
+    "noAvailableChannel": "This device has no available channel. Query the catalog first",
+    "channelLoadFailed": "Failed to load device channels. Please try again",
     "pushStarted": "Push started",
     "pushStopped": "Push stopped",
     "pushFailed": "Push start failed"

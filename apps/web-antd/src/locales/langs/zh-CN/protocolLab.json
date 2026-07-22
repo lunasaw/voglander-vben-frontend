@@ -81,6 +81,10 @@
     "queryDeviceInfo": "查询设备信息",
     "reboot": "重启",
     "play": "实时点播",
+    "commandChannel": "指令通道",
+    "commandChannelHint": "点播与 PTZ 共用后端已登记通道",
+    "channelSelect": "请选择真实设备通道",
+    "channelEmpty": "暂无可用通道，请先查询目录",
     "events": "平台事件",
     "eventsEmpty": "暂无平台事件，设备注册 / 上线 / 上报会实时显示",
     "sub": {
@@ -169,6 +173,8 @@
     "rebootSent": "重启指令已下发",
     "liveSent": "点播请求已下发",
     "selectOnlineDevice": "请先在设备列表选择一个在线设备",
+    "noAvailableChannel": "当前设备没有可用通道，请先查询目录",
+    "channelLoadFailed": "设备通道加载失败，请稍后重试",
     "pushStarted": "推流已启动",
     "pushStopped": "推流已停止",
     "pushFailed": "推流启动失败"
