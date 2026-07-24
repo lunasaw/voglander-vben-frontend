@@ -17,9 +17,10 @@ export async function getBusinessTaskPage(
   );
 }
 
-export async function getBusinessTask(taskId: string) {
+export async function getBusinessTask(taskId: string, signal?: AbortSignal) {
   return requestClient.get<BusinessTaskApi.BusinessTaskDetailVO>(
-    `/api/v1/business-tasks/${taskId}`,
+    `/api/v1/business-tasks/${encodeURIComponent(taskId)}`,
+    { signal, suppressGlobalError: true },
   );
 }
 
@@ -42,12 +43,14 @@ export async function getBusinessTaskExecutionPage(
   return requestClient.post<BusinessTaskApi.BusinessTaskExecutionListResp>(
     `/api/v1/business-task-executions/getPage?page=${paging.page}&size=${paging.size}`,
     filters,
+    { suppressGlobalError: true },
   );
 }
 
 export async function getBusinessTaskExecution(executionId: string) {
   return requestClient.get<BusinessTaskApi.BusinessTaskExecutionDetailVO>(
-    `/api/v1/business-task-executions/${executionId}`,
+    `/api/v1/business-task-executions/${encodeURIComponent(executionId)}`,
+    { suppressGlobalError: true },
   );
 }
 

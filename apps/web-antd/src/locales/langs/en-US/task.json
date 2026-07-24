@@ -109,7 +109,9 @@
     "execution": {
       "title": "Execution Details",
       "events": "Event Timeline",
-      "empty": "No execution records"
+      "empty": "No execution records",
+      "loadError": "Failed to load execution history; existing data was kept",
+      "loadMore": "Load more"
     },
     "event": {
       "CREATED": "Created",

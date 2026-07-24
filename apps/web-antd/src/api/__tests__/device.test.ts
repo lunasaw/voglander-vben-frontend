@@ -66,6 +66,7 @@ describe('device API —— 分页查询（§1.1 DeviceController）', () => {
     expect(postMock).toHaveBeenCalledWith(
       '/api/v1/device/getPage?page=2&size=20',
       { deviceId: 'd1', status: 1 },
+      { signal: undefined, suppressGlobalError: true },
     );
   });
 
@@ -74,6 +75,7 @@ describe('device API —— 分页查询（§1.1 DeviceController）', () => {
     expect(postMock).toHaveBeenCalledWith(
       '/api/v1/device/getPage?page=1&size=10',
       {},
+      { signal: undefined, suppressGlobalError: true },
     );
   });
 
@@ -99,6 +101,7 @@ describe('device API —— 通道分页（S5 §1.1 DeviceChannelController）',
     expect(postMock).toHaveBeenCalledWith(
       '/api/v1/deviceChannel/getPage?page=2&size=20',
       { deviceId: 'd1', status: 1 },
+      { signal: undefined, suppressGlobalError: true },
     );
   });
 
@@ -107,6 +110,7 @@ describe('device API —— 通道分页（S5 §1.1 DeviceChannelController）',
     expect(postMock).toHaveBeenCalledWith(
       '/api/v1/deviceChannel/getPage?page=1&size=10',
       {},
+      { signal: undefined, suppressGlobalError: true },
     );
   });
 

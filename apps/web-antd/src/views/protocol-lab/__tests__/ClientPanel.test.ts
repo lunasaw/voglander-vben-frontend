@@ -399,6 +399,7 @@ describe('clientPanel —— 模拟推流（1.0.7 §2/§4）', () => {
     expect(m.labPushStart).toHaveBeenCalledWith({
       ffmpegPath: '/usr/local/bin/ffmpeg',
       mediaFile: '/Movies/demo.mp4',
+      zlmMode: false,
     });
   });
 

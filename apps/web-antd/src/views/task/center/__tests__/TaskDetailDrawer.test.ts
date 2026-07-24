@@ -16,6 +16,10 @@ vi.mock('#/api/task', () => ({
   getBusinessTaskExecution: vi.fn(),
 }));
 vi.mock('ant-design-vue', () => ({
+  Alert: {
+    name: 'Alert',
+    template: '<div><slot /><slot name="action" /></div>',
+  },
   Button: { name: 'Button', template: '<button><slot /></button>' },
   Descriptions: { name: 'Descriptions', template: '<div><slot /></div>' },
   DescriptionsItem: {
@@ -30,6 +34,7 @@ vi.mock('ant-design-vue', () => ({
     emits: ['close', 'update:open'],
     template: '<aside v-if="open"><h2>{{ title }}</h2><slot /></aside>',
   },
+  Spin: { name: 'Spin', template: '<span />' },
   Tag: { name: 'Tag', template: '<span><slot /></span>' },
 }));
 

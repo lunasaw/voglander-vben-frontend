@@ -62,16 +62,20 @@ export function useSseEvents(fullTopics: () => string[]) {
 
   const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
-  /** 去重键：topic + ts + 业务标识（callId/deviceId/clientId/platformId/sn）。 */
+  /** 去重键：topic + ts + 可用的领域标识。 */
   function dedupKey(topic: string, data: Record<string, any>): string {
-    const id =
-      data.callId ??
-      data.deviceId ??
-      data.clientId ??
-      data.platformId ??
-      data.sn ??
-      '';
-    return `${topic}|${data.ts ?? ''}|${id}`;
+    const ids = [
+      data.assetId,
+      data.taskId,
+      data.executionId,
+      data.callId,
+      data.deviceId,
+      data.channelId,
+      data.clientId,
+      data.platformId,
+      data.sn,
+    ].filter((value) => value !== undefined && value !== null && value !== '');
+    return `${topic}|${data.ts ?? ''}|${ids.join('|')}`;
   }
 
   function pushEvent(topic: string, raw: string) {

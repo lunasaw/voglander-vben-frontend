@@ -7,15 +7,7 @@ import { computed, nextTick, ref, watch } from 'vue';
 
 import { useAccess } from '@vben/access';
 
-import {
-  Button,
-  Descriptions,
-  DescriptionsItem,
-  Drawer,
-  message,
-  Modal,
-  Tag,
-} from 'ant-design-vue';
+import { Drawer, message, Modal } from 'ant-design-vue';
 
 import {
   cancelBusinessTask,
@@ -26,9 +18,7 @@ import {
 } from '#/api/task';
 import { $t } from '#/locales';
 
-import { getTaskTypeAdapter } from './registry';
-import TaskExecutionHistory from './TaskExecutionHistory.vue';
-import TaskProgress from './TaskProgress.vue';
+import TaskDetailContent from './TaskDetailContent.vue';
 import { getTaskActions } from './utils';
 
 const props = withDefaults(
@@ -44,15 +34,10 @@ const props = withDefaults(
 const emit = defineEmits<{ 'update:open': [value: boolean] }>();
 const loadedTask = ref<BusinessTaskApi.BusinessTaskDetailVO>();
 const busyAction = ref<TaskCenterAction>();
+const refreshKey = ref(0);
 const { hasAccessByCodes } = useAccess();
 
 const displayTask = computed(() => loadedTask.value ?? props.task);
-const taskAdapter = computed(() =>
-  getTaskTypeAdapter(displayTask.value?.taskType),
-);
-const resultView = computed(() =>
-  taskAdapter.value.resultRenderer?.({ task: displayTask.value }),
-);
 const availableActions = computed(() =>
   getTaskActions({
     capabilities: displayTask.value?.capabilities,
@@ -61,16 +46,11 @@ const availableActions = computed(() =>
   }),
 );
 
-function formatTime(value?: number) {
-  return value ? new Date(value).toLocaleString() : '-';
-}
-
 watch(
   () => [props.open, props.taskId] as const,
   async ([open, taskId]) => {
-    if (open && taskId && !props.task) {
+    if (open && taskId && !props.task)
       loadedTask.value = await getBusinessTask(taskId);
-    }
   },
   { immediate: true },
 );
@@ -89,17 +69,18 @@ function close() {
 }
 
 function actionLabel(action: TaskCenterAction): string {
-  const key: Record<TaskCenterAction, string> = {
-    CANCEL: 'task.center.action.cancel',
-    MANUAL_RETRY: 'task.center.action.retry',
-    PAUSE: 'task.center.action.pause',
-    RESUME: 'task.center.action.resume',
-  };
-  return $t(key[action]);
+  return $t(
+    {
+      CANCEL: 'task.center.action.cancel',
+      MANUAL_RETRY: 'task.center.action.retry',
+      PAUSE: 'task.center.action.pause',
+      RESUME: 'task.center.action.resume',
+    }[action],
+  );
 }
 
-function confirmAction(action: TaskCenterAction): Promise<boolean> {
-  return new Promise((resolve, reject) => {
+function confirmAction(action: TaskCenterAction) {
+  return new Promise<boolean>((resolve) => {
     const messageKey: Record<TaskCenterAction, string> = {
       CANCEL: 'task.center.message.cancelConfirm',
       MANUAL_RETRY: 'task.center.message.retryConfirm',
@@ -109,7 +90,7 @@ function confirmAction(action: TaskCenterAction): Promise<boolean> {
     Modal.confirm({
       cancelText: $t('common.cancel'),
       content: $t(messageKey[action]),
-      onCancel: () => reject(new Error('cancelled')),
+      onCancel: () => resolve(false),
       onOk: () => resolve(true),
       title: actionLabel(action),
     });
@@ -119,35 +100,36 @@ function confirmAction(action: TaskCenterAction): Promise<boolean> {
 async function refreshTask() {
   if (displayTask.value?.taskId) {
     loadedTask.value = await getBusinessTask(displayTask.value.taskId);
+    refreshKey.value++;
   }
 }
 
 async function onControl(action: TaskCenterAction) {
-  if (!hasAccessByCodes(['Task:Control'])) {
+  if (
+    !hasAccessByCodes(['Task:Control']) ||
+    !displayTask.value?.taskId ||
+    busyAction.value ||
+    !availableActions.value.includes(action)
+  ) {
     message.error($t('task.center.message.permissionDenied'));
     return;
   }
-  if (!displayTask.value?.taskId || busyAction.value) {
-    return;
-  }
-  try {
-    await confirmAction(action);
-  } catch {
-    return;
-  }
+  if (!(await confirmAction(action))) return;
   busyAction.value = action;
   try {
-    const taskId = displayTask.value.taskId;
+    const task = displayTask.value;
+    const taskId = task.taskId as string;
     switch (action) {
       case 'CANCEL': {
-        loadedTask.value = await cancelBusinessTask(taskId, {});
+        loadedTask.value = await cancelBusinessTask(taskId, {
+          expectedVersion: task.version,
+        });
         break;
       }
       case 'MANUAL_RETRY': {
-        const executionId = displayTask.value.activeExecution?.executionId;
-        if (!executionId) {
-          throw new Error('execution is unavailable');
-        }
+        const executionId =
+          task.lastExecutionId ?? task.activeExecution?.executionId;
+        if (!executionId) throw new Error('execution is unavailable');
         loadedTask.value = await retryBusinessTask(taskId, {
           executionId,
           idempotencyKey: `manual-retry:${taskId}:${executionId}`,
@@ -155,12 +137,15 @@ async function onControl(action: TaskCenterAction) {
         break;
       }
       case 'PAUSE': {
-        loadedTask.value = await pauseBusinessTask(taskId, {});
+        loadedTask.value = await pauseBusinessTask(taskId, {
+          expectedVersion: task.version,
+        });
         break;
       }
-      case 'RESUME': {
-        loadedTask.value = await resumeBusinessTask(taskId, {});
-        break;
+      default: {
+        loadedTask.value = await resumeBusinessTask(taskId, {
+          expectedVersion: task.version,
+        });
       }
     }
     message.success($t('task.center.message.controlSuccess'));
@@ -181,127 +166,12 @@ async function onControl(action: TaskCenterAction) {
     width="min(100vw, 720px)"
     @close="close"
   >
-    <template v-if="displayTask">
-      <div class="mb-4 flex items-center gap-2">
-        <span class="text-lg font-semibold">{{
-          displayTask.taskName || displayTask.taskId
-        }}</span>
-        <Tag>{{ $t(taskAdapter.labelKey) }}</Tag>
-        <Tag>
-          {{ $t(`task.center.status.${displayTask.state || 'SCHEDULED'}`) }}
-        </Tag>
-      </div>
-
-      <div
-        v-if="availableActions.length > 0"
-        class="mb-5 flex flex-wrap gap-2"
-        role="group"
-        :aria-label="$t('task.center.detail.capabilities')"
-      >
-        <Button
-          v-for="action in availableActions"
-          :key="action"
-          :data-action="action"
-          :danger="action === 'CANCEL'"
-          :loading="busyAction === action"
-          :disabled="!!busyAction"
-          class="min-h-11 min-w-11"
-          type="primary"
-          @click="onControl(action)"
-        >
-          {{ actionLabel(action) }}
-        </Button>
-      </div>
-
-      <section aria-labelledby="task-summary" class="mb-5">
-        <h3 id="task-summary" class="mb-2 text-base font-medium">
-          {{ $t('task.center.detail.summary') }}
-        </h3>
-        <Descriptions :column="1" bordered size="small">
-          <DescriptionsItem :label="$t('task.center.field.taskId')">
-            {{ displayTask.taskId || '-' }}
-          </DescriptionsItem>
-          <DescriptionsItem :label="$t('task.center.field.taskType')">
-            {{ $t(taskAdapter.labelKey) }}
-          </DescriptionsItem>
-          <DescriptionsItem :label="$t('task.center.field.progress')">
-            <TaskProgress
-              :current="displayTask.progressCurrent"
-              :message="displayTask.progressMessage"
-              :total="displayTask.progressTotal"
-            />
-          </DescriptionsItem>
-          <DescriptionsItem :label="$t('task.center.field.owner')">
-            {{ displayTask.ownerId || '-' }}
-          </DescriptionsItem>
-        </Descriptions>
-      </section>
-
-      <section aria-labelledby="task-schedule" class="mb-5">
-        <h3 id="task-schedule" class="mb-2 text-base font-medium">
-          {{ $t('task.center.detail.schedule') }}
-        </h3>
-        <Descriptions :column="1" bordered size="small">
-          <DescriptionsItem :label="$t('task.center.field.schedule')">
-            {{ formatTime(displayTask.scheduleStartTime) }}
-            <span aria-hidden="true"> → </span>
-            {{ formatTime(displayTask.scheduleEndTime) }}
-          </DescriptionsItem>
-          <DescriptionsItem :label="$t('task.center.field.createTime')">
-            {{ formatTime(displayTask.createTime) }}
-          </DescriptionsItem>
-        </Descriptions>
-      </section>
-
-      <section aria-labelledby="task-counters" class="mb-5">
-        <h3 id="task-counters" class="mb-2 text-base font-medium">
-          {{ $t('task.center.detail.counters') }}
-        </h3>
-        <div class="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-          <div>
-            {{ $t('task.center.status.COMPLETED') }}:
-            {{ displayTask.successCount ?? 0 }}
-          </div>
-          <div>
-            {{ $t('task.center.status.FAILED') }}:
-            {{ displayTask.failedCount ?? 0 }}
-          </div>
-          <div>
-            {{ $t('task.center.status.MISSED') }}:
-            {{ displayTask.missedCount ?? 0 }}
-          </div>
-          <div>
-            {{ $t('task.center.status.CANCELLED') }}:
-            {{ displayTask.cancelledCount ?? 0 }}
-          </div>
-        </div>
-      </section>
-
-      <section
-        v-if="displayTask.resultSummary || resultView"
-        aria-labelledby="task-result"
-        class="mb-5"
-      >
-        <h3 id="task-result" class="mb-2 text-base font-medium">
-          {{ $t('task.center.detail.businessSummary') }}
-        </h3>
-        <p v-if="displayTask.resultSummary" class="break-words text-sm">
-          {{ displayTask.resultSummary }}
-        </p>
-        <a
-          v-if="resultView?.href"
-          :href="resultView.href"
-          class="mt-2 inline-block"
-          target="_self"
-        >
-          {{ $t(resultView.labelKey) }}
-        </a>
-      </section>
-
-      <TaskExecutionHistory :task-id="displayTask.taskId" />
-    </template>
-    <div v-else class="text-sm text-muted-foreground">
-      {{ $t('task.center.execution.empty') }}
-    </div>
+    <TaskDetailContent
+      :available-actions="availableActions"
+      :busy-action="busyAction"
+      :refresh-key="refreshKey"
+      :task="displayTask"
+      @control="onControl"
+    />
   </Drawer>
 </template>

@@ -124,6 +124,7 @@ export namespace BusinessTaskApi {
   export interface BusinessTaskVO {
     createTime?: number;
     updateTime?: number;
+    version?: number;
     taskId?: string;
     taskType?: string;
     taskName?: string;

@@ -1,7 +1,7 @@
 /**
  * 该文件可自行根据业务逻辑进行调整
  */
-import type { RequestClientOptions } from '@vben/request';
+import type { RequestClientConfig, RequestClientOptions } from '@vben/request';
 
 import { useAppConfig } from '@vben/hooks';
 import { preferences } from '@vben/preferences';
@@ -123,3 +123,93 @@ export const requestClient = createRequestClient(apiURL, {
 });
 
 export const baseRequestClient = new RequestClient({ baseURL: apiURL });
+
+export interface ApiRequestErrorMeta {
+  businessCode?: string;
+  httpStatus?: number;
+  message: string;
+  transport: 'abort' | 'network' | 'response' | 'timeout' | 'unknown';
+}
+
+export class ApiRequestError extends Error {
+  readonly meta: ApiRequestErrorMeta;
+
+  constructor(meta: ApiRequestErrorMeta) {
+    super(meta.message);
+    this.name = 'ApiRequestError';
+    this.meta = meta;
+  }
+}
+
+function stringValue(value: unknown) {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+export function toApiRequestErrorMeta(error: unknown): ApiRequestErrorMeta {
+  const candidate = error as {
+    code?: string;
+    config?: { signal?: AbortSignal };
+    message?: string;
+    name?: string;
+    response?: {
+      data?: Record<string, unknown>;
+      status?: number;
+    };
+  };
+  const data = candidate?.response?.data ?? {};
+  const businessCode =
+    stringValue(data.businessCode) ??
+    stringValue(data.errorCode) ??
+    stringValue(data.code);
+  const messageText =
+    stringValue(data.error) ??
+    stringValue(data.message) ??
+    stringValue(candidate?.message) ??
+    'Request failed';
+
+  let transport: ApiRequestErrorMeta['transport'] = 'unknown';
+  if (
+    candidate?.name === 'AbortError' ||
+    candidate?.code === 'ERR_CANCELED' ||
+    candidate?.config?.signal?.aborted
+  ) {
+    transport = 'abort';
+  } else if (
+    candidate?.code === 'ECONNABORTED' ||
+    candidate?.code === 'ETIMEDOUT' ||
+    candidate?.message?.toLowerCase().includes('timeout')
+  ) {
+    transport = 'timeout';
+  } else if (candidate?.response) {
+    transport = 'response';
+  } else if (
+    candidate?.code === 'ERR_NETWORK' ||
+    candidate?.message?.includes('Network Error')
+  ) {
+    transport = 'network';
+  }
+
+  return {
+    businessCode,
+    httpStatus: candidate?.response?.status,
+    message: messageText,
+    transport,
+  };
+}
+
+/** Uses the configured client while preserving structured failure metadata. */
+export async function requestWithErrorMeta<T>(
+  url: string,
+  config: RequestClientConfig,
+): Promise<T> {
+  try {
+    const requestConfig: RequestClientConfig & { url: string } = {
+      ...config,
+      suppressGlobalError: true,
+      url,
+    };
+    return await requestClient.instance.request<T, T>(requestConfig);
+  } catch (error) {
+    throw new ApiRequestError(toApiRequestErrorMeta(error));
+  }
+}

@@ -44,7 +44,7 @@ export function buildTaskPageBody(
 const CONTROL_PERMISSION = 'Task:Control';
 
 const actionStates: Record<TaskCenterAction, readonly string[]> = {
-  PAUSE: ['SCHEDULED', 'RUNNING'],
+  PAUSE: ['PAUSED', 'SCHEDULED', 'RUNNING'],
   RESUME: ['PAUSED'],
   CANCEL: ['SCHEDULED', 'RUNNING', 'PAUSED'],
   MANUAL_RETRY: ['FAILED'],

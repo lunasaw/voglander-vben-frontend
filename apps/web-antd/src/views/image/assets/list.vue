@@ -1,502 +1,716 @@
 <script lang="ts" setup>
-/* eslint-disable vue/html-closing-bracket-newline, vue/multiline-html-element-content-newline */
-import type { TableProps, UploadChangeParam } from 'ant-design-vue';
+import type { MenuProps } from 'ant-design-vue';
 
-import type { ImageApi } from '#/api/image';
+import type { AssetQueryFormValues } from './data';
 
-import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import type { VxeTableGridOptions } from '#/adapter/vxe-table';
+import type { ImageApi, ImageAssetStatus } from '#/api/image';
+
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import { useAccess } from '@vben/access';
-import { Page } from '@vben/common-ui';
+import { Page, useVbenDrawer } from '@vben/common-ui';
 
 import {
   Alert,
   Button,
   Card,
-  Descriptions,
-  DescriptionsItem,
-  Drawer,
+  Dropdown,
   Empty,
-  Form,
-  Image,
-  Input,
   message,
   Modal,
-  Select,
-  Skeleton,
+  Pagination,
+  Result,
+  Segmented,
   Space,
-  Statistic,
-  Table,
   Tag,
-  Upload,
+  Tooltip,
 } from 'ant-design-vue';
+import dayjs from 'dayjs';
 
+import { useVbenForm } from '#/adapter/form';
+import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
   deleteImageAsset,
-  getImageAsset,
-  getImageAssetPage,
+  downloadImageAssetBlob,
   getImageAssetStatistics,
-  imageAssetContentUrl,
-  imageAssetDownloadUrl,
   retryDeleteImageAsset,
-  uploadImageAsset,
 } from '#/api/image';
 import { useImageAssetRefresh } from '#/composables/useImageAssetRefresh';
 import { $t } from '#/locales';
+import { stableFingerprint } from '#/views/image/shared/idempotent-submit';
+import {
+  assetStatusColor,
+  assetStatusKey,
+  filenameFromContentDisposition,
+  formatBytes,
+  formatDateTime,
+  imageFormatLabel,
+  suggestedAssetFilename,
+} from '#/views/image/shared/image-presentation';
+import { imageCameraLabel } from '#/views/image/shared/image-source';
 
+import AssetDetailDrawer from './components/AssetDetailDrawer.vue';
+import AssetGallery from './components/AssetGallery.vue';
+import AssetStatistics from './components/AssetStatistics.vue';
+import AssetThumbnail from './components/AssetThumbnail.vue';
+import AssetUploadDrawer from './components/AssetUploadDrawer.vue';
 import {
   assetActionAllowed,
-  formatBytes,
-  imageFormatLabel,
-  mergeAssetQuery,
+  assetDetailIdFromRoute,
+  assetFormValuesToQuery,
+  assetQueryFromRoute,
+  assetQueryToRoute,
+  useAssetQuerySchema,
 } from './data';
+import { useAssetPageController } from './use-asset-page-controller';
 
+type AssetView = 'gallery' | 'list';
+
+const VIEW_STORAGE_KEY = 'voglander:image-assets:view';
 const route = useRoute();
+const router = useRouter();
 const { hasAccessByCodes } = useAccess();
-
-const rows = ref<ImageApi.AssetVO[]>([]);
-const total = ref(0);
-const page = ref(1);
-const size = 24;
-const loading = ref(false);
-const error = ref<string>();
-const stats = ref<ImageApi.AssetStatisticsVO>({});
-const filters = ref<ImageApi.AssetQueryReq>(mergeAssetQuery({}, route.query));
-const selected = ref<ImageApi.AssetVO>();
-const detailOpen = ref(false);
-const uploadOpen = ref(false);
-const uploadFile = ref<File>();
-const uploadName = ref('');
-const uploadBusy = ref(false);
-const uploadKey = ref<string>();
-const uploadError = ref(false);
+const initialContext = {
+  channelId: assetQueryFromRoute(route.query).channelId,
+  deviceId: assetQueryFromRoute(route.query).deviceId,
+};
+const controller = useAssetPageController(assetQueryFromRoute(route.query));
+const statistics = ref<ImageApi.AssetStatisticsVO>({});
+const statisticsLoading = ref(false);
+const statisticsError = ref(false);
+const actionBusy = ref<string>();
 
 const canQuery = computed(() => hasAccessByCodes(['Image:Asset:Query']));
-const canUpload = computed(() => hasAccessByCodes(['Image:Asset:Upload']));
 const canView = computed(() => hasAccessByCodes(['Image:Asset:View']));
+const canUpload = computed(() => hasAccessByCodes(['Image:Asset:Upload']));
 const canDelete = computed(() => hasAccessByCodes(['Image:Asset:Delete']));
 
-const columns: TableProps['columns'] = [
-  {
-    title: $t('image.assets.field.name'),
-    dataIndex: 'assetName',
-    key: 'name',
-    width: 200,
-  },
-  {
-    title: $t('image.assets.field.format'),
-    dataIndex: 'imageFormat',
-    key: 'format',
-    width: 100,
-  },
-  { title: $t('image.assets.field.size'), key: 'size', width: 120 },
-  {
-    title: $t('image.assets.field.status'),
-    dataIndex: 'status',
-    key: 'status',
-    width: 130,
-  },
-  {
-    title: $t('image.assets.field.actions'),
-    key: 'actions',
-    fixed: 'right' as const,
-    width: 180,
-  },
-];
-
-function assetRecord(value: unknown) {
-  return value as ImageApi.AssetVO;
-}
-
-async function refresh() {
-  if (!canQuery.value) return;
-  loading.value = true;
-  error.value = undefined;
+function readViewPreference(): AssetView {
+  if (!canView.value) return 'list';
   try {
-    const [list, summary] = await Promise.all([
-      getImageAssetPage({ page: page.value, size }, filters.value),
-      getImageAssetStatistics(),
-    ]);
-    rows.value = list?.items ?? [];
-    total.value = list?.total ?? 0;
-    stats.value = summary ?? {};
+    const stored = localStorage.getItem(VIEW_STORAGE_KEY);
+    return stored === 'list' ? 'list' : 'gallery';
   } catch {
-    error.value = $t('image.assets.error.load');
+    return 'gallery';
+  }
+}
+
+const view = ref<AssetView>(readViewPreference());
+
+function setView(next: number | string) {
+  view.value = canView.value && next === 'gallery' ? 'gallery' : 'list';
+  try {
+    localStorage.setItem(VIEW_STORAGE_KEY, view.value);
+  } catch {
+    // Storage is a preference only; query remains fully functional without it.
+  }
+}
+
+const [UploadDrawer, uploadDrawerApi] = useVbenDrawer({
+  connectedComponent: AssetUploadDrawer,
+  destroyOnClose: false,
+});
+const [DetailDrawer, detailDrawerApi] = useVbenDrawer({
+  connectedComponent: AssetDetailDrawer,
+  destroyOnClose: false,
+});
+
+function filtersToForm(filters: ImageApi.AssetQueryReq): AssetQueryFormValues {
+  return {
+    assetId: filters.assetId,
+    assetName: filters.assetName,
+    capturedRange:
+      filters.capturedStart !== undefined && filters.capturedEnd !== undefined
+        ? [dayjs(filters.capturedStart), dayjs(filters.capturedEnd)]
+        : undefined,
+    channelId: filters.channelId,
+    deviceId: filters.deviceId,
+    sourceTaskId: filters.sourceTaskId,
+    sourceType: filters.sourceType,
+    status: filters.status,
+  };
+}
+
+const [QueryForm, queryFormApi] = useVbenForm({
+  actionLayout: 'rowEnd',
+  collapsed: true,
+  commonConfig: {
+    componentProps: { class: 'w-full' },
+  },
+  handleReset: resetFilters,
+  handleSubmit: submitFilters,
+  schema: useAssetQuerySchema(),
+  showCollapseButton: true,
+  submitButtonOptions: { content: $t('common.search') },
+  wrapperClass: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5',
+});
+
+const gridColumns = computed<VxeTableGridOptions<ImageApi.AssetVO>['columns']>(
+  () => [
+    ...(canView.value
+      ? [
+          {
+            field: 'image',
+            slots: { default: 'image' },
+            title: $t('image.assets.field.image'),
+            width: 88,
+          },
+        ]
+      : []),
+    {
+      field: 'assetName',
+      minWidth: 220,
+      slots: { default: 'name' },
+      title: $t('image.assets.field.name'),
+    },
+    {
+      field: 'sourceType',
+      minWidth: 210,
+      slots: { default: 'source' },
+      title: $t('image.assets.field.source'),
+    },
+    {
+      field: 'dimensions',
+      formatter: ({ row }: { row: ImageApi.AssetVO }) =>
+        `${row.width ?? '-'} × ${row.height ?? '-'} · ${imageFormatLabel(row.imageFormat)}`,
+      minWidth: 150,
+      title: $t('image.assets.field.specification'),
+    },
+    {
+      field: 'fileSize',
+      formatter: ({ row }: { row: ImageApi.AssetVO }) =>
+        formatBytes(row.fileSize),
+      minWidth: 110,
+      title: $t('image.assets.field.size'),
+    },
+    {
+      field: 'capturedAt',
+      formatter: ({ row }: { row: ImageApi.AssetVO }) =>
+        formatDateTime(row.capturedAt),
+      minWidth: 180,
+      title: $t('image.assets.field.capturedAt'),
+    },
+    {
+      field: 'status',
+      slots: { default: 'status' },
+      title: $t('image.assets.field.status'),
+      width: 130,
+    },
+    {
+      field: 'operation',
+      fixed: 'right',
+      slots: { default: 'operation' },
+      title: $t('image.assets.field.actions'),
+      width: canView.value ? 170 : 100,
+    },
+  ],
+);
+
+const [Grid, gridApi] = useVbenVxeGrid({
+  gridOptions: {
+    columns: gridColumns.value,
+    data: [],
+    height: 'auto',
+    keepSource: true,
+    pagerConfig: { enabled: false },
+    rowConfig: { keyField: 'assetId' },
+    scrollX: { enabled: true },
+    scrollY: { enabled: true },
+    toolbarConfig: {
+      custom: true,
+      export: false,
+      refresh: false,
+      search: false,
+      zoom: true,
+    },
+  } as VxeTableGridOptions<ImageApi.AssetVO>,
+});
+
+watch(controller.rows, (rows) => gridApi.setGridOptions({ data: rows }), {
+  immediate: true,
+});
+watch(controller.loading, (loading) => gridApi.setLoading(loading), {
+  immediate: true,
+});
+watch(gridColumns, (columns) => gridApi.setGridOptions({ columns }));
+watch(canView, (allowed) => {
+  if (!allowed) view.value = 'list';
+});
+
+async function loadStatistics() {
+  if (!canQuery.value) return;
+  statisticsLoading.value = true;
+  statisticsError.value = false;
+  try {
+    statistics.value = (await getImageAssetStatistics()) ?? {};
+  } catch {
+    statisticsError.value = true;
   } finally {
-    loading.value = false;
+    statisticsLoading.value = false;
   }
 }
 
-function applyFilters() {
-  page.value = 1;
-  void refresh();
+async function refreshAll() {
+  await Promise.all([controller.refreshCurrentPage(), loadStatistics()]);
 }
 
-function resetFilters() {
-  filters.value = mergeAssetQuery({}, route.query);
-  applyFilters();
-}
-
-function openDetail(asset: ImageApi.AssetVO) {
-  if (!hasAccessByCodes(['Image:Asset:View'])) {
-    message.error($t('image.common.permissionDenied'));
-    return;
-  }
-  selected.value = asset;
-  detailOpen.value = true;
-  void getImageAsset(asset.assetId).then((value) => {
-    if (value) selected.value = value;
-  });
-}
-
-async function openDeepLinkedAsset() {
-  const assetId = String(route.params.assetId || route.query.assetId || '');
-  if (!assetId || !canView.value) return;
-  const asset = await getImageAsset(assetId);
-  if (asset) {
-    selected.value = asset;
-    detailOpen.value = true;
-  }
-}
-
-async function remove(asset: ImageApi.AssetVO, retry = false) {
-  if (!hasAccessByCodes(['Image:Asset:Delete'])) {
-    message.error($t('image.common.permissionDenied'));
-    return;
-  }
-  if (!assetActionAllowed(asset.status, retry ? 'retryDelete' : 'delete'))
-    return;
-  Modal.confirm({
-    title: retry
-      ? $t('image.assets.action.retryDelete')
-      : $t('image.assets.action.delete'),
-    content: $t(
-      retry
-        ? 'image.assets.confirm.retryDelete'
-        : 'image.assets.confirm.delete',
-    ),
-    onOk: async () => {
-      await (retry
-        ? retryDeleteImageAsset(asset.assetId)
-        : deleteImageAsset(asset.assetId));
-      await refresh();
+async function syncQuery(filters: ImageApi.AssetQueryReq) {
+  const stable = assetQueryToRoute(filters);
+  const detailId = assetDetailIdFromRoute(route.query, route.params.assetId);
+  await router.replace({
+    query: {
+      ...stable,
+      ...(detailId && !route.params.assetId ? { assetId: detailId } : {}),
     },
   });
 }
 
-function openUpload() {
-  if (!hasAccessByCodes(['Image:Asset:Upload'])) {
+async function submitFilters(values: Record<string, unknown>) {
+  const filters = assetFormValuesToQuery(values as AssetQueryFormValues);
+  const succeeded = await controller.query(filters);
+  if (succeeded) await syncQuery(filters);
+}
+
+async function resetFilters() {
+  const filters = { ...initialContext };
+  await queryFormApi.setValues(filtersToForm(filters));
+  const succeeded = await controller.query(filters);
+  if (succeeded) await syncQuery(filters);
+}
+
+async function applyStatistic(status?: ImageAssetStatus) {
+  const values = await queryFormApi.getValues<AssetQueryFormValues>();
+  await queryFormApi.setValues({
+    ...values,
+    ...(status === undefined ? { capturedRange: undefined } : {}),
+    status,
+  });
+  await queryFormApi.submitForm();
+}
+
+async function clearContext(field: 'channelId' | 'deviceId') {
+  await queryFormApi.setFieldValue(field, undefined);
+  await queryFormApi.submitForm();
+}
+
+function ensureViewPermission() {
+  if (hasAccessByCodes(['Image:Asset:View'])) return true;
+  message.error($t('image.common.permissionDenied'));
+  return false;
+}
+
+async function openDetail(asset: ImageApi.AssetVO) {
+  if (!ensureViewPermission()) return;
+  detailDrawerApi.setData({ asset, canDelete: canDelete.value }).open();
+  if (!route.params.assetId) {
+    await router.replace({ query: { ...route.query, assetId: asset.assetId } });
+  }
+}
+
+async function closeDetailRoute() {
+  const assetId = assetDetailIdFromRoute(route.query, route.params.assetId);
+  if (!assetId) return;
+  const query = { ...route.query };
+  delete query.assetId;
+  await (route.params.assetId
+    ? router.replace({ path: '/image/assets', query })
+    : router.replace({ query }));
+}
+
+function actionMenu(asset: ImageApi.AssetVO): NonNullable<MenuProps['items']> {
+  const items: NonNullable<MenuProps['items']> = [];
+  if (canView.value) {
+    items.push({ key: 'download', label: $t('image.assets.action.download') });
+  }
+  if (canDelete.value && assetActionAllowed(asset.status, 'delete')) {
+    items.push({
+      danger: true,
+      key: 'delete',
+      label: $t('image.assets.action.delete'),
+    });
+  }
+  if (canDelete.value && assetActionAllowed(asset.status, 'retryDelete')) {
+    items.push({
+      key: 'retryDelete',
+      label: $t('image.assets.action.retryDelete'),
+    });
+  }
+  return items;
+}
+
+async function download(asset: ImageApi.AssetVO) {
+  if (!ensureViewPermission()) return;
+  actionBusy.value = asset.assetId;
+  try {
+    const response = await downloadImageAssetBlob(asset.assetId);
+    const url = URL.createObjectURL(response.blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download =
+      filenameFromContentDisposition(response.contentDisposition) ??
+      suggestedAssetFilename(asset);
+    anchor.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    message.error($t('image.assets.error.download'));
+  } finally {
+    actionBusy.value = undefined;
+  }
+}
+
+function mutateAsset(
+  asset: ImageApi.AssetVO,
+  action: 'delete' | 'retryDelete',
+) {
+  if (
+    !hasAccessByCodes(['Image:Asset:Delete']) ||
+    !assetActionAllowed(asset.status, action)
+  ) {
     message.error($t('image.common.permissionDenied'));
     return;
   }
-  uploadOpen.value = true;
-  uploadError.value = false;
-  uploadKey.value = undefined;
+  Modal.confirm({
+    content: $t(`image.assets.confirm.${action}`, [
+      asset.assetName || asset.assetId,
+    ]),
+    okButtonProps: { danger: action === 'delete' },
+    onOk: async () => {
+      actionBusy.value = asset.assetId;
+      try {
+        await (action === 'delete'
+          ? deleteImageAsset(asset.assetId)
+          : retryDeleteImageAsset(asset.assetId));
+        message.success($t(`image.assets.success.${action}`));
+        await Promise.all([
+          controller.refreshAfterMutation(),
+          loadStatistics(),
+        ]);
+      } finally {
+        actionBusy.value = undefined;
+      }
+    },
+    title: $t(`image.assets.action.${action}`),
+  });
 }
 
-function onUploadChange(info: UploadChangeParam) {
-  const file = info.file.originFileObj;
-  if (file) uploadFile.value = file;
+function handleAssetAction(
+  action: 'delete' | 'download' | 'retryDelete',
+  asset: ImageApi.AssetVO,
+) {
+  if (action === 'download') void download(asset);
+  else mutateAsset(asset, action);
 }
 
-async function submitUpload() {
-  if (!uploadFile.value || !hasAccessByCodes(['Image:Asset:Upload'])) return;
-  uploadBusy.value = true;
-  uploadError.value = false;
-  uploadKey.value ??= crypto.randomUUID();
-  try {
-    await uploadImageAsset(
-      uploadFile.value,
-      uploadKey.value,
-      uploadName.value || undefined,
-    );
-    uploadOpen.value = false;
-    uploadFile.value = undefined;
-    uploadName.value = '';
-    await refresh();
-  } catch {
-    // Keep the same idempotency key so an unknown network result can be retried safely.
-    uploadError.value = true;
-  } finally {
-    uploadBusy.value = false;
+async function onPageChange(page: number, pageSize: number) {
+  await controller.setPage(page, pageSize);
+}
+
+const routeFilterFingerprint = computed(() =>
+  stableFingerprint(assetQueryFromRoute(route.query)),
+);
+watch(routeFilterFingerprint, async () => {
+  const filters = assetQueryFromRoute(route.query);
+  if (
+    stableFingerprint(filters) === stableFingerprint(controller.filters.value)
+  ) {
+    return;
   }
-}
+  await queryFormApi.setValues(filtersToForm(filters));
+  await controller.query(filters);
+});
 
-function pageChange(value: number) {
-  page.value = value;
-  void refresh();
+const routeDetailId = computed(() =>
+  assetDetailIdFromRoute(route.query, route.params.assetId),
+);
+function syncRouteDetail(assetId?: string) {
+  if (!assetId || !canView.value) {
+    void detailDrawerApi.close();
+    return;
+  }
+  const asset =
+    controller.rows.value.find((row) => row.assetId === assetId) ??
+    ({ assetId } as ImageApi.AssetVO);
+  detailDrawerApi.setData({ asset, canDelete: canDelete.value }).open();
 }
+watch(routeDetailId, syncRouteDetail);
 
-useImageAssetRefresh(refresh);
+useImageAssetRefresh(refreshAll);
 onMounted(async () => {
-  await refresh();
-  await openDeepLinkedAsset();
+  if (!canQuery.value) return;
+  await queryFormApi.setValues(filtersToForm(controller.filters.value));
+  await refreshAll();
+  syncRouteDetail(routeDetailId.value);
 });
 </script>
 
 <template>
-  <Page auto-content-height>
-    <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <Card>
-        <Statistic
-          :title="$t('image.assets.stats.total')"
-          :value="stats.total ?? 0"
-        />
-      </Card>
-      <Card>
-        <Statistic
-          :title="$t('image.assets.stats.available')"
-          :value="stats.available ?? 0"
-        />
-      </Card>
-      <Card>
-        <Statistic
-          :title="$t('image.assets.stats.today')"
-          :value="stats.today ?? 0"
-        />
-      </Card>
-    </div>
+  <Page
+    auto-content-height
+    :description="$t('image.assets.description')"
+    :title="$t('image.assets.title')"
+  >
+    <template #extra>
+      <Button v-if="canUpload" type="primary" @click="uploadDrawerApi.open()">
+        {{ $t('image.assets.action.upload') }}
+      </Button>
+    </template>
 
-    <Card :title="$t('image.assets.title')">
-      <template #extra>
-        <Button v-if="canUpload" type="primary" @click="openUpload">
-          {{ $t('image.assets.action.upload') }}
-        </Button>
-      </template>
+    <UploadDrawer @success="refreshAll" />
+    <DetailDrawer @action="handleAssetAction" @closed="closeDetailRoute" />
+
+    <Result
+      v-if="!canQuery"
+      status="403"
+      :sub-title="$t('image.common.permissionDenied')"
+      :title="$t('image.common.forbidden')"
+    />
+    <div v-else class="asset-page">
+      <AssetStatistics
+        :active-status="controller.filters.value.status"
+        :loading="statisticsLoading"
+        :statistics="statistics"
+        @select="applyStatistic"
+      />
       <Alert
-        v-if="!canQuery"
+        v-if="statisticsError"
         type="warning"
         show-icon
-        :message="$t('image.common.permissionDenied')"
-      />
+        :message="$t('image.assets.error.statistics')"
+      >
+        <template #action>
+          <a @click="loadStatistics">{{ $t('common.retry') }}</a>
+        </template>
+      </Alert>
+
+      <Card size="small" class="asset-page__query">
+        <QueryForm />
+      </Card>
+
       <Alert
-        v-else-if="error"
+        v-if="controller.error.value"
         type="error"
         show-icon
-        :message="error"
-        closable
-        @close="refresh"
-      />
-      <Form v-else layout="inline" class="mb-4" @submit.prevent="applyFilters">
-        <Form.Item :label="$t('image.assets.field.name')">
-          <Input v-model:value="filters.assetName" allow-clear />
-        </Form.Item>
-        <Form.Item :label="$t('image.assets.field.status')">
-          <Select
-            v-model:value="filters.status"
-            allow-clear
-            class="min-w-32"
-            :options="
-              ['AVAILABLE', 'DELETING', 'DELETE_FAILED', 'DELETED'].map(
-                (value) => ({
-                  label: $t(`image.assets.status.${value}`),
-                  value,
-                }),
-              )
-            "
-          />
-        </Form.Item>
-        <Space>
-          <Button type="primary" html-type="submit">
-            {{ $t('common.search') }} </Button
-          ><Button @click="resetFilters">
-            {{ $t('common.reset') }}
-          </Button>
-        </Space>
-      </Form>
+        :message="$t('image.assets.error.load')"
+      >
+        <template #action>
+          <a @click="controller.refreshCurrentPage">{{ $t('common.retry') }}</a>
+        </template>
+      </Alert>
 
-      <Skeleton
-        v-if="loading"
-        active
-        :paragraph="{ rows: 5 }"
-        aria-busy="true"
-      />
-      <Empty
-        v-else-if="rows.length === 0"
-        :description="$t('image.assets.empty')"
-      />
-      <template v-else>
-        <div
-          class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
-        >
-          <button
-            v-for="asset in rows"
-            :key="asset.assetId"
-            type="button"
-            class="rounded border p-2 text-left focus-visible:ring"
-            :aria-label="asset.assetName || asset.assetId"
-            @click="openDetail(asset)"
-          >
-            <Image
-              :src="imageAssetContentUrl(asset.assetId)"
-              :alt="asset.assetName || asset.assetId"
-              :preview="false"
-              class="mb-2 aspect-video w-full object-cover"
-            />
-            <span class="block truncate text-xs">{{
-              asset.assetName || asset.assetId
-            }}</span>
-            <span class="block text-xs text-muted-foreground"
-              >{{ imageFormatLabel(asset.imageFormat) }} ·
-              {{ formatBytes(asset.fileSize) }}</span
+      <Card size="small" :body-style="{ padding: '12px' }">
+        <div class="asset-page__toolbar">
+          <Space wrap>
+            <strong>{{
+              $t('image.assets.resultCount', [controller.total.value])
+            }}</strong>
+            <Tag
+              v-if="controller.filters.value.deviceId"
+              closable
+              @close.prevent="clearContext('deviceId')"
             >
-          </button>
+              {{ $t('image.assets.field.deviceId') }}:
+              {{ controller.filters.value.deviceId }}
+            </Tag>
+            <Tag
+              v-if="controller.filters.value.channelId"
+              closable
+              @close.prevent="clearContext('channelId')"
+            >
+              {{ $t('image.assets.field.channelId') }}:
+              {{ controller.filters.value.channelId }}
+            </Tag>
+          </Space>
+          <Space wrap>
+            <Segmented
+              v-if="canView"
+              :options="[
+                { label: $t('image.assets.view.gallery'), value: 'gallery' },
+                { label: $t('image.assets.view.list'), value: 'list' },
+              ]"
+              :value="view"
+              @change="setView"
+            />
+            <Button :loading="controller.loading.value" @click="refreshAll">
+              {{ $t('common.refresh') }}
+            </Button>
+          </Space>
         </div>
-        <Table
-          :columns="columns"
-          :data-source="rows"
-          :pagination="{
-            current: page,
-            pageSize: size,
-            total,
-            onChange: pageChange,
-          }"
-          row-key="assetId"
-          :scroll="{ x: 800 }"
-        >
-          <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'size'">
-              {{ formatBytes(record.fileSize) }}
-            </template>
-            <template v-else-if="column.key === 'status'">
-              <Tag
-                :color="
-                  record.status === 'AVAILABLE'
-                    ? 'success'
-                    : record.status === 'DELETE_FAILED'
-                      ? 'error'
-                      : 'default'
-                "
-              >
-                {{ $t(`image.assets.status.${record.status ?? 'unknown'}`) }}
-              </Tag>
-            </template>
-            <template v-else-if="column.key === 'actions'">
-              <Space>
-                <Button type="link" @click="openDetail(assetRecord(record))">
-                  {{ $t('image.assets.action.detail') }} </Button
-                ><Button
-                  v-if="
-                    canDelete &&
-                    assetActionAllowed(assetRecord(record).status, 'delete')
-                  "
-                  type="link"
-                  danger
-                  @click="remove(assetRecord(record))"
-                >
-                  {{ $t('image.assets.action.delete') }} </Button
-                ><Button
-                  v-if="
-                    canDelete &&
-                    assetActionAllowed(
-                      assetRecord(record).status,
-                      'retryDelete',
-                    )
-                  "
-                  type="link"
-                  @click="remove(assetRecord(record), true)"
-                >
-                  {{ $t('image.assets.action.retryDelete') }}
-                </Button>
-              </Space>
-            </template>
-          </template>
-        </Table>
-      </template>
-    </Card>
 
-    <Drawer
-      v-model:open="uploadOpen"
-      :title="$t('image.assets.action.upload')"
-      :width="420"
-      destroy-on-close
-    >
-      <Form layout="vertical">
-        <Form.Item :label="$t('image.assets.field.file')" required>
-          <Upload
-            :max-count="1"
-            :before-upload="() => false"
-            @change="onUploadChange"
-          >
-            <Button>{{ $t('image.assets.action.chooseFile') }}</Button>
-          </Upload>
-        </Form.Item>
-        <Form.Item :label="$t('image.assets.field.name')">
-          <Input v-model:value="uploadName" />
-        </Form.Item>
-        <Alert
-          v-if="uploadError"
-          type="error"
-          show-icon
-          :message="$t('image.assets.error.uploadRetry')"
-        />
-        <Button
-          type="primary"
-          :loading="uploadBusy"
-          :disabled="!uploadFile"
-          @click="submitUpload"
+        <Empty
+          v-if="!controller.loading.value && controller.rows.value.length === 0"
+          class="asset-page__empty"
+          :description="
+            Object.values(controller.filters.value).some(Boolean)
+              ? $t('image.assets.emptyFiltered')
+              : $t('image.assets.empty')
+          "
         >
-          {{
-            uploadError
-              ? $t('image.assets.action.retryUpload')
-              : $t('image.assets.action.submit')
-          }}
-        </Button>
-      </Form>
-    </Drawer>
-
-    <Drawer
-      v-model:open="detailOpen"
-      :title="$t('image.assets.detail.title')"
-      :width="520"
-      destroy-on-close
-    >
-      <template v-if="selected && canView">
-        <Image
-          :src="imageAssetContentUrl(selected.assetId)"
-          :alt="selected.assetName || selected.assetId"
-          class="mb-4 max-h-80 w-full object-contain"
-        />
-        <Descriptions bordered :column="1" size="small">
-          <DescriptionsItem :label="$t('image.assets.field.name')">
-            {{ selected.assetName || selected.assetId }}
-          </DescriptionsItem>
-          <DescriptionsItem :label="$t('image.assets.field.format')">
-            {{ imageFormatLabel(selected.imageFormat) }}
-          </DescriptionsItem>
-          <DescriptionsItem :label="$t('image.assets.field.size')">
-            {{ formatBytes(selected.fileSize) }}
-          </DescriptionsItem>
-          <DescriptionsItem :label="$t('image.assets.field.dimensions')">
-            {{ selected.width }} × {{ selected.height }}
-          </DescriptionsItem>
-          <DescriptionsItem :label="$t('image.assets.field.source')">
-            {{ selected.source?.sourceType || '-' }}
-          </DescriptionsItem>
-        </Descriptions>
-        <Space class="mt-4">
           <Button
-            :href="imageAssetDownloadUrl(selected.assetId)"
-            target="_blank"
+            v-if="canUpload"
+            type="primary"
+            @click="uploadDrawerApi.open()"
           >
-            {{ $t('image.assets.action.download') }} </Button
-          ><Button
-            v-if="canDelete && assetActionAllowed(selected.status, 'delete')"
-            danger
-            @click="remove(selected)"
-          >
-            {{ $t('image.assets.action.delete') }} </Button
-          ><Button
-            v-if="
-              canDelete && assetActionAllowed(selected.status, 'retryDelete')
-            "
-            @click="remove(selected, true)"
-          >
-            {{ $t('image.assets.action.retryDelete') }}
+            {{ $t('image.assets.action.upload') }}
           </Button>
-        </Space>
-      </template>
-    </Drawer>
+        </Empty>
+
+        <AssetGallery
+          v-else-if="view === 'gallery' && canView"
+          :can-delete="canDelete"
+          :rows="controller.rows.value"
+          @action="handleAssetAction"
+          @detail="openDetail"
+        />
+
+        <Grid v-else>
+          <template #image="{ row }">
+            <button
+              type="button"
+              class="asset-page__table-image"
+              @click="openDetail(row)"
+            >
+              <AssetThumbnail
+                :alt="row.assetName || row.assetId"
+                :asset-id="row.assetId"
+                :disabled="row.status === 'DELETED'"
+                variant="table"
+              />
+            </button>
+          </template>
+          <template #name="{ row }">
+            <div class="min-w-0">
+              <Tooltip :title="row.assetName || row.assetId">
+                <strong class="block truncate">{{
+                  row.assetName || row.assetId
+                }}</strong>
+              </Tooltip>
+              <code class="text-muted-foreground text-xs">{{
+                row.assetId
+              }}</code>
+            </div>
+          </template>
+          <template #source="{ row }">
+            <div>
+              <Tag>
+                {{
+                  $t(
+                    `image.assets.source.${row.sourceType ?? row.source?.sourceType ?? 'unknown'}`,
+                  )
+                }}
+              </Tag>
+              <small class="text-muted-foreground block truncate">
+                {{ imageCameraLabel(row.source) }}
+              </small>
+            </div>
+          </template>
+          <template #status="{ row }">
+            <Tag :color="assetStatusColor(row.status)">
+              {{ $t(assetStatusKey(row.status)) }}
+            </Tag>
+          </template>
+          <template #operation="{ row }">
+            <Space>
+              <Button v-if="canView" type="link" @click="openDetail(row)">
+                {{ $t('image.assets.action.detail') }}
+              </Button>
+              <Dropdown
+                v-if="actionMenu(row).length > 0"
+                :menu="{
+                  items: actionMenu(row),
+                  onClick: (info: any) =>
+                    handleAssetAction(
+                      String(info.key) as 'delete' | 'download' | 'retryDelete',
+                      row,
+                    ),
+                }"
+              >
+                <Button
+                  type="link"
+                  :loading="actionBusy === row.assetId"
+                  :aria-label="$t('image.assets.action.more')"
+                >
+                  {{ $t('image.assets.action.more') }}
+                </Button>
+              </Dropdown>
+            </Space>
+          </template>
+        </Grid>
+
+        <div v-if="controller.total.value > 0" class="asset-page__pagination">
+          <Pagination
+            show-size-changer
+            :current="controller.page.value"
+            :page-size="controller.pageSize.value"
+            :page-size-options="['12', '24', '48', '96']"
+            :show-total="
+              (value: number) => $t('image.assets.resultCount', [value])
+            "
+            :total="controller.total.value"
+            @change="onPageChange"
+            @show-size-change="onPageChange"
+          />
+        </div>
+      </Card>
+    </div>
   </Page>
 </template>
+
+<style scoped>
+.asset-page {
+  display: grid;
+  gap: 16px;
+}
+
+.asset-page__query :deep(form) {
+  margin-bottom: 0;
+}
+
+.asset-page__toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.asset-page__empty {
+  padding: 48px 0;
+}
+
+.asset-page__table-image {
+  display: block;
+  width: 56px;
+  height: 42px;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--radius) - 2px);
+}
+
+.asset-page__table-image:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.asset-page__pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+@media (max-width: 767px) {
+  .asset-page__toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .asset-page__pagination {
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+}
+</style>

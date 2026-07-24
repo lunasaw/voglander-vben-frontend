@@ -57,6 +57,7 @@ describe('business-task query API', () => {
     expect(getMock).toHaveBeenNthCalledWith(
       1,
       '/api/v1/business-tasks/btask_1',
+      { signal: undefined, suppressGlobalError: true },
     );
     expect(getMock).toHaveBeenNthCalledWith(
       2,
@@ -77,9 +78,11 @@ describe('business-task query API', () => {
     expect(postMock).toHaveBeenCalledWith(
       '/api/v1/business-task-executions/getPage?page=3&size=5',
       { taskId: 'btask_1', state: 'FAILED' },
+      { suppressGlobalError: true },
     );
     expect(getMock).toHaveBeenCalledWith(
       '/api/v1/business-task-executions/bexec_1',
+      { suppressGlobalError: true },
     );
   });
 });

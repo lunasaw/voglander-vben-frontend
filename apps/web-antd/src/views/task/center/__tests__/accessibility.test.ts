@@ -3,8 +3,8 @@ import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 
 import listSource from '../list.vue?raw';
+import detailContentSource from '../TaskDetailContent.vue?raw';
 import TaskDetailDrawer from '../TaskDetailDrawer.vue';
-import drawerSource from '../TaskDetailDrawer.vue?raw';
 
 vi.mock('#/locales', () => ({ $t: (key: string) => key }));
 vi.mock('@vben/access', () => ({
@@ -18,6 +18,10 @@ vi.mock('#/api/task', () => ({
   getBusinessTaskExecution: vi.fn(),
 }));
 vi.mock('ant-design-vue', () => ({
+  Alert: {
+    name: 'Alert',
+    template: '<div><slot /><slot name="action" /></div>',
+  },
   Button: { name: 'Button', template: '<button><slot /></button>' },
   Descriptions: { name: 'Descriptions', template: '<div><slot /></div>' },
   DescriptionsItem: {
@@ -30,6 +34,7 @@ vi.mock('ant-design-vue', () => ({
     emits: ['close'],
     template: '<aside v-if="open"><slot /></aside>',
   },
+  Spin: { name: 'Spin', template: '<span />' },
   Tag: { name: 'Tag', template: '<span><slot /></span>' },
 }));
 
@@ -60,6 +65,6 @@ describe('task-center responsive and keyboard accessibility', () => {
     expect(listSource).toContain('lg:grid-cols-3');
     expect(listSource).toContain('xl:grid-cols-6');
     expect(listSource).toContain('task.center.title');
-    expect(drawerSource).toContain('min-h-11');
+    expect(detailContentSource).toContain('min-h-11');
   });
 });

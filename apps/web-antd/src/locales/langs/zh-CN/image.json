@@ -1,26 +1,44 @@
 {
   "management": { "title": "图像管理" },
-  "common": { "permissionDenied": "没有执行此操作的权限" },
-  "asset": {
-    "title": "图像资产"
+  "common": {
+    "copied": "已复制",
+    "forbidden": "无权访问",
+    "permissionDenied": "没有执行此操作的权限"
   },
+  "asset": { "title": "图像资产" },
   "assets": {
     "title": "图像资产",
+    "description": "统一管理上传与机位采集生成的图像",
     "empty": "暂无图像资产",
+    "emptyFiltered": "没有符合当前筛选条件的图像资产",
+    "imageUnavailable": "图像不可用",
+    "resultCount": "共 {0} 项",
     "stats": {
+      "label": "图像资产统计",
       "total": "资产总数",
       "available": "可用资产",
-      "today": "今日新增"
+      "today": "今日新增",
+      "deleteFailed": "删除失败"
     },
     "field": {
+      "image": "图像",
       "name": "名称",
       "file": "文件",
       "format": "格式",
       "size": "大小",
       "dimensions": "尺寸",
+      "specification": "规格",
       "source": "来源",
       "status": "状态",
-      "actions": "操作"
+      "actions": "操作",
+      "assetId": "资产 ID",
+      "sourceTaskId": "来源任务 ID",
+      "sourceExecutionId": "来源执行 ID",
+      "deviceId": "设备 ID",
+      "channelId": "通道 ID",
+      "camera": "采集机位",
+      "capturedAt": "采集时间",
+      "ingestedAt": "入库时间"
     },
     "action": {
       "query": "查询图像",
@@ -32,16 +50,51 @@
       "viewForCamera": "查看该机位资产",
       "delete": "删除",
       "retryDelete": "重试删除",
-      "retryUpload": "重试上传"
+      "retryUpload": "重试上传",
+      "retryThumbnail": "重试缩略图",
+      "more": "更多"
+    },
+    "view": { "gallery": "宫格", "list": "列表" },
+    "source": {
+      "USER_UPLOAD": "用户上传",
+      "CAMERA_CAPTURE": "机位采集",
+      "EXTERNAL_IMPORT": "外部导入",
+      "unknown": "未知来源"
     },
     "detail": { "title": "资产详情" },
     "confirm": {
-      "delete": "确认删除此图像资产？",
-      "retryDelete": "确认重试删除此资产？"
+      "delete": "确认删除图像资产“{0}”？",
+      "retryDelete": "确认重试删除图像资产“{0}”？"
+    },
+    "success": {
+      "delete": "删除请求已提交",
+      "retryDelete": "已重新提交删除请求"
     },
     "error": {
       "load": "资产加载失败，请重试",
-      "uploadRetry": "上传结果未知，可使用相同请求重试"
+      "statistics": "资产统计加载失败",
+      "detail": "部分资产详情加载失败",
+      "preview": "原图预览加载失败",
+      "thumbnail": "缩略图加载失败",
+      "download": "图像下载失败",
+      "uploadRetry": "上传结果未知；原内容重试将沿用同一幂等键"
+    },
+    "upload": {
+      "dropTitle": "拖拽图像到此处，或点击选择",
+      "dropHint": "支持 JPEG、PNG、WEBP；仅上传一个文件",
+      "constraintsLoading": "正在读取服务端图像约束",
+      "constraints": "允许格式：{0}；最大文件：{1}；最大像素：{2}",
+      "constraintsError": "无法读取上传约束，请重试",
+      "validating": "正在校验图像格式与像素",
+      "success": "图像上传成功",
+      "unknownTitle": "上传结果尚未确认",
+      "unknownClose": "关闭不会撤销服务器可能已接收的请求。确定关闭吗？",
+      "validation": {
+        "decode": "文件无法作为有效图像解码",
+        "format": "文件扩展名、MIME 或允许格式不匹配",
+        "pixels": "图像像素尺寸超过服务端限制",
+        "size": "文件大小超过服务端限制"
+      }
     },
     "status": {
       "AVAILABLE": "可用",
@@ -51,11 +104,11 @@
       "unknown": "未知"
     }
   },
-  "collection": {
-    "title": "图像采集"
-  },
+  "collection": { "title": "图像采集" },
   "collections": {
     "title": "图像采集",
+    "description": "创建、调度并跟踪机位图像采集任务",
+    "listTitle": "采集任务",
     "empty": "暂无采集任务",
     "action": {
       "query": "查询采集任务",
@@ -66,7 +119,11 @@
       "pause": "暂停",
       "resume": "恢复",
       "retry": "重试",
-      "viewAsset": "查看资产"
+      "retryCreate": "重试创建",
+      "reschedule": "调整计划",
+      "viewAsset": "查看单个图像",
+      "viewAllAssets": "查看任务全部图像",
+      "more": "更多"
     },
     "field": {
       "name": "任务名称",
@@ -74,25 +131,73 @@
       "mode": "模式",
       "state": "状态",
       "progress": "进度",
+      "schedule": "调度",
+      "result": "结果",
       "actions": "操作",
       "deviceId": "设备 ID",
       "channelId": "通道 ID",
-      "scheduleStart": "开始时间（毫秒）",
-      "scheduleEnd": "结束时间（毫秒）",
-      "interval": "间隔"
+      "scheduleStart": "开始时间",
+      "scheduleEnd": "结束时间",
+      "scheduleRange": "采集时间范围",
+      "interval": "采集间隔",
+      "retentionPolicy": "保留策略",
+      "nextPlanTime": "下次执行",
+      "reason": "调整原因"
     },
-    "mode": { "ONCE": "单次", "SCHEDULED": "定时" },
+    "mode": { "ONCE": "单次", "SCHEDULED": "定时", "UNKNOWN": "未知模式" },
     "status": {
       "SCHEDULED": "已计划",
       "RUNNING": "运行中",
       "PAUSED": "已暂停",
+      "CANCELLING": "取消中",
       "COMPLETED": "已完成",
+      "PARTIAL_COMPLETED": "部分完成",
       "FAILED": "失败",
       "CANCELLED": "已取消",
       "unknown": "未知"
     },
-    "schedule": { "count": "预计 {count} 个计划点" },
+    "schedule": {
+      "title": "调度设置",
+      "seconds": "秒",
+      "count": "预计 {count} 个计划点",
+      "summary": "开始：{0}；结束：{1}；间隔：{2} 秒；预计：{3} 次",
+      "validation": {
+        "range": "请选择完整的开始和结束时间",
+        "order": "结束时间不能早于开始时间",
+        "interval": "采集间隔不满足服务端最小值",
+        "count": "预计采集次数超过服务端上限"
+      }
+    },
+    "live": {
+      "open": "实时同步",
+      "connecting": "正在重连",
+      "polling": "定时刷新"
+    },
+    "camera": {
+      "online": "在线",
+      "offline": "离线",
+      "missing": "机位不存在或无权限",
+      "devicePlaceholder": "输入设备 ID 或名称搜索",
+      "channelPlaceholder": "输入通道 ID 或名称搜索",
+      "loadError": "机位选项加载失败，可重试搜索"
+    },
+    "create": {
+      "success": "采集任务创建成功",
+      "constraintsError": "采集约束加载失败，请重试",
+      "unknownTitle": "创建结果尚未确认",
+      "unknownClose": "关闭不会撤销服务器可能已接收的创建请求。确定关闭吗？"
+    },
+    "reschedule": { "success": "采集计划已更新" },
+    "detail": {
+      "title": "采集任务详情",
+      "results": "采集结果",
+      "collectionError": "采集领域详情加载失败",
+      "businessError": "通用任务详情加载失败"
+    },
+    "confirm": { "cancel": "确认取消采集任务“{0}”？" },
+    "control": { "success": "任务操作成功" },
     "error": {
+      "load": "采集任务加载失败，请重试",
       "invalid": "请填写有效的任务和机位；定时模式需满足时间与间隔约束",
       "unknown": "提交结果未知，请刷新任务列表确认",
       "stateConflict": "任务状态已变化，请刷新后重试"

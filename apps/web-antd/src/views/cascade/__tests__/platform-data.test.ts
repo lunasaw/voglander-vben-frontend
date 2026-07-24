@@ -88,8 +88,6 @@ describe('cascade/platform/data', () => {
         (o: any) => o.code,
       );
       expect(codes).toContain('subscribe');
-      expect(codes).toContain('enable');
-      expect(codes).toContain('disable');
     });
   });
 

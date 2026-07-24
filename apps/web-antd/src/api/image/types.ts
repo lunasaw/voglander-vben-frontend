@@ -6,13 +6,19 @@ export type ImageAssetStatus =
   | 'DELETED'
   | 'DELETING';
 export type ImageCollectionMode = 'ONCE' | 'SCHEDULED';
+export type ImageAssetSourceType =
+  | 'CAMERA_CAPTURE'
+  | 'EXTERNAL_IMPORT'
+  | 'USER_UPLOAD';
 
 export namespace ImageApi {
+  export type ThumbnailProfile = 'gallery' | 'table';
+
   export interface AssetQueryReq {
     assetId?: string;
     assetName?: string;
     status?: ImageAssetStatus;
-    sourceType?: string;
+    sourceType?: ImageAssetSourceType;
     sourceTaskId?: string;
     sourceExecutionId?: string;
     deviceId?: string;
@@ -22,14 +28,20 @@ export namespace ImageApi {
   }
 
   export interface AssetSourceVO {
-    sourceType?: string;
+    sourceType?: ImageAssetSourceType;
     sourceSystem?: string;
     sourceEntityType?: string;
     sourceEntityId?: string;
     sourceTaskId?: string;
     sourceExecutionId?: string;
     originalFilename?: string;
-    sourceMetadata?: Record<string, unknown>;
+    sourceMetadata?: {
+      [key: string]: unknown;
+      channelId?: string;
+      channelName?: string;
+      deviceId?: string;
+      deviceName?: string;
+    };
   }
 
   export interface AssetVO {
@@ -42,11 +54,13 @@ export namespace ImageApi {
     width?: number;
     height?: number;
     checksum?: string;
-    capturedTime?: number;
-    ingestedTime?: number;
-    ownerType?: string;
-    ownerId?: string;
-    retentionPolicy?: string;
+    capturedAt?: number;
+    ingestedAt?: number;
+    originalFilename?: string;
+    sourceEntityId?: string;
+    sourceExecutionId?: string;
+    sourceTaskId?: string;
+    sourceType?: ImageAssetSourceType;
     source?: AssetSourceVO;
   }
 
@@ -76,6 +90,13 @@ export namespace ImageApi {
     intervalSeconds?: number;
     retentionPolicy?: string;
   }
+  export interface CollectionCreateVO {
+    executionId?: string;
+    nextPlanTime?: number;
+    plannedCount?: number;
+    state?: string;
+    taskId: string;
+  }
   export interface CollectionQueryReq {
     taskName?: string;
     collectionMode?: string;
@@ -87,6 +108,7 @@ export namespace ImageApi {
     taskId: string;
     taskName?: string;
     taskMode?: string;
+    collectionMode?: ImageCollectionMode;
     state?: string;
     scheduleStartTime?: number;
     scheduleEndTime?: number;
@@ -96,7 +118,10 @@ export namespace ImageApi {
     successCount?: number;
     failedCount?: number;
     missedCount?: number;
+    cancelledCount?: number;
     progressCurrent?: number;
+    progressMessage?: string;
+    progressRevision?: number;
     progressTotal?: number;
     deviceId?: string;
     channelId?: string;
@@ -108,7 +133,12 @@ export namespace ImageApi {
     resultRefType?: string;
     resultRefId?: string;
     resultSummary?: string;
+    lastFailureCode?: string;
+    lastFailureMessage?: string;
+    createTime?: number;
+    updateTime?: number;
     version?: number;
+    scheduleVersion?: number;
   }
   export interface CollectionListResp {
     total: number;
@@ -121,7 +151,7 @@ export namespace ImageApi {
     retentionPolicies: string[];
   }
   export interface RescheduleReq {
-    expectedVersion?: number;
+    expectedVersion: number;
     scheduleStartTime: number;
     scheduleEndTime: number;
     intervalSeconds: number;

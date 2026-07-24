@@ -1,28 +1,44 @@
 {
   "management": { "title": "Image Management" },
   "common": {
+    "copied": "Copied",
+    "forbidden": "Access denied",
     "permissionDenied": "You do not have permission for this action"
   },
-  "asset": {
-    "title": "Image Assets"
-  },
+  "asset": { "title": "Image Assets" },
   "assets": {
     "title": "Image Assets",
+    "description": "Manage images uploaded by users and captured from cameras",
     "empty": "No image assets",
+    "emptyFiltered": "No image assets match the current filters",
+    "imageUnavailable": "Image unavailable",
+    "resultCount": "{0} items",
     "stats": {
+      "label": "Image asset statistics",
       "total": "Total Assets",
       "available": "Available",
-      "today": "Added Today"
+      "today": "Added Today",
+      "deleteFailed": "Delete Failed"
     },
     "field": {
+      "image": "Image",
       "name": "Name",
       "file": "File",
       "format": "Format",
       "size": "Size",
       "dimensions": "Dimensions",
+      "specification": "Specification",
       "source": "Source",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "assetId": "Asset ID",
+      "sourceTaskId": "Source task ID",
+      "sourceExecutionId": "Source execution ID",
+      "deviceId": "Device ID",
+      "channelId": "Channel ID",
+      "camera": "Camera",
+      "capturedAt": "Captured at",
+      "ingestedAt": "Ingested at"
     },
     "action": {
       "query": "Query Images",
@@ -34,16 +50,51 @@
       "viewForCamera": "View camera assets",
       "delete": "Delete",
       "retryDelete": "Retry Delete",
-      "retryUpload": "Retry upload"
+      "retryUpload": "Retry upload",
+      "retryThumbnail": "Retry thumbnail",
+      "more": "More"
+    },
+    "view": { "gallery": "Gallery", "list": "List" },
+    "source": {
+      "USER_UPLOAD": "User upload",
+      "CAMERA_CAPTURE": "Camera capture",
+      "EXTERNAL_IMPORT": "External import",
+      "unknown": "Unknown source"
     },
     "detail": { "title": "Asset details" },
     "confirm": {
-      "delete": "Delete this image asset?",
-      "retryDelete": "Retry deleting this asset?"
+      "delete": "Delete image asset “{0}”?",
+      "retryDelete": "Retry deleting image asset “{0}”?"
+    },
+    "success": {
+      "delete": "Delete request submitted",
+      "retryDelete": "Delete request resubmitted"
     },
     "error": {
       "load": "Failed to load assets. Try again.",
-      "uploadRetry": "The upload result is unknown; retry with the same request."
+      "statistics": "Failed to load asset statistics",
+      "detail": "Some asset details could not be loaded",
+      "preview": "Failed to load the original image",
+      "thumbnail": "Failed to load thumbnail",
+      "download": "Failed to download image",
+      "uploadRetry": "The upload result is unknown; retrying unchanged content will reuse the same idempotency key"
+    },
+    "upload": {
+      "dropTitle": "Drop an image here, or click to choose",
+      "dropHint": "JPEG, PNG, or WEBP; one file only",
+      "constraintsLoading": "Loading server image constraints",
+      "constraints": "Formats: {0}; max file: {1}; max pixels: {2}",
+      "constraintsError": "Could not load upload constraints. Try again.",
+      "validating": "Validating image format and dimensions",
+      "success": "Image uploaded",
+      "unknownTitle": "Upload result not confirmed",
+      "unknownClose": "Closing will not revoke a request the server may have received. Close anyway?",
+      "validation": {
+        "decode": "The file cannot be decoded as a valid image",
+        "format": "The extension, MIME type, or allowed format does not match",
+        "pixels": "Image dimensions exceed the server limit",
+        "size": "File size exceeds the server limit"
+      }
     },
     "status": {
       "AVAILABLE": "Available",
@@ -53,11 +104,11 @@
       "unknown": "Unknown"
     }
   },
-  "collection": {
-    "title": "Image Collection"
-  },
+  "collection": { "title": "Image Collection" },
   "collections": {
     "title": "Image Collection",
+    "description": "Create, schedule, and track camera image collection tasks",
+    "listTitle": "Collection tasks",
     "empty": "No collection tasks",
     "action": {
       "query": "Query Collection Tasks",
@@ -68,7 +119,11 @@
       "pause": "Pause",
       "resume": "Resume",
       "retry": "Retry",
-      "viewAsset": "View asset"
+      "retryCreate": "Retry create",
+      "reschedule": "Reschedule",
+      "viewAsset": "View image",
+      "viewAllAssets": "View all task images",
+      "more": "More"
     },
     "field": {
       "name": "Task Name",
@@ -76,25 +131,77 @@
       "mode": "Mode",
       "state": "State",
       "progress": "Progress",
+      "schedule": "Schedule",
+      "result": "Result",
       "actions": "Actions",
       "deviceId": "Device ID",
       "channelId": "Channel ID",
-      "scheduleStart": "Start time (ms)",
-      "scheduleEnd": "End time (ms)",
-      "interval": "Interval"
+      "scheduleStart": "Start time",
+      "scheduleEnd": "End time",
+      "scheduleRange": "Collection time range",
+      "interval": "Collection interval",
+      "retentionPolicy": "Retention policy",
+      "nextPlanTime": "Next execution",
+      "reason": "Reason"
     },
-    "mode": { "ONCE": "Once", "SCHEDULED": "Scheduled" },
+    "mode": {
+      "ONCE": "Once",
+      "SCHEDULED": "Scheduled",
+      "UNKNOWN": "Unknown mode"
+    },
     "status": {
       "SCHEDULED": "Scheduled",
       "RUNNING": "Running",
       "PAUSED": "Paused",
+      "CANCELLING": "Cancelling",
       "COMPLETED": "Completed",
+      "PARTIAL_COMPLETED": "Partially completed",
       "FAILED": "Failed",
       "CANCELLED": "Cancelled",
       "unknown": "Unknown"
     },
-    "schedule": { "count": "Estimated {count} planned points" },
+    "schedule": {
+      "title": "Schedule",
+      "seconds": "seconds",
+      "count": "Estimated {count} planned points",
+      "summary": "Start: {0}; end: {1}; interval: {2}s; estimated: {3}",
+      "validation": {
+        "range": "Select a complete start and end time",
+        "order": "End time cannot be before start time",
+        "interval": "The interval is below the server minimum",
+        "count": "The estimated collection count exceeds the server limit"
+      }
+    },
+    "live": {
+      "open": "Live sync",
+      "connecting": "Reconnecting",
+      "polling": "Scheduled refresh"
+    },
+    "camera": {
+      "online": "Online",
+      "offline": "Offline",
+      "missing": "Camera missing or inaccessible",
+      "devicePlaceholder": "Search by device ID or name",
+      "channelPlaceholder": "Search by channel ID or name",
+      "loadError": "Failed to load camera options; retry the search"
+    },
+    "create": {
+      "success": "Collection task created",
+      "constraintsError": "Failed to load collection constraints. Try again.",
+      "unknownTitle": "Create result not confirmed",
+      "unknownClose": "Closing will not revoke a create request the server may have received. Close anyway?"
+    },
+    "reschedule": { "success": "Collection schedule updated" },
+    "detail": {
+      "title": "Collection task details",
+      "results": "Collection results",
+      "collectionError": "Failed to load collection-domain details",
+      "businessError": "Failed to load business-task details"
+    },
+    "confirm": { "cancel": "Cancel collection task “{0}”?" },
+    "control": { "success": "Task action completed" },
     "error": {
+      "load": "Failed to load collection tasks. Try again.",
       "invalid": "Enter a valid task and camera; scheduled mode must satisfy time and interval constraints",
       "unknown": "The result is unknown; refresh the task list to confirm",
       "stateConflict": "The task state changed; refresh and try again"

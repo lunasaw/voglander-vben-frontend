@@ -217,10 +217,12 @@ export namespace DeviceApi {
 export async function getDevicePage(
   params: { page: number; size: number },
   body?: DeviceApi.DevicePageReq,
+  signal?: AbortSignal,
 ) {
   return requestClient.post<DeviceApi.DeviceListResp>(
     `/api/v1/device/getPage?page=${params.page}&size=${params.size}`,
     body ?? {},
+    { signal, suppressGlobalError: true },
   );
 }
 
@@ -249,10 +251,12 @@ export async function deleteDeviceBatch(ids: number[]) {
 export async function getDeviceChannelPage(
   params: { page: number; size: number },
   body?: DeviceApi.DeviceChannelQueryReq,
+  signal?: AbortSignal,
 ) {
   return requestClient.post<DeviceApi.DeviceChannelListResp>(
     `/api/v1/deviceChannel/getPage?page=${params.page}&size=${params.size}`,
     body ?? {},
+    { signal, suppressGlobalError: true },
   );
 }
 

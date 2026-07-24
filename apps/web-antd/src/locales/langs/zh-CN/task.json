@@ -109,7 +109,9 @@
     "execution": {
       "title": "执行详情",
       "events": "事件时间线",
-      "empty": "暂无执行记录"
+      "empty": "暂无执行记录",
+      "loadError": "执行历史加载失败，已保留现有数据",
+      "loadMore": "加载更多"
     },
     "event": {
       "CREATED": "创建",
