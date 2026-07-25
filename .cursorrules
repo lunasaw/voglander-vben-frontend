@@ -224,6 +224,17 @@
   3. 生成对应的角色权限分配记录
   4. 确保国际化键值与前端保持一致
 
+### 12. 接口契约登记（前后端必须精确镜像，严禁自造字段/端点）
+
+> 新增或变更后端接口字段/端点时，须在此登记并与 `voglander/.cursor/rules/project-rule.mdc` 同步。
+
+#### 1.0.7 GB28181-2022 设备订阅（设备列表 3 个开关）
+- **新增端点**：`PUT /api/v1/device/subscription/toggle`，入参 `{ deviceId: string, type: "CATALOG"|"MOBILE_POSITION"|"ALARM", enabled: boolean }`，返回 `boolean`（下发/撤销是否受理成功）。
+  - `type` 必须逐字对齐后端 `SubscriptionConstant.Type` 枚举名（`CATALOG`/`MOBILE_POSITION`/`ALARM`），前端 i18n 里的 `position` 仅作展示别名，下发到后端的 `type` 始终是 `MOBILE_POSITION`。
+- **DeviceVO 新增字段**：`subscription?: { catalog: boolean, position: boolean, alarm: boolean }`（后端在 `POST /api/v1/device/getPage` 按 deviceId 批量回填，避免 N+1；缺省时为 `undefined`，前端拍平回退 `false`）。`subscription.position` 对应后端 `MOBILE_POSITION` 类型，后端 VO 已做映射，前端不再转换。
+- **前端权限码**：`Device:Subscription:Edit`（列开关 `disabled` + 回调内双重校验，须在后端菜单/权限表登记并由 `GET /auth/codes` 下发）。
+- **离线容忍语义**：设备离线时开订阅，后端仅持久化意图（`status=PENDING`）并返回 `success`，下次设备注册由钩子补发 SUBSCRIBE；前端「开关成功 ≠ 订阅已激活」，不主动探测运行态。
+
 ## 代码质量要求
 - 使用TypeScript进行类型安全开发
 - 遵循Vue 3 Composition API规范

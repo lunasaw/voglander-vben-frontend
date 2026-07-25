@@ -165,7 +165,7 @@ function handlePlayerError(error: { code?: number; message: string }) {
   console.warn('Player error:', error);
   message.error({
     content: `播放器错误: ${error.message}`,
-    duration: 100,
+    duration: 5,
   });
 }
 

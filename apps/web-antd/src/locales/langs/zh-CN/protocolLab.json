@@ -55,6 +55,23 @@
     "heartbeat": "心跳保活",
     "report": "主动上报"
   },
+  "push": {
+    "title": "模拟推流",
+    "auto": "自动推流",
+    "autoOn": "开（收到点播自动推流）",
+    "autoOff": "关（需手动点击）",
+    "ffmpeg": "ffmpeg 路径",
+    "ffmpegPh": "ffmpeg 可执行文件绝对路径（后端机器视角）",
+    "media": "视频文件",
+    "mediaPh": "待推视频文件绝对路径（后端机器视角）",
+    "start": "模拟推流",
+    "stop": "停止推流",
+    "target": "推流目标",
+    "countdown": "请在 {sec}s 内点击推流（平台点播超时窗）",
+    "zlmMode": "推流模式",
+    "zlmModeOn": "ZLM中继",
+    "zlmModeOff": "直推RTP"
+  },
   "server": {
     "title": "平台端 (Server)",
     "devices": "在线设备",
@@ -64,8 +81,17 @@
     "queryDeviceInfo": "查询设备信息",
     "reboot": "重启",
     "play": "实时点播",
+    "commandChannel": "指令通道",
+    "commandChannelHint": "点播与 PTZ 共用后端已登记通道",
+    "channelSelect": "请选择真实设备通道",
+    "channelEmpty": "暂无可用通道，请先查询目录",
     "events": "平台事件",
-    "eventsEmpty": "暂无平台事件，设备注册 / 上线 / 上报会实时显示"
+    "eventsEmpty": "暂无平台事件，设备注册 / 上线 / 上报会实时显示",
+    "sub": {
+      "catalog": "目录",
+      "position": "位置",
+      "alarm": "告警"
+    }
   },
   "ptz": {
     "up": "上",
@@ -92,6 +118,13 @@
     "keepalive": "心跳",
     "catalog": "目录回包",
     "deviceInfo": "设备信息",
+    "deviceStatus": "设备状态",
+    "ptzPosition": "云台位置",
+    "preset": "预置位",
+    "config": "设备配置",
+    "configDownload": "配置下载",
+    "recordInfo": "录像信息",
+    "mobilePosition": "移动位置",
     "inviteOk": "点播成功",
     "bye": "会话结束",
     "alarm": "告警",
@@ -107,15 +140,26 @@
     "queryCatalog": "目录查询",
     "queryDeviceInfo": "设备信息查询",
     "queryDeviceStatus": "设备状态查询",
+    "queryRecordInfo": "录像查询",
+    "queryConfigDownload": "配置下载查询",
+    "queryPreset": "预置位查询",
+    "queryMobilePosition": "移动位置查询",
+    "queryAlarm": "报警查询",
     "configBasicParam": "基础参数配置",
     "broadcast": "语音广播",
-    "invite": "点播请求"
+    "invite": "点播请求",
+    "byeRecv": "收到挂断",
+    "pushStarted": "推流启动",
+    "pushStopped": "推流停止",
+    "pushFailed": "推流失败"
   },
   "timeline": {
     "empty": "暂无事件"
   },
   "msg": {
     "registerSent": "注册请求已发送",
+    "subscribeOn": "已开启{0}订阅",
+    "subscribeOff": "已关闭{0}订阅",
     "unregisterSent": "注销请求已发送",
     "keepaliveSent": "心跳已发送",
     "autoKeepaliveOn": "自动心跳已开启",
@@ -128,6 +172,11 @@
     "queryDeviceInfoSent": "设备信息查询已下发",
     "rebootSent": "重启指令已下发",
     "liveSent": "点播请求已下发",
-    "selectOnlineDevice": "请先在设备列表选择一个在线设备"
+    "selectOnlineDevice": "请先在设备列表选择一个在线设备",
+    "noAvailableChannel": "当前设备没有可用通道，请先查询目录",
+    "channelLoadFailed": "设备通道加载失败，请稍后重试",
+    "pushStarted": "推流已启动",
+    "pushStopped": "推流已停止",
+    "pushFailed": "推流启动失败"
   }
 }

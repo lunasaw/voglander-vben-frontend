@@ -185,9 +185,6 @@ const [Grid, gridApi] = useVbenVxeGrid({
       refresh: { code: 'query' },
       search: true,
       zoom: true,
-      slots: {
-        buttons: 'toolbar-buttons',
-      },
     },
   } as VxeTableGridOptions<ZlmMediaApi.MediaData>,
 });
@@ -345,7 +342,7 @@ function handleExport() {
     />
 
     <Grid>
-      <template #toolbar-buttons>
+      <template #toolbar-actions>
         <Button @click="handleExport">
           <RotateCw class="mr-1 size-4" />
           {{ $t('media.list.actions.export') }}

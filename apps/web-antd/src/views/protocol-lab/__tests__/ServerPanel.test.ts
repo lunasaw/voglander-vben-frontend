@@ -1,6 +1,6 @@
 import type { LabEvent } from '../../../composables/useSseEvents';
 
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -15,7 +15,7 @@ import ServerPanel from '../components/ServerPanel.vue';
  *  - catalog 写 channelCount，info 写 manufacturer/model
  *  - 自动选中首个设备
  *  - C2 时序约束：未选中在线设备时命令区禁用
- *  - 通道号约定 deviceId+'01'
+ *  - 点播 / PTZ 通道来自持久化通道分页，无通道时禁止下发
  */
 
 vi.mock('#/locales', () => ({ $t: (k: string) => k }));
@@ -23,21 +23,54 @@ vi.mock('#/locales', () => ({ $t: (k: string) => k }));
 // vi.mock 工厂会被提升到文件顶部，工厂内若引用顶层变量会触发 TDZ；
 // 故用 vi.hoisted 持有所有 spy，保证工厂执行时已初始化。
 const m = vi.hoisted(() => ({
+  broadcast: vi.fn().mockResolvedValue(undefined),
+  controlAlarm: vi.fn().mockResolvedValue(undefined),
+  controlRecordStart: vi.fn().mockResolvedValue(undefined),
+  controlRecordStop: vi.fn().mockResolvedValue(undefined),
+  downloadConfig: vi.fn().mockResolvedValue(undefined),
+  getDeviceChannelPage: vi.fn(),
+  hasAccess: vi.fn(() => true),
   liveStart: vi.fn().mockResolvedValue(undefined),
+  messageError: vi.fn(),
   messageSuccess: vi.fn(),
   messageWarning: vi.fn(),
   ptzControl: vi.fn().mockResolvedValue(undefined),
+  queryAlarm: vi.fn().mockResolvedValue(undefined),
   queryCatalog: vi.fn().mockResolvedValue(undefined),
   queryDeviceInfo: vi.fn().mockResolvedValue(undefined),
+  queryDeviceStatus: vi.fn().mockResolvedValue(undefined),
+  queryMobilePosition: vi.fn().mockResolvedValue(undefined),
+  queryPreset: vi.fn().mockResolvedValue(undefined),
+  queryRecord: vi.fn().mockResolvedValue(undefined),
   rebootDevice: vi.fn().mockResolvedValue(undefined),
+  toggleDeviceSubscription: vi.fn().mockResolvedValue(true),
+}));
+
+vi.mock('@vben/access', () => ({
+  useAccess: () => ({ hasAccessByCodes: m.hasAccess }),
+}));
+
+vi.mock('#/api/device', () => ({
+  getDeviceChannelPage: m.getDeviceChannelPage,
 }));
 
 vi.mock('#/api/protocol-lab', () => ({
+  broadcast: m.broadcast,
+  controlAlarm: m.controlAlarm,
+  controlRecordStart: m.controlRecordStart,
+  controlRecordStop: m.controlRecordStop,
+  downloadConfig: m.downloadConfig,
   liveStart: m.liveStart,
   ptzControl: m.ptzControl,
+  queryAlarm: m.queryAlarm,
   queryCatalog: m.queryCatalog,
   queryDeviceInfo: m.queryDeviceInfo,
+  queryDeviceStatus: m.queryDeviceStatus,
+  queryMobilePosition: m.queryMobilePosition,
+  queryPreset: m.queryPreset,
+  queryRecord: m.queryRecord,
   rebootDevice: m.rebootDevice,
+  toggleDeviceSubscription: m.toggleDeviceSubscription,
 }));
 
 vi.mock('ant-design-vue', () => {
@@ -61,6 +94,7 @@ vi.mock('ant-design-vue', () => {
         '<button :disabled="disabled" @click="$emit(\'click\', $event)"><slot/></button>',
     },
     Card: { name: 'Card', template: '<div class="card"><slot/></div>' },
+    Divider: { name: 'Divider', template: '<hr class="divider"><slot/></hr>' },
     Empty: EmptyStub,
     List: { name: 'List', template: '<div class="list"><slot/></div>' },
     ListItem: {
@@ -68,8 +102,25 @@ vi.mock('ant-design-vue', () => {
       emits: ['click'],
       template: '<li class="list-item" @click="$emit(\'click\')"><slot/></li>',
     },
-    message: { success: m.messageSuccess, warning: m.messageWarning },
+    message: {
+      error: m.messageError,
+      success: m.messageSuccess,
+      warning: m.messageWarning,
+    },
+    Select: {
+      name: 'Select',
+      props: ['value', 'options', 'disabled', 'loading', 'placeholder'],
+      emits: ['update:value'],
+      template: '<select class="select" :disabled="disabled"></select>',
+    },
     Space: { name: 'Space', template: '<div class="space"><slot/></div>' },
+    Switch: {
+      name: 'Switch',
+      props: ['checked', 'loading', 'disabled', 'size'],
+      emits: ['change'],
+      template:
+        '<button class="switch" :disabled="disabled" @click="$emit(\'change\', !checked)"></button>',
+    },
     Tooltip: {
       name: 'Tooltip',
       template: '<div class="tooltip"><slot/></div>',
@@ -87,6 +138,13 @@ function mountPanel() {
     global: {
       stubs: {
         SipTimeline: { template: '<div class="sip-timeline-stub" />' },
+        MediaPlayer: {
+          name: 'MediaPlayer',
+          props: ['open', 'playUrls', 'title', 'loading'],
+          emits: ['close'],
+          template:
+            '<div class="media-player-stub" :data-open="String(open)" @click="$emit(\'close\')" />',
+        },
       },
     },
   });
@@ -97,14 +155,57 @@ function buttonByText(wrapper: any, text: string) {
   return wrapper.findAll('button').find((b: any) => b.text() === text);
 }
 
+function channelPage(...channels: Array<{ channelId: string; name?: string }>) {
+  return {
+    items: channels.map((channel, index) => ({
+      deviceId: 'd1',
+      id: index + 1,
+      status: 1,
+      statusName: '在线',
+      ...channel,
+    })),
+    total: channels.length,
+  };
+}
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+  return { promise, reject, resolve };
+}
+
 beforeEach(() => {
-  m.ptzControl.mockClear();
-  m.queryCatalog.mockClear();
-  m.queryDeviceInfo.mockClear();
-  m.rebootDevice.mockClear();
-  m.liveStart.mockClear();
-  m.messageWarning.mockClear();
-  m.messageSuccess.mockClear();
+  m.hasAccess.mockReset().mockReturnValue(true);
+  m.getDeviceChannelPage
+    .mockReset()
+    .mockResolvedValue(channelPage({ channelId: 'c1', name: 'Camera 1' }));
+  for (const k of [
+    'broadcast',
+    'controlAlarm',
+    'controlRecordStart',
+    'controlRecordStop',
+    'downloadConfig',
+    'liveStart',
+    'ptzControl',
+    'queryAlarm',
+    'queryCatalog',
+    'queryDeviceInfo',
+    'queryDeviceStatus',
+    'queryMobilePosition',
+    'queryPreset',
+    'queryRecord',
+    'rebootDevice',
+    'toggleDeviceSubscription',
+    'messageError',
+    'messageWarning',
+    'messageSuccess',
+  ] as const) {
+    m[k].mockClear();
+  }
 });
 
 describe('serverPanel —— 设备列表 upsert', () => {
@@ -136,10 +237,19 @@ describe('serverPanel —— 设备列表 upsert', () => {
   it('device.catalog 写入 channelCount 并置在线', async () => {
     const wrapper = mountPanel();
     await wrapper.setProps({
-      events: [devEvent('device.catalog', { deviceId: 'd1', channelCount: 8 })],
+      events: [
+        devEvent('device.catalog', {
+          deviceId: 'd1',
+          channelCount: 2,
+          channels: [
+            { deviceId: '34020000001320000001', name: 'Lab-ch1' },
+            { deviceId: '34020000001320000002', name: 'Lab-ch2' },
+          ],
+        }),
+      ],
     });
     await nextTick();
-    expect(wrapper.text()).toContain('8');
+    expect(wrapper.text()).toContain('2');
     expect(wrapper.find('.badge').attributes('data-status')).toBe('success');
   });
 
@@ -176,7 +286,7 @@ describe('serverPanel —— 自动选中与命令门控（C2）', () => {
 
   it('无在线设备时命令按钮禁用', () => {
     const wrapper = mountPanel();
-    const btn = buttonByText(wrapper, 'protocolLab.server.queryCatalog');
+    const btn = buttonByText(wrapper, 'device.action.queryCatalog');
     expect(btn?.attributes('disabled')).toBeDefined();
   });
 
@@ -186,7 +296,7 @@ describe('serverPanel —— 自动选中与命令门控（C2）', () => {
       events: [devEvent('device.register', { deviceId: 'd1' })],
     });
     await nextTick();
-    const btn = buttonByText(wrapper, 'protocolLab.server.queryCatalog');
+    const btn = buttonByText(wrapper, 'device.action.queryCatalog');
     expect(btn?.attributes('disabled')).toBeUndefined();
   });
 
@@ -200,8 +310,123 @@ describe('serverPanel —— 自动选中与命令门控（C2）', () => {
       events: [devEvent('device.offline', { deviceId: 'd1' }, 1)],
     });
     await nextTick();
-    const btn = buttonByText(wrapper, 'protocolLab.server.queryCatalog');
+    const btn = buttonByText(wrapper, 'device.action.queryCatalog');
     expect(btn?.attributes('disabled')).toBeDefined();
+  });
+});
+
+describe('serverPanel —— 真实通道加载与选择', () => {
+  async function registerDevice(deviceId = 'd1') {
+    const wrapper = mountPanel();
+    await wrapper.setProps({
+      events: [devEvent('device.register', { deviceId })],
+    });
+    await flushPromises();
+    return wrapper;
+  }
+
+  it('选中设备后按 deviceId 拉取通道，并默认选中第一条', async () => {
+    m.getDeviceChannelPage.mockResolvedValueOnce(
+      channelPage(
+        { channelId: 'c1', name: 'Camera 1' },
+        { channelId: 'c2', name: 'Camera 2' },
+      ),
+    );
+
+    const wrapper = await registerDevice();
+
+    expect(m.getDeviceChannelPage).toHaveBeenCalledWith(
+      { page: 1, size: 200 },
+      { deviceId: 'd1' },
+    );
+    const select = wrapper.findComponent({ name: 'Select' });
+    expect(select.props('value')).toBe('c1');
+    expect(select.props('options')).toEqual([
+      { label: 'c1 · Camera 1', value: 'c1' },
+      { label: 'c2 · Camera 2', value: 'c2' },
+    ]);
+  });
+
+  it('没有通道时提示并禁用点播和 PTZ', async () => {
+    m.getDeviceChannelPage.mockResolvedValueOnce(channelPage());
+
+    const wrapper = await registerDevice();
+
+    expect(m.messageWarning).toHaveBeenCalledWith(
+      'protocolLab.msg.noAvailableChannel',
+    );
+    expect(
+      buttonByText(wrapper, 'protocolLab.server.play')?.attributes('disabled'),
+    ).toBeDefined();
+    expect(
+      wrapper.findComponent({ name: 'PtzControl' }).props('disabled'),
+    ).toBe(true);
+    expect(m.liveStart).not.toHaveBeenCalled();
+    expect(m.ptzControl).not.toHaveBeenCalled();
+  });
+
+  it('通道加载失败时提示且不猜测通道 ID', async () => {
+    m.getDeviceChannelPage.mockRejectedValueOnce(new Error('network'));
+
+    const wrapper = await registerDevice();
+
+    expect(m.messageError).toHaveBeenCalledWith(
+      'protocolLab.msg.channelLoadFailed',
+    );
+    expect(wrapper.findComponent({ name: 'Select' }).props('value')).toBe('');
+    expect(
+      buttonByText(wrapper, 'protocolLab.server.play')?.attributes('disabled'),
+    ).toBeDefined();
+  });
+
+  it('切换设备后忽略前一个设备的迟到响应', async () => {
+    const first = deferred<ReturnType<typeof channelPage>>();
+    m.getDeviceChannelPage
+      .mockReturnValueOnce(first.promise)
+      .mockResolvedValueOnce(channelPage({ channelId: 'd2c1' }));
+    const wrapper = mountPanel();
+    await wrapper.setProps({
+      events: [
+        devEvent('device.register', { deviceId: 'd1' }, 1),
+        devEvent('device.register', { deviceId: 'd2' }, 2),
+      ],
+    });
+    await nextTick();
+
+    const d2 = wrapper
+      .findAll('.list-item')
+      .find((item) => item.text().includes('d2'));
+    await d2?.trigger('click');
+    await flushPromises();
+    expect(wrapper.findComponent({ name: 'Select' }).props('value')).toBe(
+      'd2c1',
+    );
+
+    first.resolve(channelPage({ channelId: 'd1c1' }));
+    await flushPromises();
+    expect(wrapper.findComponent({ name: 'Select' }).props('value')).toBe(
+      'd2c1',
+    );
+  });
+
+  it('所选设备收到 catalog 后重新拉取持久化通道', async () => {
+    const wrapper = await registerDevice();
+    m.getDeviceChannelPage.mockResolvedValueOnce(
+      channelPage({ channelId: 'catalog-c1' }),
+    );
+
+    await wrapper.setProps({
+      events: [
+        devEvent('device.register', { deviceId: 'd1' }),
+        devEvent('device.catalog', { channelCount: 1, deviceId: 'd1' }, 1),
+      ],
+    });
+    await flushPromises();
+
+    expect(m.getDeviceChannelPage).toHaveBeenCalledTimes(2);
+    expect(wrapper.findComponent({ name: 'Select' }).props('value')).toBe(
+      'catalog-c1',
+    );
   });
 });
 
@@ -211,59 +436,251 @@ describe('serverPanel —— 命令下发', () => {
     await wrapper.setProps({
       events: [devEvent('device.register', { deviceId: 'd1' })],
     });
-    await nextTick();
+    await flushPromises();
     return wrapper;
   }
 
   it('查目录下发 queryCatalog(selectedId)', async () => {
     const wrapper = await onlineWrapper();
-    await buttonByText(wrapper, 'protocolLab.server.queryCatalog')?.trigger(
-      'click',
-    );
+    await buttonByText(wrapper, 'device.action.queryCatalog')?.trigger('click');
     expect(m.queryCatalog).toHaveBeenCalledWith('d1');
   });
 
   it('查设备信息下发 queryDeviceInfo(selectedId)', async () => {
     const wrapper = await onlineWrapper();
-    await buttonByText(wrapper, 'protocolLab.server.queryDeviceInfo')?.trigger(
-      'click',
-    );
+    await buttonByText(wrapper, 'device.action.queryInfo')?.trigger('click');
     expect(m.queryDeviceInfo).toHaveBeenCalledWith('d1');
   });
 
   it('重启下发 rebootDevice(selectedId)', async () => {
     const wrapper = await onlineWrapper();
-    await buttonByText(wrapper, 'protocolLab.server.reboot')?.trigger('click');
+    await buttonByText(wrapper, 'device.action.reboot')?.trigger('click');
     expect(m.rebootDevice).toHaveBeenCalledWith('d1');
   });
 
-  it('pTZ 下发携带 channelId=deviceId+01 与 command/speed', async () => {
+  it('查状态下发 queryDeviceStatus(selectedId)', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.queryStatus')?.trigger('click');
+    expect(m.queryDeviceStatus).toHaveBeenCalledWith('d1');
+  });
+
+  it('查预置位下发 queryPreset(selectedId)', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.queryPreset')?.trigger('click');
+    expect(m.queryPreset).toHaveBeenCalledWith('d1');
+  });
+
+  it('查移动位置下发 queryMobilePosition(selectedId)', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.queryMobilePosition')?.trigger(
+      'click',
+    );
+    expect(m.queryMobilePosition).toHaveBeenCalledWith('d1');
+  });
+
+  it('配置下载下发 downloadConfig(selectedId, BASIC)', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.configDownload')?.trigger(
+      'click',
+    );
+    expect(m.downloadConfig).toHaveBeenCalledWith('d1', 'BASIC');
+  });
+
+  it('开始/停止录像下发 controlRecordStart/Stop(selectedId)', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.recordStart')?.trigger('click');
+    expect(m.controlRecordStart).toHaveBeenCalledWith('d1');
+    await buttonByText(wrapper, 'device.action.recordStop')?.trigger('click');
+    expect(m.controlRecordStop).toHaveBeenCalledWith('d1');
+  });
+
+  it('录像查询下发 queryRecord({deviceId})', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.recordQuery')?.trigger('click');
+    expect(m.queryRecord).toHaveBeenCalledWith(
+      expect.objectContaining({ deviceId: 'd1' }),
+    );
+  });
+
+  it('报警查询 / 复位下发 queryAlarm / controlAlarm({deviceId})', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.alarmQuery')?.trigger('click');
+    expect(m.queryAlarm).toHaveBeenCalledWith(
+      expect.objectContaining({ deviceId: 'd1' }),
+    );
+    await buttonByText(wrapper, 'device.action.alarmControl')?.trigger('click');
+    expect(m.controlAlarm).toHaveBeenCalledWith(
+      expect.objectContaining({ deviceId: 'd1' }),
+    );
+  });
+
+  it('广播下发 broadcast(selectedId)', async () => {
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'device.action.broadcast')?.trigger('click');
+    expect(m.broadcast).toHaveBeenCalledWith('d1');
+  });
+
+  it('pTZ 下发携带通道接口返回的真实 channelId', async () => {
     const wrapper = await onlineWrapper();
     // 方向盘"上"按钮文案 = protocolLab.ptz.up
     await buttonByText(wrapper, 'protocolLab.ptz.up')?.trigger('click');
     expect(m.ptzControl).toHaveBeenCalledWith({
       deviceId: 'd1',
-      channelId: 'd101',
+      channelId: 'c1',
       command: 'UP',
       speed: 128,
     });
   });
 
-  it('点播下发 liveStart(deviceId, channelId)', async () => {
+  it('点播下发 liveStart(deviceId, channelId) 使用所选真实通道', async () => {
+    m.getDeviceChannelPage.mockResolvedValueOnce(
+      channelPage({ channelId: 'c1' }, { channelId: 'c2' }),
+    );
     const wrapper = await onlineWrapper();
+    const select = wrapper.findComponent({ name: 'Select' });
+    await select.vm.$emit('update:value', 'c2');
+    await nextTick();
     await buttonByText(wrapper, 'protocolLab.server.play')?.trigger('click');
     expect(m.liveStart).toHaveBeenCalledWith({
       deviceId: 'd1',
-      channelId: 'd101',
+      channelId: 'c2',
     });
   });
 
   it('下发成功提示 message.success', async () => {
     const wrapper = await onlineWrapper();
-    await buttonByText(wrapper, 'protocolLab.server.queryCatalog')?.trigger(
-      'click',
-    );
+    await buttonByText(wrapper, 'device.action.queryCatalog')?.trigger('click');
     await nextTick();
     expect(m.messageSuccess).toHaveBeenCalled();
+  });
+});
+
+describe('serverPanel —— 行内订阅开关（GB28181-2022 §9.11）', () => {
+  // 每行 3 个 Switch，序：catalog / position / alarm（与模板一致）。
+  const SUB_ORDER = ['catalog', 'position', 'alarm'] as const;
+
+  async function onlineWrapper() {
+    const wrapper = mountPanel();
+    await wrapper.setProps({
+      events: [devEvent('device.register', { deviceId: 'd1' })],
+    });
+    await flushPromises();
+    return wrapper;
+  }
+
+  function switchAt(wrapper: any, kind: (typeof SUB_ORDER)[number]) {
+    return wrapper.findAll('.switch').at(SUB_ORDER.indexOf(kind));
+  }
+
+  it('开目录订阅 → toggleDeviceSubscription(d1, CATALOG, true)', async () => {
+    const wrapper = await onlineWrapper();
+    await switchAt(wrapper, 'catalog')?.trigger('click');
+    expect(m.toggleDeviceSubscription).toHaveBeenCalledWith(
+      'd1',
+      'CATALOG',
+      true,
+    );
+  });
+
+  it('开位置订阅 → toggleDeviceSubscription(d1, MOBILE_POSITION, true)', async () => {
+    const wrapper = await onlineWrapper();
+    await switchAt(wrapper, 'position')?.trigger('click');
+    expect(m.toggleDeviceSubscription).toHaveBeenCalledWith(
+      'd1',
+      'MOBILE_POSITION',
+      true,
+    );
+  });
+
+  it('开告警订阅 → toggleDeviceSubscription(d1, ALARM, true)', async () => {
+    const wrapper = await onlineWrapper();
+    await switchAt(wrapper, 'alarm')?.trigger('click');
+    expect(m.toggleDeviceSubscription).toHaveBeenCalledWith(
+      'd1',
+      'ALARM',
+      true,
+    );
+  });
+
+  it('成功后写回开关态，再点即关闭（enabled=false）', async () => {
+    const wrapper = await onlineWrapper();
+    await switchAt(wrapper, 'catalog')?.trigger('click'); // 开
+    await nextTick();
+    await switchAt(wrapper, 'catalog')?.trigger('click'); // 关
+    expect(m.toggleDeviceSubscription).toHaveBeenNthCalledWith(
+      2,
+      'd1',
+      'CATALOG',
+      false,
+    );
+  });
+
+  it('无权限时不调 API 且 message.error', async () => {
+    m.hasAccess.mockReturnValueOnce(false);
+    const wrapper = await onlineWrapper();
+    await switchAt(wrapper, 'catalog')?.trigger('click');
+    expect(m.toggleDeviceSubscription).not.toHaveBeenCalled();
+    expect(m.messageError).toHaveBeenCalled();
+  });
+});
+
+describe('serverPanel —— 点播后自动开播放器弹窗', () => {
+  const playUrls = {
+    httpFlv: 'http://127.0.0.1:8082/rtp/s.live.flv',
+    hls: 'http://127.0.0.1:8082/rtp/s/hls.m3u8',
+    rtmp: 'rtmp://127.0.0.1:1935/rtp/s',
+  };
+
+  async function onlineWrapper() {
+    const wrapper = mountPanel();
+    await wrapper.setProps({
+      events: [devEvent('device.register', { deviceId: 'd1' })],
+    });
+    await nextTick();
+    return wrapper;
+  }
+
+  it('点播默认不开弹窗（初始 open=false）', async () => {
+    const wrapper = await onlineWrapper();
+    expect(wrapper.find('.media-player-stub').attributes('data-open')).toBe(
+      'false',
+    );
+  });
+
+  it('liveStart 返回 playUrls 后打开弹窗并透传地址', async () => {
+    m.liveStart.mockResolvedValueOnce({ status: 1, playUrls });
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'protocolLab.server.play')?.trigger('click');
+    await nextTick();
+    await nextTick();
+
+    const player = wrapper.findComponent({ name: 'MediaPlayer' });
+    expect(player.props('open')).toBe(true);
+    expect(player.props('playUrls')).toEqual(playUrls);
+  });
+
+  it('liveStart 无 playUrls（点播失败）时不开弹窗', async () => {
+    m.liveStart.mockResolvedValueOnce({ status: 0, playUrls: null });
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'protocolLab.server.play')?.trigger('click');
+    await nextTick();
+    await nextTick();
+
+    expect(wrapper.find('.media-player-stub').attributes('data-open')).toBe(
+      'false',
+    );
+  });
+
+  it('弹窗 close 事件后 open 回落 false', async () => {
+    m.liveStart.mockResolvedValueOnce({ status: 1, playUrls });
+    const wrapper = await onlineWrapper();
+    await buttonByText(wrapper, 'protocolLab.server.play')?.trigger('click');
+    await nextTick();
+    await nextTick();
+
+    await wrapper.find('.media-player-stub').trigger('click'); // 触发 close
+    await nextTick();
+    const player = wrapper.findComponent({ name: 'MediaPlayer' });
+    expect(player.props('open')).toBe(false);
   });
 });

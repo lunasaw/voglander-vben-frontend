@@ -90,14 +90,15 @@ async function initPlayer() {
   }
 
   // 配置FLV播放器 - 根据格式类型进行差异化配置
+  // 不强制 hasAudio/hasVideo：让 flv.js 从流元数据自动探测轨道。
+  // GB28181 lab 推流用 ffmpeg -an（纯视频无音轨），若强制 hasAudio:true，
+  // flv.js 会等待永不到来的音频 init 段 → MSE 卡住、首帧迟迟不就绪 → 表现为"加载失败"。
   const flvConfig: flvjs.MediaDataSource = {
     type: 'flv',
     url: props.url,
     isLive: true,
     cors: true,
     withCredentials: false,
-    hasAudio: true,
-    hasVideo: true,
   };
 
   // WebSocket FLV特殊配置

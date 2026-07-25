@@ -122,10 +122,22 @@ onMounted(async () => {
   min-height: 640px;
 }
 
+/* grid 子项默认 min-height:auto，会被内容撑开行轨道、使 panel-card 的 height:100%
+   解析成内容高度，从而 .ant-card-body 的 overflow 永不触发（表现为初次加载左栏不滚动，
+   F12 改宽度触发重排后才滚）。min-height:0 锁定行轨道为 grid 固定高度，内部才能滚。 */
+.lab-grid > * {
+  min-height: 0;
+}
+
 @media (max-width: 1100px) {
   .lab-grid {
     grid-template-columns: 1fr;
     height: auto;
+  }
+
+  /* 单列堆叠时回退自然高度，由页面整体滚动 */
+  .lab-grid > * {
+    min-height: 260px;
   }
 }
 </style>

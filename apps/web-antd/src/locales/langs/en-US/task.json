@@ -1,0 +1,152 @@
+{
+  "management": {
+    "title": "Task Management"
+  },
+  "center": {
+    "title": "Task Center",
+    "stats": {
+      "scheduled": "Waiting",
+      "running": "Running",
+      "paused": "Paused",
+      "cancelling": "Cancelling",
+      "completedToday": "Completed Today",
+      "failed": "Failed"
+    },
+    "filter": {
+      "taskId": "Task ID",
+      "taskType": "Task Type",
+      "state": "State",
+      "taskName": "Task Name",
+      "owner": "Owner",
+      "createdAt": "Created At",
+      "scheduleAt": "Schedule Time",
+      "executionState": "Execution State",
+      "all": "All",
+      "apply": "Search",
+      "reset": "Reset"
+    },
+    "field": {
+      "taskId": "Task ID",
+      "taskType": "Task Type",
+      "taskName": "Task Name",
+      "state": "State",
+      "progress": "Progress",
+      "schedule": "Schedule",
+      "lastExecution": "Last Execution",
+      "owner": "Owner",
+      "createTime": "Created At",
+      "executionId": "Execution ID",
+      "attempt": "Attempts",
+      "plannedAt": "Planned At",
+      "startedAt": "Started At",
+      "finishedAt": "Finished At",
+      "failureCode": "Failure Code",
+      "failureMessage": "Failure Message",
+      "result": "Result"
+    },
+    "action": {
+      "detail": "Details",
+      "pause": "Pause",
+      "resume": "Resume",
+      "cancel": "Cancel",
+      "retry": "Retry",
+      "refresh": "Refresh",
+      "viewExecution": "View Execution",
+      "viewResult": "View Result"
+    },
+    "status": {
+      "SCHEDULED": "Scheduled",
+      "RUNNING": "Running",
+      "PAUSED": "Paused",
+      "CANCELLING": "Cancelling",
+      "COMPLETED": "Completed",
+      "PARTIAL_COMPLETED": "Partially Completed",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled",
+      "PENDING": "Pending",
+      "RETRY_WAIT": "Waiting for Retry",
+      "SUCCEEDED": "Succeeded",
+      "MISSED": "Missed"
+    },
+    "mode": {
+      "ONCE": "Immediate",
+      "AT_TIME": "At Time",
+      "FIXED_RATE": "Fixed Rate"
+    },
+    "capability": {
+      "PAUSE": "Pause",
+      "CANCEL": "Cancel",
+      "MANUAL_RETRY": "Manual Retry",
+      "PROGRESS": "Progress",
+      "RESCHEDULE": "Reschedule"
+    },
+    "progress": {
+      "indeterminate": "Processing",
+      "completed": "Completed",
+      "currentOfTotal": "{0} / {1}",
+      "phase": "Current phase: {0}"
+    },
+    "detail": {
+      "title": "Task Details",
+      "summary": "Summary",
+      "schedule": "Schedule",
+      "owner": "Owner",
+      "counters": "Execution Statistics",
+      "businessSummary": "Business Summary",
+      "executions": "Execution History",
+      "timeline": "Event Timeline",
+      "capabilities": "Available Actions",
+      "noResult": "No result",
+      "unknownType": "Unknown Task Type"
+    },
+    "type": {
+      "imageCollection": "Image Collection",
+      "dataExport": "Data Export",
+      "dataImport": "Data Import",
+      "aiAnalysis": "AI Analysis",
+      "test": "Test Task"
+    },
+    "execution": {
+      "title": "Execution Details",
+      "events": "Event Timeline",
+      "empty": "No execution records",
+      "loadError": "Failed to load execution history; existing data was kept",
+      "loadMore": "Load more"
+    },
+    "event": {
+      "CREATED": "Created",
+      "SCHEDULED": "Scheduled",
+      "CLAIMED": "Claimed",
+      "STARTED": "Started",
+      "PROGRESS": "Progress Updated",
+      "RETRY_SCHEDULED": "Retry Scheduled",
+      "SUCCEEDED": "Succeeded",
+      "FAILED": "Failed",
+      "MISSED": "Missed",
+      "PAUSED": "Paused",
+      "RESUMED": "Resumed",
+      "CANCELLING": "Cancelling",
+      "CANCELLED": "Cancelled",
+      "LEASE_EXPIRED": "Lease Expired",
+      "MANUAL_RETRY": "Manual Retry"
+    },
+    "failure": {
+      "guidance": "Check the failure code, task configuration, or try again later.",
+      "unknown": "The task failed. Contact an administrator for help."
+    },
+    "message": {
+      "pauseConfirm": "Pause this task?",
+      "resumeConfirm": "Resume this task?",
+      "cancelConfirm": "Cancel this task? Pending executions will not continue.",
+      "retryConfirm": "Retry this execution? A new task will be created.",
+      "controlSuccess": "The action was submitted.",
+      "stateConflict": "The task state changed. The page will refresh.",
+      "permissionDenied": "You do not have permission to perform this action.",
+      "reconnect": "The live connection was lost. Refreshing task data."
+    }
+  },
+  "action": {
+    "query": "Query Tasks",
+    "control": "Control Tasks"
+  }
+}

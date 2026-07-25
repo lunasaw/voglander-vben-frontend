@@ -55,6 +55,23 @@
     "heartbeat": "Keepalive",
     "report": "Active Reporting"
   },
+  "push": {
+    "title": "Simulated Push",
+    "auto": "Auto Push",
+    "autoOn": "On (auto-push on invite)",
+    "autoOff": "Off (manual click)",
+    "ffmpeg": "FFmpeg Path",
+    "ffmpegPh": "Absolute path to ffmpeg (on the backend host)",
+    "media": "Media File",
+    "mediaPh": "Absolute path to the video file (on the backend host)",
+    "start": "Push",
+    "stop": "Stop Push",
+    "target": "Push Target",
+    "countdown": "Click push within {sec}s (platform invite timeout window)",
+    "zlmMode": "Push Mode",
+    "zlmModeOn": "ZLM Relay",
+    "zlmModeOff": "Direct RTP"
+  },
   "server": {
     "title": "Platform (Server)",
     "devices": "Online Devices",
@@ -64,8 +81,17 @@
     "queryDeviceInfo": "Query Device Info",
     "reboot": "Reboot",
     "play": "Live Play",
+    "commandChannel": "Command Channel",
+    "commandChannelHint": "Live play and PTZ share a persisted channel",
+    "channelSelect": "Select a real device channel",
+    "channelEmpty": "No channel available. Query the catalog first",
     "events": "Platform Events",
-    "eventsEmpty": "No platform events yet. Device register / online / reports show here in real time"
+    "eventsEmpty": "No platform events yet. Device register / online / reports show here in real time",
+    "sub": {
+      "catalog": "Catalog",
+      "position": "Position",
+      "alarm": "Alarm"
+    }
   },
   "ptz": {
     "up": "Up",
@@ -92,6 +118,13 @@
     "keepalive": "Keepalive",
     "catalog": "Catalog Response",
     "deviceInfo": "Device Info",
+    "deviceStatus": "Device Status",
+    "ptzPosition": "PTZ Position",
+    "preset": "Preset",
+    "config": "Device Config",
+    "configDownload": "Config Download",
+    "recordInfo": "Record Info",
+    "mobilePosition": "Mobile Position",
     "inviteOk": "Invite OK",
     "bye": "Session Bye",
     "alarm": "Alarm",
@@ -107,15 +140,26 @@
     "queryCatalog": "Catalog Query",
     "queryDeviceInfo": "Device Info Query",
     "queryDeviceStatus": "Device Status Query",
+    "queryRecordInfo": "Record Query",
+    "queryConfigDownload": "Config Download Query",
+    "queryPreset": "Preset Query",
+    "queryMobilePosition": "Mobile Position Query",
+    "queryAlarm": "Alarm Query",
     "configBasicParam": "Basic Param Config",
     "broadcast": "Voice Broadcast",
-    "invite": "Invite Request"
+    "invite": "Invite Request",
+    "byeRecv": "BYE Received",
+    "pushStarted": "Push Started",
+    "pushStopped": "Push Stopped",
+    "pushFailed": "Push Failed"
   },
   "timeline": {
     "empty": "No events"
   },
   "msg": {
     "registerSent": "Register request sent",
+    "subscribeOn": "{0} subscription enabled",
+    "subscribeOff": "{0} subscription disabled",
     "unregisterSent": "Unregister request sent",
     "keepaliveSent": "Keepalive sent",
     "autoKeepaliveOn": "Auto keepalive enabled",
@@ -128,6 +172,11 @@
     "queryDeviceInfoSent": "Device info query sent",
     "rebootSent": "Reboot command sent",
     "liveSent": "Live play request sent",
-    "selectOnlineDevice": "Please select an online device from the list first"
+    "selectOnlineDevice": "Please select an online device from the list first",
+    "noAvailableChannel": "This device has no available channel. Query the catalog first",
+    "channelLoadFailed": "Failed to load device channels. Please try again",
+    "pushStarted": "Push started",
+    "pushStopped": "Push stopped",
+    "pushFailed": "Push start failed"
   }
 }

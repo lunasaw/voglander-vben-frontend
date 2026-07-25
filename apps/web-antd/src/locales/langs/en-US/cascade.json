@@ -1,0 +1,144 @@
+{
+  "menu": "Cascade Management",
+  "title": "Cascade Management",
+  "platform": {
+    "title": "Cascade Platform Management",
+    "name": "Cascade Platform",
+    "add": "Add Platform",
+    "create": "Add Platform",
+    "edit": "Edit Platform",
+    "delete": "Delete Platform",
+    "status": "Enable/Disable",
+    "detail": "Platform Detail",
+    "refreshScheduler": "Refresh Scheduler",
+    "field": {
+      "id": "ID",
+      "platformId": "Platform ID",
+      "platformIp": "Platform IP",
+      "platformPort": "Platform Port",
+      "platformDomain": "Platform Domain",
+      "localClientId": "Local Client ID",
+      "localIp": "Local IP",
+      "localPort": "Local Port",
+      "transport": "Transport Protocol",
+      "charset": "Charset",
+      "username": "Auth Username",
+      "password": "Auth Password",
+      "registerExpires": "Register Expires (s)",
+      "keepaliveInterval": "Keepalive Interval (s)",
+      "enabled": "Status",
+      "registerStatus": "Register Status",
+      "createTime": "Create Time",
+      "updateTime": "Update Time",
+      "operation": "Action"
+    },
+    "transport": {
+      "udp": "UDP",
+      "tcp": "TCP"
+    },
+    "enabled": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "registerStatus": {
+      "offline": "Offline",
+      "online": "Online",
+      "registering": "Registering",
+      "failed": "Failed"
+    },
+    "action": {
+      "enable": "Enable",
+      "disable": "Disable"
+    },
+    "msg": {
+      "enableConfirm": "Enable platform [{0}]? Registration scheduler will start automatically.",
+      "disableConfirm": "Disable platform [{0}]? Registration task will stop and logout request will be sent.",
+      "refreshConfirm": "Refresh registration scheduler? All enabled platforms will be reloaded.",
+      "enableSuccess": "Platform enabled",
+      "disableSuccess": "Platform disabled",
+      "registering": "Platform [{0}] registering, please wait...",
+      "registerSuccess": "Platform [{0}] registered successfully",
+      "registerFailed": "Platform [{0}] registration failed",
+      "refreshSuccess": "Scheduler refreshed",
+      "deleteConfirm": "Delete platform [{0}]? Ensure it's disabled and has no associated channel mappings.",
+      "platformIdRequired": "Platform ID is required",
+      "platformIdFormat": "Platform ID must be 20-digit GB28181 format",
+      "platformIpRequired": "Platform IP is required",
+      "platformPortRequired": "Platform port is required",
+      "localClientIdRequired": "Local client ID is required"
+    },
+    "placeholder": {
+      "platformId": "Enter 20-digit GB28181 platform ID",
+      "platformIp": "Enter platform IP address",
+      "platformPort": "Enter platform port (default 5060)",
+      "platformDomain": "Enter platform domain (optional)",
+      "localClientId": "Enter 20-digit local client ID",
+      "localIp": "Enter local IP (optional)",
+      "localPort": "Enter local port (optional)",
+      "username": "Enter auth username (optional)",
+      "password": "Enter auth password (optional)",
+      "registerExpires": "Enter register expires (seconds, default 3600)",
+      "keepaliveInterval": "Enter keepalive interval (seconds, default 60)"
+    }
+  },
+  "channel": {
+    "title": "Cascade Channel Management",
+    "name": "Cascade Channel",
+    "add": "Add Channel Mapping",
+    "create": "Add Mapping",
+    "edit": "Edit Channel Mapping",
+    "delete": "Delete Mapping",
+    "detail": "Channel Detail",
+    "field": {
+      "id": "ID",
+      "platformId": "Platform",
+      "localDeviceId": "Local Device ID",
+      "localChannelId": "Local Channel ID",
+      "cascadeChannelId": "Cascade Channel ID",
+      "cascadeName": "Cascade Name",
+      "createTime": "Create Time",
+      "updateTime": "Update Time",
+      "operation": "Action"
+    },
+    "msg": {
+      "deleteConfirm": "Delete channel mapping [{0}]?",
+      "platformIdRequired": "Platform is required",
+      "localDeviceIdRequired": "Local device ID is required",
+      "localChannelIdRequired": "Local channel ID is required",
+      "cascadeChannelIdRequired": "Cascade channel ID is required",
+      "cascadeChannelIdFormat": "Cascade channel ID must be 20-digit GB28181 format"
+    },
+    "placeholder": {
+      "platformId": "Select platform",
+      "localDeviceId": "Enter local device ID",
+      "localChannelId": "Enter local channel ID",
+      "cascadeChannelId": "Enter cascade channel ID (20-digit GB28181)",
+      "cascadeName": "Enter cascade name (optional)"
+    },
+    "help": {
+      "cascadeChannelId": "Channel ID exposed to upstream platform, must follow GB28181 20-digit rule"
+    },
+    "batchBind": {
+      "title": "Batch Bind Channels",
+      "channels": "Channel List",
+      "placeholder": "One per line: localChannelId, or localChannelId,localDeviceId,cascadeName",
+      "help": "One per line; cascade ID defaults to localChannelId when only that is given; optionally append localDeviceId and cascadeName by comma",
+      "platformRequired": "Please select a platform first",
+      "channelsRequired": "Please enter at least one channel",
+      "success": "Batch bind succeeded, {0} added"
+    }
+  },
+  "subscribe": {
+    "title": "Subscription Detail",
+    "empty": "No active subscription for this platform",
+    "action": {
+      "view": "Subscriptions"
+    },
+    "field": {
+      "subType": "Subscribe Type",
+      "expires": "Expires (s)",
+      "expireTime": "Expire Time",
+      "status": "Status"
+    }
+  }
+}

@@ -8,33 +8,13 @@ import { $t } from '#/locales';
  * 这里集中维护 topic → 文案 / 颜色 的映射，组件按 topic 取展示属性。
  */
 
-/** 八向 + 变倍方向盘（command 直发词表，门面层 PTZ_VOCAB 翻译为规范枚举）。 */
-export interface PtzButton {
-  /** 后端词表（大小写无关）。 */
-  command: string;
-  /** i18n key 后缀（protocolLab.ptz.<key>）。 */
-  key: string;
-  /** 方向盘网格位置（3×3，row/col 从 1 起）。 */
-  row: number;
-  col: number;
-}
-
-export const PTZ_DIRECTIONS: PtzButton[] = [
-  { command: 'UP_LEFT', key: 'upLeft', row: 1, col: 1 },
-  { command: 'UP', key: 'up', row: 1, col: 2 },
-  { command: 'UP_RIGHT', key: 'upRight', row: 1, col: 3 },
-  { command: 'LEFT', key: 'left', row: 2, col: 1 },
-  { command: 'STOP', key: 'stop', row: 2, col: 2 },
-  { command: 'RIGHT', key: 'right', row: 2, col: 3 },
-  { command: 'DOWN_LEFT', key: 'downLeft', row: 3, col: 1 },
-  { command: 'DOWN', key: 'down', row: 3, col: 2 },
-  { command: 'DOWN_RIGHT', key: 'downRight', row: 3, col: 3 },
-];
-
-export const PTZ_ZOOM: PtzButton[] = [
-  { command: 'ZOOM_IN', key: 'zoomIn', row: 1, col: 1 },
-  { command: 'ZOOM_OUT', key: 'zoomOut', row: 1, col: 2 },
-];
+// PTZ 方向盘词表已提取到共享组件层（components/ptz-control.ts），供协议台与设备页共用。
+// 这里 re-export 保持协议台既有 import 路径（`../data`）不变。
+export {
+  PTZ_DIRECTIONS,
+  PTZ_ZOOM,
+  type PtzButton,
+} from '#/components/ptz-control';
 
 /** topic → 时间线展示属性（标题 i18n key + 颜色标签）。 */
 interface TopicMeta {
@@ -52,6 +32,13 @@ export const TOPIC_META: Record<string, TopicMeta> = {
   'device.keepalive': { labelKey: 'keepalive', color: 'blue' },
   'device.catalog': { labelKey: 'catalog', color: 'cyan' },
   'device.info': { labelKey: 'deviceInfo', color: 'cyan' },
+  'device.status': { labelKey: 'deviceStatus', color: 'cyan' },
+  'device.ptz_position': { labelKey: 'ptzPosition', color: 'geekblue' },
+  'device.preset': { labelKey: 'preset', color: 'cyan' },
+  'device.config': { labelKey: 'config', color: 'purple' },
+  'device.config_download': { labelKey: 'configDownload', color: 'purple' },
+  'device.recordinfo': { labelKey: 'recordInfo', color: 'cyan' },
+  'device.mobileposition': { labelKey: 'mobilePosition', color: 'green' },
   'session.invite_ok': { labelKey: 'inviteOk', color: 'purple' },
   'session.bye': { labelKey: 'bye', color: 'orange' },
   'alarm.new': { labelKey: 'alarm', color: 'red' },
@@ -74,13 +61,43 @@ export const TOPIC_META: Record<string, TopicMeta> = {
     labelKey: 'queryDeviceStatus',
     color: 'cyan',
   },
+  'clientcmd.query.recordinfo': { labelKey: 'queryRecordInfo', color: 'cyan' },
+  'clientcmd.query.configdownload': {
+    labelKey: 'queryConfigDownload',
+    color: 'cyan',
+  },
+  'clientcmd.query.preset': { labelKey: 'queryPreset', color: 'cyan' },
+  'clientcmd.query.mobileposition': {
+    labelKey: 'queryMobilePosition',
+    color: 'cyan',
+  },
+  'clientcmd.query.alarm': { labelKey: 'queryAlarm', color: 'orange' },
   'clientcmd.config.basicparam': {
     labelKey: 'configBasicParam',
     color: 'purple',
   },
   'clientcmd.broadcast': { labelKey: 'broadcast', color: 'magenta' },
   'clientcmd.invite': { labelKey: 'invite', color: 'purple' },
+  'clientcmd.bye': { labelKey: 'byeRecv', color: 'orange' },
+  'clientcmd.push.started': { labelKey: 'pushStarted', color: 'green' },
+  'clientcmd.push.stopped': { labelKey: 'pushStopped', color: 'orange' },
+  'clientcmd.push.failed': { labelKey: 'pushFailed', color: 'red' },
 };
+
+/**
+ * 设备详情时间线订阅的 topic 全集 = **设备→平台方向**（协议台右侧时间线同一集合）：
+ * `device.*`（上报/查询应答）+ `session.*`（点播会话）+ `alarm.*`（报警上报/查询应答）。
+ *
+ * 派生口径 = 全部非 `clientcmd.*`（`clientcmd.*` 是平台→设备下发，不属于设备视角的"收到事件"）。
+ * 从 TOPIC_META 派生为单一来源，新增右侧 topic 只改 TOPIC_META 一处即可。
+ *
+ * ⚠️ 报警应答走 `alarm.new`（非 `device.alarm`）：若此处只订阅 `device.*`，
+ * 则 useSseEvents 的「订阅前缀 + addEventListener」两层都收不到 `alarm`/`session` 帧
+ * （设备详情「查询报警/点播会话」无 SSE 信号的根因）。
+ */
+export const DEVICE_DETAIL_TOPICS: string[] = Object.keys(TOPIC_META).filter(
+  (t) => !t.startsWith('clientcmd.'),
+);
 
 /** 取 topic 的展示标题（找不到映射时回退原始 topic）。 */
 export function topicLabel(topic: string): string {

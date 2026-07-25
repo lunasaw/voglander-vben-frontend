@@ -33,6 +33,14 @@ export namespace ProtocolLabApi {
     targetCustomized: boolean;
     /** 后端已就绪的全部 SSE 主题（event: 名 = 完整 topic）。 */
     topics: string[];
+    /** push.auto：收到 INVITE 是否自动起 ffmpeg（只读展示）。 */
+    pushAuto?: boolean;
+    /** push.zlm-mode：ZLM中继模式开关初值（ffmpeg→ZLM RTMP→RTP）。 */
+    pushZlmMode?: boolean;
+    /** push.ffmpeg-path：ffmpeg 路径输入框初值。 */
+    ffmpegPath?: string;
+    /** push.media-file：视频文件路径输入框初值（可能为空，联调前填）。 */
+    mediaFile?: string;
   }
 
   /** POST /lab/client/keepalive/auto 返回的当前调度状态。 */
@@ -89,6 +97,45 @@ export namespace ProtocolLabApi {
     channelId?: string;
   }
 
+  /**
+   * POST /lab/client/push/start 入参（均选填，空=用后端配置默认值）。
+   *
+   * 路径是**后端运行机器**视角的绝对路径（非浏览器本地路径）；前端仅透传字符串，
+   * 文件是否存在 / 是否越界由后端 `LabMediaPushService.validateFile` 校验并报错。
+   */
+  export interface PushStartReq {
+    /** ffmpeg 可执行文件绝对路径，覆盖配置。 */
+    ffmpegPath?: string;
+    /** 待推视频文件绝对路径，覆盖配置。 */
+    mediaFile?: string;
+    /** 推流模式：true=ZLM中继，false=直推RTP，undefined=用后端配置默认。 */
+    zlmMode?: boolean;
+  }
+
+  /**
+   * push/start|stop|status 返回的推流状态（后端 `LabMediaPushService.PushStatus`）。
+   *
+   * 单流模型：一次只维护一路推流。IDLE=无推流，RUNNING=ffmpeg 在推，
+   * STOPPED=已停，FAILED=启动/运行失败（看 lastLog）。
+   */
+  export interface PushStatus {
+    state: 'FAILED' | 'IDLE' | 'RUNNING' | 'STOPPED';
+    /** 关联的 INVITE callId。 */
+    callId?: string;
+    /** 平台收流 IP（SDP c=）。 */
+    mediaIp?: string;
+    /** 平台收流端口（SDP m=），IDLE 时为 0。 */
+    mediaPort?: number;
+    /** SDP y= ssrc。 */
+    ssrc?: string;
+    /** 完整 ffmpeg 命令行（空格拼接，仅展示）。 */
+    cmd?: string;
+    /** 启动时刻（毫秒）。 */
+    startMs?: number;
+    /** ffmpeg 最近 ≤30 行日志（换行拼接）。 */
+    lastLog?: string;
+  }
+
   /** 右侧 PTZ 控制请求（既有 /ptz/control 端点）。 */
   export interface PtzControlReq {
     deviceId: string;
@@ -120,6 +167,34 @@ export namespace ProtocolLabApi {
       wsFlv?: string;
     };
   }
+
+  /** 录像查询请求（/device-cmd/record，时间 Unix 毫秒）。 */
+  export interface RecordQueryReq {
+    deviceId: string;
+    startTime?: number;
+    endTime?: number;
+  }
+
+  /** 报警查询请求（/device-cmd/alarm/query，时间 Unix 毫秒）。 */
+  export interface AlarmQueryReq {
+    deviceId: string;
+    startTime?: number;
+    endTime?: number;
+    startPriority?: string;
+    endPriority?: string;
+    alarmMethod?: string;
+    alarmType?: string;
+  }
+
+  /** 报警复位请求（/device-cmd/alarm/control）。 */
+  export interface AlarmControlReq {
+    deviceId: string;
+    alarmMethod?: string;
+    alarmType?: string;
+  }
+
+  /** 订阅类型（与后端 SubscriptionConstant.Type 一致，与 device.ts 同源）。 */
+  export type SubscriptionType = 'ALARM' | 'CATALOG' | 'MOBILE_POSITION';
 }
 
 /* -------------------------------------------------------------------------- */
@@ -173,6 +248,34 @@ export async function labPushAlarm(data?: ProtocolLabApi.AlarmPushReq) {
   return requestClient.post<null>(`${LAB_CLIENT}/alarm/push`, data ?? {});
 }
 
+/**
+ * 模拟推流：用 ffmpeg 把视频推到最近一次 INVITE 的收流目标。
+ *
+ * 不传参=用后端配置默认 ffmpeg/file；传 ffmpegPath/mediaFile 覆盖。
+ * 后端无 INVITE 目标 / 非 UDP / 文件非法时返回错误码，requestClient 统一弹错。
+ */
+export async function labPushStart(data?: ProtocolLabApi.PushStartReq) {
+  return requestClient.post<ProtocolLabApi.PushStatus>(
+    `${LAB_CLIENT}/push/start`,
+    data ?? {},
+  );
+}
+
+/** 停止模拟推流（幂等，返回 state=IDLE）。 */
+export async function labPushStop() {
+  return requestClient.post<ProtocolLabApi.PushStatus>(
+    `${LAB_CLIENT}/push/stop`,
+    {},
+  );
+}
+
+/** 查询当前模拟推流状态（空闲为 state=IDLE）。 */
+export async function labPushStatus() {
+  return requestClient.get<ProtocolLabApi.PushStatus>(
+    `${LAB_CLIENT}/push/status`,
+  );
+}
+
 /* -------------------------------------------------------------------------- */
 /*                    右侧：平台（Server）下发——复用既有端点                     */
 /* -------------------------------------------------------------------------- */
@@ -212,5 +315,94 @@ export async function liveStart(data: ProtocolLabApi.LiveStartReq) {
     protocol: 'FLV',
     streamMode: 'UDP',
     ...data,
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/*        S2 支链命令——复用 /device-cmd/* 已存在端点（与 device.ts 同源）       */
+/*                                                                            */
+/*  验证台 ServerPanel 经 DeviceCommandPanel 下发，与设备管理页协议能力对等。    */
+/*  全部命中后端已落地端点，无新字段/端点（不触发 .cursorrules 契约登记）。        */
+/* -------------------------------------------------------------------------- */
+
+/** 查设备状态（回包入 extendInfo.deviceStatus）。 */
+export async function queryDeviceStatus(deviceId: string) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/query-status', {
+    deviceId,
+  });
+}
+
+/** 查预置位（回包入 extendInfo.presets；G2：仅查询，不支持下发）。 */
+export async function queryPreset(deviceId: string) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/query-preset', {
+    deviceId,
+  });
+}
+
+/** 查移动位置订阅（interval 选填）。 */
+export async function queryMobilePosition(deviceId: string, interval?: string) {
+  return requestClient.post<boolean>(
+    '/api/v1/device-cmd/query-mobile-position',
+    { deviceId, interval },
+  );
+}
+
+/** 下载配置（configType 后端 @NotBlank，缺失返回 400）。 */
+export async function downloadConfig(deviceId: string, configType: string) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/config/download', {
+    deviceId,
+    configType,
+  });
+}
+
+/** 开始录像（记 [AUDIT]）。 */
+export async function controlRecordStart(deviceId: string) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/record/start', {
+    deviceId,
+  });
+}
+
+/** 停止录像（记 [AUDIT]）。 */
+export async function controlRecordStop(deviceId: string) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/record/stop', {
+    deviceId,
+  });
+}
+
+/** 触发录像查询（G1：结果走 device.recordinfo 通知，列表本体暂无读端点）。 */
+export async function queryRecord(data: ProtocolLabApi.RecordQueryReq) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/record', data);
+}
+
+/** 查报警。 */
+export async function queryAlarm(data: ProtocolLabApi.AlarmQueryReq) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/alarm/query', data);
+}
+
+/** 报警复位（记 [AUDIT]）。 */
+export async function controlAlarm(data: ProtocolLabApi.AlarmControlReq) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/alarm/control', data);
+}
+
+/** 语音广播（记 [AUDIT]）。 */
+export async function broadcast(deviceId: string) {
+  return requestClient.post<boolean>('/api/v1/device-cmd/broadcast', {
+    deviceId,
+  });
+}
+
+/**
+ * 开关设备订阅（GB28181-2022 §9.11：目录/位置/告警）。
+ * 与 device.ts 同源端点：开关即下发/撤销 SUBSCRIBE。
+ */
+export async function toggleDeviceSubscription(
+  deviceId: string,
+  type: ProtocolLabApi.SubscriptionType,
+  enabled: boolean,
+) {
+  return requestClient.put<boolean>('/api/v1/device/subscription/toggle', {
+    deviceId,
+    type,
+    enabled,
   });
 }

@@ -65,14 +65,17 @@ export function getPlayerForFormat(format: string): PlayerInfo {
 }
 
 // 格式优先级配置
+// 选址原则：首帧最快 + 浏览器原生可播。
+// HTTP-FLV(flv.js) 首帧最快(~1s, 实时)；fMP4/TS 次之；HLS 因 segDur*segNum 需累积切片(~4-6s)
+// 才能出首个可播 m3u8，作为兜底放最后，避免点播瞬间命中未就绪 m3u8 报 DEMUXER_ERROR/Empty src。
 export const formatPriority = [
-  'hls',
-  'httpFmp4',
-  'wsFmp4',
   'httpFlv',
   'wsFlv',
+  'httpFmp4',
+  'wsFmp4',
   'httpTs',
   'wsTs',
+  'hls',
   'webrtc',
   'rtmp',
   'rtsp',

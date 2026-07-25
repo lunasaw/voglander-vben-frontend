@@ -1,7 +1,8 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { errorMessageResponseInterceptor } from './preset-interceptors';
 import { RequestClient } from './request-client';
 
 describe('requestClient', () => {
@@ -62,6 +63,25 @@ describe('requestClient', () => {
       isAxiosError: true,
       code: 'ECONNABORTED',
     });
+  });
+
+  it('shows global errors by default and can suppress them per request', async () => {
+    const notify = vi.fn();
+    requestClient.addResponseInterceptor(
+      errorMessageResponseInterceptor(notify),
+    );
+    mock.onGet('/test/default-error').reply(500, { message: 'failed' });
+    mock.onGet('/test/scoped-error').reply(500, { message: 'scoped' });
+
+    await expect(requestClient.get('/test/default-error')).rejects.toEqual({
+      message: 'failed',
+    });
+    expect(notify).toHaveBeenCalledOnce();
+
+    await expect(
+      requestClient.get('/test/scoped-error', { suppressGlobalError: true }),
+    ).rejects.toEqual({ message: 'scoped' });
+    expect(notify).toHaveBeenCalledOnce();
   });
 
   it('should successfully upload a file', async () => {
