@@ -53,6 +53,7 @@ describe('image API contract', () => {
     expect(path).toBe('/api/v1/images/uploads');
     expect(options.data).toBeInstanceOf(FormData);
     expect((options.data as FormData).get('file')).toBe(file);
+    expect(options.headers['Content-Type']).toBe('multipart/form-data');
     expect(options.headers['Idempotency-Key']).toBe('idem-1');
     expect(options.method).toBe('POST');
   });

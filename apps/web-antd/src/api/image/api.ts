@@ -41,7 +41,10 @@ export async function uploadImageAsset(
   if (assetName) body.append('assetName', assetName);
   return requestWithErrorMeta<ImageApi.AssetVO>('/api/v1/images/uploads', {
     data: body,
-    headers: { 'Idempotency-Key': idempotencyKey },
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'Idempotency-Key': idempotencyKey,
+    },
     method: 'POST',
   });
 }
