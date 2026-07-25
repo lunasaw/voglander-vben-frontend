@@ -28,7 +28,7 @@ const [Form, formApi] = useVbenForm({
 });
 
 function resetForm() {
-  formApi.resetForm();
+  formApi.reset();
   const resetData: Partial<SystemDeptApi.SystemDept> = formData.value || {};
   // 过滤permissions数组中的null值
   if (resetData.permissions && Array.isArray(resetData.permissions)) {

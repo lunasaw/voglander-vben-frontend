@@ -1,4 +1,5 @@
 import {
+  appCopyrightPreferences,
   defineOverridesPreferences,
   definePreferencesExtension,
 } from '@vben/preferences';
@@ -25,6 +26,7 @@ export const overridesPreferences = defineOverridesPreferences({
   theme: {
     mode: 'light', // 设置默认主题为浅色（白色）模式
   },
+  copyright: appCopyrightPreferences,
 });
 
 export const preferencesExtension =
