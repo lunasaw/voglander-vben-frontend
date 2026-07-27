@@ -58,7 +58,6 @@ import AssetThumbnail from './components/AssetThumbnail.vue';
 import AssetUploadDrawer from './components/AssetUploadDrawer.vue';
 import {
   assetActionAllowed,
-  assetDetailIdFromRoute,
   assetFormValuesToQuery,
   assetQueryFromRoute,
   assetQueryToRoute,
@@ -258,13 +257,7 @@ async function refreshAll() {
 
 async function syncQuery(filters: ImageApi.AssetQueryReq) {
   const stable = assetQueryToRoute(filters);
-  const detailId = assetDetailIdFromRoute(route.query, route.params.assetId);
-  await router.replace({
-    query: {
-      ...stable,
-      ...(detailId && !route.params.assetId ? { assetId: detailId } : {}),
-    },
-  });
+  await router.replace({ query: stable });
 }
 
 async function submitFilters(values: Record<string, unknown>) {
@@ -304,19 +297,6 @@ function ensureViewPermission() {
 async function openDetail(asset: ImageApi.AssetVO) {
   if (!ensureViewPermission()) return;
   detailDrawerApi.setData({ asset, canDelete: canDelete.value }).open();
-  if (!route.params.assetId) {
-    await router.replace({ query: { ...route.query, assetId: asset.assetId } });
-  }
-}
-
-async function closeDetailRoute() {
-  const assetId = assetDetailIdFromRoute(route.query, route.params.assetId);
-  if (!assetId) return;
-  const query = { ...route.query };
-  delete query.assetId;
-  await (route.params.assetId
-    ? router.replace({ path: '/image/assets', query })
-    : router.replace({ query }));
 }
 
 function actionMenu(asset: ImageApi.AssetVO): NonNullable<MenuProps['items']> {
@@ -410,38 +390,26 @@ async function onPageChange(page: number, pageSize: number) {
 const routeFilterFingerprint = computed(() =>
   stableFingerprint(assetQueryFromRoute(route.query)),
 );
-watch(routeFilterFingerprint, async () => {
-  const filters = assetQueryFromRoute(route.query);
-  if (
-    stableFingerprint(filters) === stableFingerprint(controller.filters.value)
-  ) {
-    return;
-  }
-  await queryFormApi.setValues(filtersToForm(filters));
-  await controller.query(filters);
-});
-
-const routeDetailId = computed(() =>
-  assetDetailIdFromRoute(route.query, route.params.assetId),
+watch(
+  routeFilterFingerprint,
+  async () => {
+    const filters = assetQueryFromRoute(route.query);
+    if (
+      stableFingerprint(filters) === stableFingerprint(controller.filters.value)
+    ) {
+      return;
+    }
+    await queryFormApi.setValues(filtersToForm(filters));
+    await controller.query(filters);
+  },
+  { flush: 'pre' },
 );
-function syncRouteDetail(assetId?: string) {
-  if (!assetId || !canView.value) {
-    void detailDrawerApi.close();
-    return;
-  }
-  const asset =
-    controller.rows.value.find((row) => row.assetId === assetId) ??
-    ({ assetId } as ImageApi.AssetVO);
-  detailDrawerApi.setData({ asset, canDelete: canDelete.value }).open();
-}
-watch(routeDetailId, syncRouteDetail);
 
 useImageAssetRefresh(refreshAll);
 onMounted(async () => {
   if (!canQuery.value) return;
   await queryFormApi.setValues(filtersToForm(controller.filters.value));
   await refreshAll();
-  syncRouteDetail(routeDetailId.value);
 });
 </script>
 
@@ -458,7 +426,7 @@ onMounted(async () => {
     </template>
 
     <UploadDrawer @success="refreshAll" />
-    <DetailDrawer @action="handleAssetAction" @closed="closeDetailRoute" />
+    <DetailDrawer @action="handleAssetAction" />
 
     <Result
       v-if="!canQuery"
