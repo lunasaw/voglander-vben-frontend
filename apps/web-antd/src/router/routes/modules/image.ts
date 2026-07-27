@@ -15,13 +15,21 @@ const routes: RouteRecordRaw[] = [
       {
         path: '/image/assets',
         name: 'ImageAssets',
-        meta: { icon: 'lucide:images', title: $t('image.assets.title') },
+        meta: {
+          fullPathKey: false,
+          icon: 'lucide:images',
+          title: $t('image.assets.title'),
+        },
         component: () => import('#/views/image/assets/list.vue'),
       },
       {
         path: '/image/assets/:assetId',
         name: 'ImageAssetDetail',
-        meta: { hideInMenu: true, title: $t('image.assets.detail.title') },
+        meta: {
+          fullPathKey: false,
+          hideInMenu: true,
+          title: $t('image.assets.detail.title'),
+        },
         component: () => import('#/views/image/assets/list.vue'),
       },
       {

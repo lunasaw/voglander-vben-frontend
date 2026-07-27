@@ -52,5 +52,9 @@
     "video.js": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:"
+  },
+  "devDependencies": {
+    "@playwright/test": "catalog:",
+    "playwright": "catalog:"
   }
 }

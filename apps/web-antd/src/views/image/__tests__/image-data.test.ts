@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   assetActionAllowed,
   assetDetailIdFromRoute,
+  assetDetailRouteLocation,
   assetQueryFromRoute,
   assetQueryToRoute,
   formatBytes,
@@ -86,6 +87,25 @@ describe('image view pure functions', () => {
     );
     expect(assetDetailIdFromRoute({ assetId: overlong })).toBeUndefined();
     expect(assetDetailIdFromRoute({ assetId: ['asset-1'] })).toBeUndefined();
+  });
+
+  it('uses the route as the single source for asset detail selection', () => {
+    expect(
+      assetDetailRouteLocation({ status: 'AVAILABLE' }, 'asset-2'),
+    ).toEqual({
+      query: { assetId: 'asset-2', status: 'AVAILABLE' },
+    });
+    expect(
+      assetDetailRouteLocation(
+        { assetId: 'stale-query-id', deviceId: 'device-1' },
+        'asset-2',
+        'asset-1',
+      ),
+    ).toEqual({
+      name: 'ImageAssetDetail',
+      params: { assetId: 'asset-2' },
+      query: { deviceId: 'device-1' },
+    });
   });
 
   it('serializes only stable asset query fields', () => {
