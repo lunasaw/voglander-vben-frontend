@@ -1,5 +1,7 @@
 import type { Dayjs } from 'dayjs';
 
+import type { LocationQueryRaw, RouteLocationRaw } from 'vue-router';
+
 import type { VbenFormSchema } from '#/adapter/form';
 import type {
   ImageApi,
@@ -80,6 +82,23 @@ export function assetDetailIdFromRoute(
   routeParam?: unknown,
 ) {
   return routeText(routeParam) ?? routeText(routeQuery.assetId);
+}
+
+export function assetDetailRouteLocation(
+  routeQuery: LocationQueryRaw,
+  assetId: string,
+  routeParam?: unknown,
+): RouteLocationRaw {
+  const query = { ...routeQuery };
+  if (routeText(routeParam)) {
+    delete query.assetId;
+    return {
+      name: 'ImageAssetDetail',
+      params: { assetId },
+      query,
+    };
+  }
+  return { query: { ...query, assetId } };
 }
 
 export function assetQueryToRoute(filters: ImageApi.AssetQueryReq) {

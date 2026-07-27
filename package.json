@@ -62,6 +62,9 @@
     "test:benchmark": "vitest bench --run",
     "test:unit": "vitest run --dom",
     "test:e2e": "turbo run test:e2e",
+    "test:e2e:drawer": "playwright test tests/e2e/image-asset-detail-drawer.spec.ts",
+    "test:e2e:drawer:debug": "playwright test tests/e2e/image-asset-detail-drawer.spec.ts --debug",
+    "test:e2e:drawer:ui": "playwright test tests/e2e/image-asset-detail-drawer.spec.ts --ui",
     "update:deps": "npx taze -r -w",
     "version": "pnpm exec changeset version && pnpm install --no-frozen-lockfile",
     "catalog": "pnpm dlx codemod pnpm/catalog"
@@ -103,7 +106,7 @@
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:",
-    "vue": "catalog:",
+    "vue": "^3.5.40",
     "vue-tsc": "catalog:"
   },
   "engines": {
